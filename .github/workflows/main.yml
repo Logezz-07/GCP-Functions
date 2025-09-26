@@ -30,12 +30,12 @@ jobs:
 
       # 4️⃣ Terraform Init
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: teraform
         run: terraform init
 
       # 5️⃣ Terraform Plan
       - name: Terraform Plan
-        working-directory: terraform
+        working-directory: teraform
         run: |
           # Convert comma-separated FUNCTIONS_LIST secret to Terraform list syntax
           FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
@@ -48,7 +48,7 @@ jobs:
 
       # 6️⃣ Terraform Apply
       - name: Terraform Apply
-        working-directory: terraform
+        working-directory: teraform
         run: |
           # Convert comma-separated FUNCTIONS_LIST secret to Terraform list syntax
           FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')

@@ -1,13 +1,13 @@
 
 const functions = require('@google-cloud/functions-framework');
 const axios = require('axios');
-const { logger } = require('@roger/r4b-common-nodemodules').logger;
+const logger = require('@roger/r4b-common-nodemodules').logger;
 
 
 
 functions.http('helloHttp', async (req, res) => {
     try {
-        logger.logWebhookDetails("test", "test");
+        logger.logWebhookDetails("Test", "Logezz");
         const body = req.body;
         // Get the tag
         const fulfillmentInfo = body.fulfillmentInfo || {};

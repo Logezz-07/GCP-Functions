@@ -23,6 +23,11 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+          
+      # Artifact Registry login for private npm packages
+      - name: Artifact Registry login
+        working-directory: Function-1
+        run: npm run artifactregistry-login
 
       # 3️⃣ Setup Terraform
       - name: Setup Terraform

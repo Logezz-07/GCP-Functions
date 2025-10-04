@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@google-cloud/functions-framework": "^3.1.0",
-    "@roger/r4b-common-nodemodules": "^1.0.0",
+    "@roger/r4b-common-nodemodules": "^1.0.1",
     "axios": "^1.6.7"
   },
   "keywords": [],

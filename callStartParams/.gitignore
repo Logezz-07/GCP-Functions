@@ -1,5 +1,0 @@
-# Ignore node modules
-node_modules/
-
-# Ignore npm config file
-.npmrc

@@ -7,8 +7,6 @@ const logger = require('@roger/r4b-common-nodemodules').logger;
 
 functions.http('helloHttp', async (req, res) => {
     try {
-        logger.logWebhookDetails("Test", "Logezz");
-        logger.logApiRequest({ sessionId: "Test", tag: "Logezz", attempt: 1, url: "http://example.com", method: "GET", headers: {} });
         const body = req.body;
         // Get the tag
         const fulfillmentInfo = body.fulfillmentInfo || {};

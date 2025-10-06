@@ -16,13 +16,19 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.git_tag }}
+           ref: ${{ github.event.inputs.git_tag }}
 
       # 2️⃣ Authenticate to GCP
       - name: Auth to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # Artifact Registry login for private npm packages
+      - name: Artifact Registry login
+        working-directory: Function-1
+        run: npm run artifactregistry-login
+      
 
       # 3️⃣ Setup Terraform
       - name: Setup Terraform
@@ -37,10 +43,10 @@ jobs:
       - name: Terraform Plan
         working-directory: teraform
         run: |
-          # Convert comma-separated FUNCTIONS_LIST secret to valid Terraform list syntax
-          FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | tr ',' '\n' | sed 's/^/"/;s/$/"/' | paste -sd, -)
+          # Convert comma-separated FUNCTIONS_LIST secret to Terraform list syntax
+          FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
           echo "Functions to deploy: [$FUNCTIONS_LIST]"
-
+          
           terraform plan \
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
@@ -50,8 +56,8 @@ jobs:
       - name: Terraform Apply
         working-directory: teraform
         run: |
-          # Convert comma-separated FUNCTIONS_LIST secret to valid Terraform list syntax
-          FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | tr ',' '\n' | sed 's/^/"/;s/$/"/' | paste -sd, -)
+          # Convert comma-separated FUNCTIONS_LIST secret to Terraform list syntax
+          FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
           echo "Applying deployment for functions: [$FUNCTIONS_LIST]"
 
           terraform apply -auto-approve \

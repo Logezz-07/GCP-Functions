@@ -85,7 +85,6 @@ functions.http("CallStartParams", async (req, res) => {
       const apiResult = await apiRequest.getRequest({ sessionId, tag, url: apiUrl, headers, params });
       Status = apiResult.Status;
       ResponsePayload = apiResult.ResponsePayload;
-      let t1 = new Date();
       if (Status === 200 && ResponsePayload.identifiedCustomer) {
         const accountList = [];
         ResponsePayload.idcData?.primaryContacts?.forEach((contact) => {
@@ -102,8 +101,7 @@ functions.http("CallStartParams", async (req, res) => {
           identifiedCustomer: ResponsePayload.identifiedCustomer,
           AccountList: accountList,
         };
-        let t2 = new Date();
-        console.log("Time taken for AniIdentification API (ms): ", t2 - t1);
+      
       } else {
         sessionParams = {
           returnCode: "1",

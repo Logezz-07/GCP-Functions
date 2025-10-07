@@ -24,12 +24,14 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # 2.1️⃣ Setup npm auth for Artifact Registry
-      - name: Auth to Artifact Registry
+      # 2.1️⃣ Artifact Registry login for all functions dynamically
+      - name: Artifact Registry login for all functions
         run: |
-          npx google-artifactregistry-auth \
-            --repo-config=./.npmrc \
-            --credential-config=${{ secrets.GCP_SA_KEY }}
+          IFS=',' read -ra FUNCS <<< "${{ secrets.FUNCTIONS_LIST }}"
+          for FUNC in "${FUNCS[@]}"; do
+            echo "Running artifact login in folder: $FUNC"
+            npm --prefix "$FUNC" run artifactregistry-login
+          done
 
       # 3️⃣ Setup Terraform
       - name: Setup Terraform
@@ -44,10 +46,8 @@ jobs:
       - name: Terraform Plan
         working-directory: teraform
         run: |
-          # Convert comma-separated FUNCTIONS_LIST secret to Terraform list syntax
           FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
           echo "Functions to deploy: [$FUNCTIONS_LIST]"
-
           terraform plan \
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
@@ -57,10 +57,8 @@ jobs:
       - name: Terraform Apply
         working-directory: teraform
         run: |
-          # Convert comma-separated FUNCTIONS_LIST secret to Terraform list syntax
           FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
           echo "Applying deployment for functions: [$FUNCTIONS_LIST]"
-
           terraform apply -auto-approve \
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \

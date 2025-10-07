@@ -16,13 +16,20 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-           ref: ${{ github.event.inputs.git_tag }}
+          ref: ${{ github.event.inputs.git_tag }}
 
-      # 2️⃣ Authenticate to GCP
+      # 2️⃣ Authenticate to Google Cloud
       - name: Auth to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # 2.1️⃣ Setup npm auth for Artifact Registry
+      - name: Auth to Artifact Registry
+        run: |
+          npx google-artifactregistry-auth \
+            --repo-config=./.npmrc \
+            --credential-config=${{ secrets.GCP_SA_KEY }}
 
       # 3️⃣ Setup Terraform
       - name: Setup Terraform
@@ -40,7 +47,7 @@ jobs:
           # Convert comma-separated FUNCTIONS_LIST secret to Terraform list syntax
           FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
           echo "Functions to deploy: [$FUNCTIONS_LIST]"
-          
+
           terraform plan \
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \

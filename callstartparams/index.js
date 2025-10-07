@@ -3,7 +3,7 @@ const apiRequest = require('@roger/r4b-common-nodemodules').apiClient;
 const logger = require('@roger/r4b-common-nodemodules').logger;
 const axios = require("axios");
 
-functions.http("CallStartParams", async (req, res) => {
+functions.http("helloHttp", async (req, res) => {
   const sessionId = req.body.sessionInfo?.session.split("/sessions/").pop() || "unknown-session";
   const tag = req.body.fulfillmentInfo?.tag || "Unknown-Tag";
 

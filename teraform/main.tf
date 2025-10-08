@@ -1,5 +1,4 @@
-terraform {
-
+terraform { 
   backend "gcs" {
     bucket = "roger-470808-terraform-state" 
     prefix = "cloud-functions-state"              
@@ -29,17 +28,16 @@ data "google_storage_bucket" "bucket" {
   name = "roger-470808-gcf-source"
 }
 
-
 # Archive function source code
 data "archive_file" "functions" {
   for_each    = toset(var.functions)
   type        = "zip"
   output_path = "/tmp/${each.key}.zip"
   source_dir  = "../${each.key}"  
-  excludes    = ["node_modules","README.md"]
+  excludes    = ["node_modules", "README.md"]
 }
 
-# Upload each zip to bucket
+# Upload each zip to the GCS bucket
 resource "google_storage_bucket_object" "function_objects" {
   for_each = toset(var.functions)
   name     = "${each.key}-${data.archive_file.functions[each.key].output_sha}.zip"
@@ -47,7 +45,7 @@ resource "google_storage_bucket_object" "function_objects" {
   source   = data.archive_file.functions[each.key].output_path
 }
 
-# Create Cloud Functions
+# Deploy Cloud Functions (Gen 2)
 resource "google_cloudfunctions2_function" "functions" {
   for_each    = toset(var.functions)
   name        = each.key
@@ -72,10 +70,15 @@ resource "google_cloudfunctions2_function" "functions" {
     available_memory   = "256M"
     timeout_seconds    = 60
     ingress_settings   = "ALLOW_INTERNAL_ONLY"
+
+    environment_variables = {
+      NODE_ENV        = "production"
+      FUNCTION_TARGET = "helloHttp"
+    }
   }
 }
 
-# Allow public HTTP invoke
+# Allow public invoke access
 resource "google_cloud_run_service_iam_member" "member" {
   for_each = google_cloudfunctions2_function.functions
 

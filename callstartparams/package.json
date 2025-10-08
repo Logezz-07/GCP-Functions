@@ -4,17 +4,17 @@
   "main": "index.js",
   "scripts": {
     "artifactregistry-login": "npx google-artifactregistry-auth --repo-config=./.npmrc --credential-config=./.npmrc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "functions-framework --target=helloHttp"
   },
   "dependencies": {
+    "@google-cloud/functions-framework": "^3.1.0",
     "@roger/r4b-common-nodemodules": "^1.0.7",
     "axios": "^1.6.7"
   },
-  "devDependencies": {
-    "@google-cloud/functions-framework": "^4.0.0"
-  },
+
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": ""
 }
+

@@ -4,7 +4,6 @@
   "main": "index.js",
   "scripts": {
     "artifactregistry-login": "npx google-artifactregistry-auth --repo-config=./.npmrc --credential-config=./.npmrc",
-    "start": "npx @google-cloud/functions-framework --target=helloHttp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

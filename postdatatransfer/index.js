@@ -25,7 +25,7 @@ functions.http("helloHttp", async (req, res) => {
         const transferId = sessionParamsFromCX?.CONN_ID || "1234567890abcdef";
         const callingSystem = req.query?.callingSystem || "engage";
 
-        const apiUrl = `https://dev01-cct.rogers.com/dev01-cctdtapi/data-transfer/1.0.0/datatransfer/${transferId}?callingSystem=${callingSystem}`;
+        const apiUrl = `https://dev1-cct.rogers.com/dev01-cctdtapi/data-transfer/1.0.0/datatransfer/${transferId}?callingSystem=${callingSystem}`;
 
         // Prepare headers
         const headers = {

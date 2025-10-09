@@ -11,7 +11,7 @@ functions.http("helloHttp", async (req, res) => {
     let ResponsePayload = {};
 
     try {
-        // Secret headers from request
+        
         const secretHeader = {
             token: req.headers["token"],
             expiryTime: req.headers["expirytime"],

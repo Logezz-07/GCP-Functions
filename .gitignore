@@ -2,11 +2,10 @@
 node_modules/
 
 # Ignore npm configs
-
+.npmrc
 
 # Ignore environment files
 .env
-*.log
 
 # Ignore local build or debug
 dist/

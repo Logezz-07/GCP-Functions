@@ -2,7 +2,7 @@
 node_modules/
 
 # Ignore npm configs
-.npmrc
+**/.npmrc
 
 # Ignore environment files
 .env

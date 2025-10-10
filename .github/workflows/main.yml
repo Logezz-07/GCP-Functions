@@ -24,14 +24,6 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # 2.1️⃣ Artifact Registry login for all functions dynamically
-      - name: Artifact Registry login for all functions
-        run: |
-          IFS=',' read -ra FUNCS <<< "${{ secrets.FUNCTIONS_LIST }}"
-          for FUNC in "${FUNCS[@]}"; do
-            echo "Running artifact login in folder: $FUNC"
-            npm --prefix "$FUNC" run artifactregistry-login
-          done
 
       # 3️⃣ Setup Terraform
       - name: Setup Terraform

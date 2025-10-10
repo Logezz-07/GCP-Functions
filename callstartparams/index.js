@@ -16,6 +16,7 @@ functions.http("helloHttp", async (req, res) => {
   try {
     // ---------------------- CallStartApi ---------------------- //
     if (tag === "callStartApi") {
+      logger.logConsole("info", `CallStartApi - Invoked`, { sessionId, tag });
       const dnis = sessionParamsFromCX?.Dnis || "NA";
       logger.logWebhookRequest(sessionId, tag, { Dnis: dnis });
 
@@ -101,7 +102,7 @@ functions.http("helloHttp", async (req, res) => {
           identifiedCustomer: ResponsePayload.identifiedCustomer,
           AccountList: accountList,
         };
-      
+
       } else {
         sessionParams = {
           returnCode: "1",

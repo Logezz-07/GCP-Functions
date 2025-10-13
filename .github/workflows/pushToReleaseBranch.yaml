@@ -13,6 +13,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: dev
+          fetch-depth: 0  # important! fetch all tags and history
 
       # 2️⃣ Setup Node.js
       - name: Setup Node.js
@@ -40,21 +41,27 @@ jobs:
           npm run check-syntax
           echo "✅ TypeScript syntax check completed successfully!"
 
-      # 7️⃣ Generate Custom Version
+      # 7️⃣ Generate Custom Version (Fixed Increment Logic)
       - name: Generate Custom Version
         id: version
         run: |
+          echo "🔍 Fetching remote tags..."
+          git fetch --tags
+
           LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
+          echo "🧩 Latest tag found: ${LATEST_TAG}"
+
           if [ -z "$LATEST_TAG" ]; then
             NEXT_VERSION=1
           else
             NUM=$(echo $LATEST_TAG | sed 's/R4B-Function-v//')
             NEXT_VERSION=$((NUM + 1))
           fi
+
           VERSION="R4B-Function-v$NEXT_VERSION"
           echo $VERSION > version.txt
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "🆕 New Version: $VERSION"
+          echo "🆕 New Version Generated: $VERSION"
 
       # 8️⃣ Push to Release Branch with Safe Gitignore and Conditional Tag
       - name: Push to Release Branch with Tag
@@ -68,6 +75,8 @@ jobs:
           package.json
           package-lock.json
           dist/
+          coverage/
+          **/.env
           EOT
 
           git config user.name "GitHub Actions"
@@ -82,9 +91,9 @@ jobs:
           VERSION=${{ steps.version.outputs.VERSION }}
           echo "🏷 Preparing to tag version: $VERSION"
 
-          # Check if tag already exists
-          if git rev-parse "$VERSION" >/dev/null 2>&1; then
-            echo "⚠️ Tag $VERSION already exists, skipping tag push."
+          # Check if tag already exists in remote
+          if git ls-remote --tags origin | grep -q "refs/tags/$VERSION"; then
+            echo "⚠️ Tag $VERSION already exists in remote, skipping tag creation."
           else
             git tag $VERSION
             git push origin $VERSION

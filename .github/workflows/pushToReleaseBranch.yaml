@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 20
 
-      # 3️⃣ Authenticate to Google Cloud (without committing creds)
+      # 3️⃣ Authenticate to Google Cloud
       - name: Auth to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -42,13 +42,17 @@ jobs:
           echo "✅ TypeScript syntax check completed successfully!"
 
       # 7️⃣ Generate Custom Version and Push to Release Branch
-      - name: Push to Release Branch with Tag
+      - name: Push to Release Branch (with change detection)
+        id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FUNCTIONS_LIST: ${{ secrets.FUNCTIONS_LIST }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
+
+          echo "🚀 Fetching dev branch for comparison..."
+          git fetch origin dev:dev
 
           echo "🚀 Switching to release branch..."
           git checkout -B release

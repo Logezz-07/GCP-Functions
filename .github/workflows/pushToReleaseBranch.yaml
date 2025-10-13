@@ -74,24 +74,25 @@ jobs:
           echo "🚀 Switching to release branch..."
           git checkout -B release
 
-          # Remove unwanted files and node_modules before push
+          # Remove unwanted files before staging
           echo "🧹 Cleaning release branch..."
           rm -rf node_modules
-          rm -f gha-creds*.json .npmrc
+          rm -f gha-creds*.json .npmrc version.txt
 
-          # Stage remaining files
-          git add .
+          # Stage only the functions in FUNCTIONS_LIST
+          FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
+          echo "Staging functions: $FUNCTIONS_LIST"
+          for func in $FUNCTIONS_LIST; do
+            git add "$func"
+          done
 
           # Check if there are any changes to commit
           if git diff-index --quiet HEAD --; then
             echo "ℹ️ No changes detected in release branch. Skipping commit and version increment."
-            
-            # Get latest version tag for info
             LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
             VERSION=$LATEST_TAG
             echo "🏷 Current version remains: $VERSION"
           else
-            # Commit changes
             git commit -m "Prepare release branch (removed root-level files)"
             git push origin release --force
 
@@ -105,9 +106,6 @@ jobs:
             fi
 
             VERSION="R4B-Function-v$NEXT_VERSION"
-            echo "🆕 New Version Generated: $VERSION"
-
-            # Tag the new version
             git tag $VERSION
             git push origin $VERSION
             echo "✅ Tag $VERSION created and pushed successfully!"

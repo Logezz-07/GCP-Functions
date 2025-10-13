@@ -41,29 +41,7 @@ jobs:
           npm run check-syntax
           echo "✅ TypeScript syntax check completed successfully!"
 
-      # 7️⃣ Generate Custom Version
-      - name: Generate Custom Version
-        id: version
-        run: |
-          echo "🔍 Fetching remote tags..."
-          git fetch --tags
-
-          LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
-          echo "🧩 Latest tag found: ${LATEST_TAG}"
-
-          if [ -z "$LATEST_TAG" ]; then
-            NEXT_VERSION=1
-          else
-            NUM=$(echo $LATEST_TAG | sed 's/R4B-Function-v//')
-            NEXT_VERSION=$((NUM + 1))
-          fi
-
-          VERSION="R4B-Function-v$NEXT_VERSION"
-          echo $VERSION > version.txt
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "🆕 New Version Generated: $VERSION"
-
-      # 8️⃣ Push to Release Branch with Tag (without secret files)
+      # 7️⃣ Generate Custom Version and Push to Release Branch
       - name: Push to Release Branch with Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -75,30 +53,32 @@ jobs:
           echo "🚀 Switching to release branch..."
           git checkout -B release
 
-          # Remove unwanted files before staging
-          echo "🧹 Cleaning release branch..."
-          rm -rf node_modules
-          rm -f gha-creds*.json .npmrc version.txt
-
           # Convert comma-separated FUNCTIONS_LIST to space-separated
           FUNCTIONS_LIST=$(echo "$FUNCTIONS_LIST" | tr ',' ' ')
-          echo "Staging functions: $FUNCTIONS_LIST"
+          echo "🔍 Checking for changes in functions: $FUNCTIONS_LIST"
 
+          CHANGE_FOUND=0
           for func in $FUNCTIONS_LIST; do
-            git add "$func"
+            if ! git diff --quiet "$func"; then
+              echo "⚡ Changes detected in $func"
+              CHANGE_FOUND=1
+              break
+            fi
           done
 
-          # Check if there are any changes to commit
-          if git diff-index --quiet HEAD --; then
-            echo "ℹ️ No changes detected in release branch. Skipping commit and version increment."
-            LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
-            VERSION=$LATEST_TAG
-            echo "🏷 Current version remains: $VERSION"
-          else
+          if [ $CHANGE_FOUND -eq 1 ]; then
+            echo "🧹 Cleaning release branch (removing node_modules, secrets, etc.)..."
+            rm -rf node_modules
+            rm -f gha-creds*.json .npmrc version.txt
+
+            echo "📦 Staging all files..."
+            git add .
+
+            echo "💾 Committing changes..."
             git commit -m "Prepare release branch (removed root-level files)"
             git push origin release --force
 
-            # Generate new version
+            echo "🏷 Generating new version tag..."
             LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
             if [ -z "$LATEST_TAG" ]; then
               NEXT_VERSION=1
@@ -111,6 +91,11 @@ jobs:
             git tag $VERSION
             git push origin $VERSION
             echo "✅ Tag $VERSION created and pushed successfully!"
+          else
+            echo "ℹ️ No changes detected in FUNCTIONS_LIST. Skipping commit and version increment."
+            LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
+            VERSION=$LATEST_TAG
+            echo "🏷 Current version remains: $VERSION"
           fi
 
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT

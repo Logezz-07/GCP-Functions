@@ -19,7 +19,9 @@ jobs:
           node-version: 20
 
       - name: Run TypeScript Syntax Check
-        run: npm run check-syntax
+        run: |
+          npx tsc --noEmit
+          echo "✅ Syntax check passed"
 
       - name: Generate Custom Version
         id: version

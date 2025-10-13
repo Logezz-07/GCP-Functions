@@ -59,7 +59,7 @@ jobs:
 
           CHANGE_FOUND=0
           for func in $FUNCTIONS_LIST; do
-            if ! git diff --quiet "$func"; then
+            if ! git diff --quiet release..dev -- "$func"; then
               echo "⚡ Changes detected in $func"
               CHANGE_FOUND=1
               break

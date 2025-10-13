@@ -69,7 +69,7 @@ jobs:
           if [ $CHANGE_FOUND -eq 1 ]; then
             echo "🧹 Cleaning release branch (removing node_modules, secrets, etc.)..."
             rm -rf node_modules
-            rm -f gha-creds*.json .npmrc version.txt
+            rm -f gha-creds*.json .npmrc version.txt package-lock.json package.json tsconfig.json
 
             echo "📦 Staging all files..."
             git add .

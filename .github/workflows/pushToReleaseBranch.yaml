@@ -18,6 +18,10 @@ jobs:
         with:
           node-version: 20
 
+      # ✅ Run artifact login before installing dependencies
+      - name: Authenticate with Artifact Registry
+        run: npm run artifact-login
+
       - name: Install Dependencies
         run: npm ci
 
@@ -37,6 +41,7 @@ jobs:
           VERSION="R4B-Function-v$NEXT_VERSION"
           echo $VERSION > version.txt
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Push to Release Branch with Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

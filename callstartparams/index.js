@@ -2,16 +2,15 @@ const functions = require("@google-cloud/functions-framework");
 const apiRequest = require('@roger/r4b-common-nodemodules').apiClient;
 const logger = require('@roger/r4b-common-nodemodules').logger;
 const axios = require("axios");
-
 functions.http("helloHttp", async (req, res) => {
   const sessionId = req.body.sessionInfo?.session.split("/sessions/").pop() || "unknown-session";
   const tag = req.body.fulfillmentInfo?.tag || "Unknown-Tag";
-
   logger.logWebhookDetails(sessionId, tag);
   const sessionParamsFromCX = req.body.sessionInfo?.parameters || {};
   let sessionParams = {};
   let Status = 1;
-  let ResponsePayload = {};
+  ewuhyweg
+  let ResponsePayload = {}
 
   try {
     // ---------------------- CallStartApi ---------------------- //

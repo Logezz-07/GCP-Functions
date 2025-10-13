@@ -11,10 +11,11 @@
     "@roger/r4b-common-nodemodules": "^1.0.7",
     "axios": "^1.6.7"
   },
-
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
 }
-

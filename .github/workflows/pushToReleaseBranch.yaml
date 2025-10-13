@@ -8,21 +8,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout the dev branch
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           ref: dev
 
+      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
+      # 3️⃣ Install TypeScript only (devDependency)
+      - name: Install TypeScript
+        run: npm install --save-dev typescript
+
+      # 4️⃣ Run TypeScript Syntax Check without requiring node_modules dependencies
       - name: Run TypeScript Syntax Check
         run: |
-          npx tsc --noEmit
+          # Create temporary tsconfig for syntax-only check
+          echo '{
+            "compilerOptions": {
+              "allowJs": true,
+              "checkJs": true,
+              "noEmit": true,
+              "skipLibCheck": true,
+              "module": "commonjs",
+              "target": "es2022",
+              "strict": false
+            },
+            "include": ["**/*.js"],
+            "exclude": ["node_modules", "dist"]
+          }' > tsconfig.temp.json
+
+          npx tsc --project tsconfig.temp.json
           echo "✅ Syntax check passed"
 
+      # 5️⃣ Generate Custom Version
       - name: Generate Custom Version
         id: version
         run: |
@@ -37,6 +60,7 @@ jobs:
           echo $VERSION > version.txt
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
+      # 6️⃣ Push to Release Branch with Tag
       - name: Push to Release Branch with Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

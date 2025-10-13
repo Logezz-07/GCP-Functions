@@ -67,6 +67,7 @@ jobs:
       - name: Push to Release Branch with Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FUNCTIONS_LIST: ${{ secrets.FUNCTIONS_LIST }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
@@ -79,9 +80,10 @@ jobs:
           rm -rf node_modules
           rm -f gha-creds*.json .npmrc version.txt
 
-          # Stage only the functions in FUNCTIONS_LIST
-          FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
+          # Convert comma-separated FUNCTIONS_LIST to space-separated
+          FUNCTIONS_LIST=$(echo "$FUNCTIONS_LIST" | tr ',' ' ')
           echo "Staging functions: $FUNCTIONS_LIST"
+
           for func in $FUNCTIONS_LIST; do
             git add "$func"
           done

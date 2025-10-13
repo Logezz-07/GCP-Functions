@@ -8,37 +8,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout Code from Dev Branch
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           ref: dev
 
+      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      # 1️⃣ Authenticate to Google Cloud
+      # 3️⃣ Authenticate to Google Cloud
       - name: Auth to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # 2️⃣ Authenticate with Artifact Registry
+      # 4️⃣ Authenticate with Artifact Registry
       - name: Authenticate with Artifact Registry
         run: npm run artifactregistry-login
 
-      # 3️⃣ Install Dependencies
+      # 5️⃣ Install Dependencies
       - name: Install Dependencies
         run: npm ci
 
-      # 4️⃣ Run TypeScript Syntax Check
+      # 6️⃣ Run TypeScript Syntax Check
       - name: Run TypeScript Syntax Check
         run: |
           npm run check-syntax
           echo "✅ TypeScript syntax check completed successfully!"
 
-      # 5️⃣ Generate Custom Version
+      # 7️⃣ Generate Custom Version
       - name: Generate Custom Version
         id: version
         run: |
@@ -52,29 +54,39 @@ jobs:
           VERSION="R4B-Function-v$NEXT_VERSION"
           echo $VERSION > version.txt
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "🆕 New Version: $VERSION"
 
-      # 6️⃣ Add .gitignore and Push to Release Branch with Tag
+      # 8️⃣ Push to Release Branch with Safe Gitignore and Conditional Tag
       - name: Push to Release Branch with Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Creating .gitignore..."
+          echo "🛠 Creating .gitignore..."
           cat <<EOT > .gitignore
           **/node_modules/
           **/.npmrc
+          package.json
+          package-lock.json
           dist/
-          coverage/
-          **/.env
           EOT
 
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
+          echo "🚀 Switching to release branch..."
           git checkout -B release
           git add .gitignore
           git commit -m "Add safe .gitignore before release" || echo "No changes to commit"
           git push origin release --force
 
           VERSION=${{ steps.version.outputs.VERSION }}
-          git tag $VERSION
-          git push origin $VERSION
+          echo "🏷 Preparing to tag version: $VERSION"
+
+          # Check if tag already exists
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "⚠️ Tag $VERSION already exists, skipping tag push."
+          else
+            git tag $VERSION
+            git push origin $VERSION
+            echo "✅ Tag $VERSION created and pushed successfully!"
+          fi

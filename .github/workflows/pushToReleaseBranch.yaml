@@ -77,10 +77,10 @@ jobs:
           # Remove unwanted files and node_modules before push
           echo "🧹 Cleaning release branch..."
           rm -rf node_modules
-          rm -f gha-creds*.json version.txt
+          rm -f gha-creds*.json
 
           # Stage remaining files
-          git add .
+          git add src/
 
           # Check if there are any changes to commit
           if git diff-index --quiet HEAD --; then

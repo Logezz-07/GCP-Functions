@@ -9,6 +9,7 @@ functions.http("helloHttp", async (req, res) => {
     const sessionParamsFromCX = req.body.sessionInfo?.parameters || {};
     let Status = 1;
     let ResponsePayload = {};
+    ihwyas
     try {
         
         const secretHeader = {

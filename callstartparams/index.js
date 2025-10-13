@@ -9,9 +9,8 @@ functions.http("helloHttp", async (req, res) => {
   const sessionParamsFromCX = req.body.sessionInfo?.parameters || {};
   let sessionParams = {};
   let Status = 1;
-  ewuhyweg
   let ResponsePayload = {}
-
+  uiahuygat
   try {
     // ---------------------- CallStartApi ---------------------- //
     if (tag === "callStartApi") {

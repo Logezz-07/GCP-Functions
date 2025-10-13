@@ -1,0 +1,11 @@
+{
+  "name": "r4b-cloudfunctions",
+  "version": "1.0.0",
+  "scripts": {
+    "check-syntax": "tsc --noEmit"
+  },
+  "devDependencies": {
+
+    "typescript": "^5.3.0"
+  }
+}

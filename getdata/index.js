@@ -9,14 +9,13 @@ functions.http("helloHttp", async (req, res) => {
     const sessionParamsFromCX = req.body.sessionInfo?.parameters || {};
     let Status = 1;
     let ResponsePayload = {};
-    ihwyas
     try {
         
         const secretHeader = {
             token: req.headers["token"],
             expiryTime: req.headers["expirytime"],
             clientId: req.headers["clientid"],
-            clientSecret: req.headers["clientsecret"
+            clientSecret: req.headers["clientsecret"]
         };
 
         if (!secretHeader.token || !secretHeader.expiryTime || !secretHeader.clientId || !secretHeader.clientSecret) {

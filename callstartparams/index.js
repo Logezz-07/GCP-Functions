@@ -10,7 +10,6 @@ functions.http("helloHttp", async (req, res) => {
   let sessionParams = {};
   let Status = 1;
   let ResponsePayload = {}
-  uiahuygat
   try {
     // ---------------------- CallStartApi ---------------------- //
     if (tag === "callStartApi") {

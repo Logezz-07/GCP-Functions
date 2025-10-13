@@ -27,6 +27,10 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
+       # 4️⃣ Authenticate with Artifact Registry
+      - name: Authenticate with Artifact Registry
+        run: npm run artifactregistry-login
+
       # 4️⃣ Install Dependencies
       - name: Install Dependencies
         run: npm ci

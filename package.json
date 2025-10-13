@@ -2,6 +2,7 @@
   "name": "r4b-cloudfunctions",
   "version": "1.0.0",
   "scripts": {
+    "artifactregistry-login": "npx google-artifactregistry-auth --repo-config=./.npmrc --credential-config=./.npmrc",
     "check-syntax": "tsc --noEmit"
   },
   "dependencies": {

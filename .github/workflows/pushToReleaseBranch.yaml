@@ -77,7 +77,7 @@ jobs:
           # Remove unwanted files and node_modules before push
           echo "🧹 Cleaning release branch..."
           rm -rf node_modules
-          rm -f .gitignore .npmrc package.json package-lock.json tsconfig.json gha-creds*.json version.txt
+          rm -f gha-creds*.json version.txt
 
           # Stage remaining files
           git add .

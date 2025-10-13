@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: dev
-          fetch-depth: 0  # fetch all tags and history
+          fetch-depth: 0
 
       # 2️⃣ Setup Node.js
       - name: Setup Node.js
@@ -75,9 +75,8 @@ jobs:
           git checkout -B release
 
           # Remove unwanted files and node_modules before push
-          echo "🧹 Cleaning release branch..."
           rm -rf node_modules
-          rm -f .gitignore .npmrc package.json package-lock.json tsconfig.json gha-creds*.json
+          rm -f .gitignore .npmrc package.json package-lock.json tsconfig.json gha-creds*.json version.txt
 
           # Stage remaining files
           git add .
@@ -85,7 +84,7 @@ jobs:
           git push origin release --force
 
           VERSION=${{ steps.version.outputs.VERSION }}
-          echo "🏷 Preparing to tag version: $VERSION"
+          echo "Preparing to tag version: $VERSION"
 
           # Tag only if not exists
           if git ls-remote --tags origin | grep -q "refs/tags/$VERSION"; then

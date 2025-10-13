@@ -8,43 +8,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the dev branch
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           ref: dev
 
-      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      # 3️⃣ Install TypeScript only (devDependency)
-      - name: Install TypeScript
-        run: npm install --save-dev typescript
+      - name: Install Dependencies
+        run: npm ci
 
-      # 4️⃣ Run TypeScript Syntax Check without requiring node_modules dependencies
       - name: Run TypeScript Syntax Check
-        run: |
-          # Create temporary tsconfig for syntax-only check
-          echo '{
-            "compilerOptions": {
-              "allowJs": true,
-              "checkJs": true,
-              "noEmit": true,
-              "skipLibCheck": true,
-              "module": "commonjs",
-              "target": "es2022",
-              "strict": false
-            },
-            "include": ["**/*.js"]
-          }' > tsconfig.temp.json
+        run: npm run check-syntax
 
-          npx tsc --project tsconfig.temp.json
-          echo "✅ Syntax check passed"
-
-      # 5️⃣ Generate Custom Version
       - name: Generate Custom Version
         id: version
         run: |
@@ -58,8 +37,6 @@ jobs:
           VERSION="R4B-Function-v$NEXT_VERSION"
           echo $VERSION > version.txt
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
-      # 6️⃣ Push to Release Branch with Tag
       - name: Push to Release Branch with Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,7 +45,6 @@ jobs:
           git config user.email "actions@github.com"
           git checkout -B release
           git push origin release --force
-
           VERSION=${{ steps.version.outputs.VERSION }}
           git tag $VERSION
           git push origin $VERSION

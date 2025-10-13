@@ -76,6 +76,7 @@ jobs:
 
           # Remove unwanted root-level files before push
           echo "🧹 Removing root-level files from release branch..."
+          rm -rf node_modules
           rm -f .gitignore .npmrc package.json package-lock.json tsconfig.json
 
           # Stage remaining files

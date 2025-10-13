@@ -18,16 +18,25 @@ jobs:
         with:
           node-version: 20
 
-      # ✅ Run artifact login before installing dependencies
+      # 1️⃣ Authenticate to Google Cloud
+      - name: Auth to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # 2️⃣ Authenticate with Artifact Registry
       - name: Authenticate with Artifact Registry
         run: npm run artifactregistry-login
 
+      # 3️⃣ Install Dependencies
       - name: Install Dependencies
         run: npm ci
 
+      # 4️⃣ Run TypeScript Syntax Check
       - name: Run TypeScript Syntax Check
         run: npm run check-syntax
 
+      # 5️⃣ Generate Custom Version
       - name: Generate Custom Version
         id: version
         run: |
@@ -42,6 +51,7 @@ jobs:
           echo $VERSION > version.txt
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
+      # 6️⃣ Push to Release Branch with Tag
       - name: Push to Release Branch with Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

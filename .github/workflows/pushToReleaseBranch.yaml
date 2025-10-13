@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout Code from Dev Branch
+      # 1️⃣ Checkout Dev Branch
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
@@ -27,23 +27,18 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # 4️⃣ Authenticate with Artifact Registry
-      - name: Authenticate with Artifact Registry
-        run: npm run artifactregistry-login
-
-      # 5️⃣ Install Dependencies
+      # 4️⃣ Install Dependencies
       - name: Install Dependencies
         run: npm ci
 
-      # 6️⃣ Run TypeScript Syntax Check
+      # 5️⃣ Run TypeScript Syntax Check
       - name: Run TypeScript Syntax Check
         run: |
           npm run check-syntax
           echo "✅ TypeScript syntax check completed successfully!"
 
-      # 7️⃣ Generate Custom Version and Push to Release Branch
-      - name: Push to Release Branch (with change detection)
-        id: release
+      # 6️⃣ Push to Release Branch with Tag (only if changes in FUNCTIONS_LIST)
+      - name: Push to Release Branch with Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FUNCTIONS_LIST: ${{ secrets.FUNCTIONS_LIST }}
@@ -51,11 +46,9 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-          echo "🚀 Fetching dev branch for comparison..."
+          echo "🚀 Fetching remote branches..."
           git fetch origin dev
-
-          echo "🚀 Switching to release branch..."
-          git checkout -B release
+          git fetch origin release
 
           # Convert comma-separated FUNCTIONS_LIST to space-separated
           FUNCTIONS_LIST=$(echo "$FUNCTIONS_LIST" | tr ',' ' ')
@@ -63,12 +56,15 @@ jobs:
 
           CHANGE_FOUND=0
           for func in $FUNCTIONS_LIST; do
-            if ! git diff --quiet release..origin/dev -- "$func"; then
+            if ! git diff --quiet origin/release..origin/dev -- "$func"; then
               echo "⚡ Changes detected in $func"
               CHANGE_FOUND=1
               break
             fi
           done
+
+          # Create or switch to release branch based on remote
+          git checkout -B release origin/release
 
           if [ $CHANGE_FOUND -eq 1 ]; then
             echo "🧹 Cleaning release branch (removing node_modules, secrets, etc.)..."

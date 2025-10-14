@@ -24,20 +24,13 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # 3️⃣ Secure Artifact Registry Login (no .npmrc file)
-      - name: Artifact Registry Login (Secure)
+      # 3️⃣ Generate short-lived NPM token for Artifact Registry
+      - name: Generate NPM token
+        id: npm_token
         run: |
-          echo "🔐 Authenticating npm to Artifact Registry..."
-
-          # Set the scoped registry URL
-          npm config set @roger:registry "https://us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/"
-
-          
-
-          # Set auth token for that registry dynamically
-          npm config set "//us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:_authToken" "$(gcloud auth print-access-token)"
-
-          echo "✅ Artifact Registry authentication completed!"
+          echo "🔐 Generating short-lived NPM token..."
+          echo "NPM_TOKEN=$(gcloud auth print-access-token)" >> $GITHUB_ENV
+          echo "✅ Token generated."
 
       # 4️⃣ Setup Terraform
       - name: Setup Terraform
@@ -57,7 +50,8 @@ jobs:
           terraform plan \
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
-            -var="functions=[$FUNCTIONS_LIST]"
+            -var="functions=[$FUNCTIONS_LIST]" \
+            -var="npm_token=${{ env.NPM_TOKEN }}"
 
       # 7️⃣ Terraform Apply
       - name: Terraform Apply
@@ -68,4 +62,5 @@ jobs:
           terraform apply -auto-approve \
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
-            -var="functions=[$FUNCTIONS_LIST]"
+            -var="functions=[$FUNCTIONS_LIST]" \
+            -var="npm_token=${{ env.NPM_TOKEN }}"

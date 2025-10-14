@@ -1,5 +1,10 @@
-# Ignore dependencies
-node_modules/
+# Ignore everything in every node_modules
+**/node_modules/*
+
+# Re-include ONLY the @roger scope packages
+!**/node_modules/@roger
+!**/node_modules/@roger/**
+
 
 # Ignore npm configs
 

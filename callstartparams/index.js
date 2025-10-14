@@ -16,7 +16,6 @@ functions.http("helloHttp", async (req, res) => {
       logger.logConsole("info", `CallStartApi - Invoked`, { sessionId, tag });
       const dnis = sessionParamsFromCX?.Dnis || "NA";
       logger.logWebhookRequest(sessionId, tag, { Dnis: dnis });
-
       const apiUrl = `https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params`;
       const headers = {
         cdr: "112432245667775757",

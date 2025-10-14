@@ -3,6 +3,7 @@ const apiRequest = require('@roger/r4b-common-nodemodules').apiClient;
 const logger = require('@roger/r4b-common-nodemodules').logger;
 
 functions.http("helloHttp", async (req, res) => {
+    console.log("Request Body:", JSON.stringify(req.body, null, 2));
     const sessionId = req.body.sessionInfo?.session?.split("/sessions/").pop() || "unknown-session";
     const tag = req.body.fulfillmentInfo?.tag || "PostDataTransfer";
     logger.logWebhookDetails(sessionId, tag);
@@ -10,7 +11,6 @@ functions.http("helloHttp", async (req, res) => {
     let Status = 1;
     let ResponsePayload = {};
     try {
-        
         const secretHeader = {
             token: req.headers["token"],
             expiryTime: req.headers["expirytime"],

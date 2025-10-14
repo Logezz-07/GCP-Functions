@@ -1,4 +1,4 @@
-name: pushToReleaseBranch
+name: R4B-CodeCheck/PushToRelease
 
 on:
   workflow_dispatch:

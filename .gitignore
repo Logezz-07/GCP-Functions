@@ -6,4 +6,4 @@
 !**/node_modules/@roger/**
 
 #ignore npmrc files
-**/.npmrc
+#**/.npmrc

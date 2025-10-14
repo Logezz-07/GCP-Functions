@@ -47,22 +47,31 @@ jobs:
           git checkout -B release
           git reset --hard origin/dev
 
-          # Generate next version tag
-          echo "🏷 Generating new version tag..."
-          LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
-          if [ -z "$LATEST_TAG" ]; then
-            NEXT_VERSION=1
+          # Push release branch
+          echo "⬆️ Pushing to release branch"
+          PUSH_OUTPUT=$(git push origin release --force 2>&1)
+          echo "$PUSH_OUTPUT"
+
+          # Only create and push tag if release branch had updates
+          if [[ "$PUSH_OUTPUT" == *"Everything up-to-date"* ]]; then
+            echo "ℹ️ Release branch already up-to-date. Skipping versioning."
           else
-            NUM=$(echo $LATEST_TAG | sed 's/R4B-Function-v//')
-            NEXT_VERSION=$((NUM + 1))
+            echo "💾 Release branch updated. Generating new version tag..."
+
+            # Generate next version tag
+            echo "🏷 Generating new version tag..."
+            LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
+            if [ -z "$LATEST_TAG" ]; then
+              NEXT_VERSION=1
+            else
+              NUM=$(echo $LATEST_TAG | sed 's/R4B-Function-v//')
+              NEXT_VERSION=$((NUM + 1))
+            fi
+            VERSION="R4B-Function-v$NEXT_VERSION"
+            git tag $VERSION
+
+            # Push the new tag
+            git push origin $VERSION
+            echo "✅ Release branch updated and tag $VERSION pushed successfully!"
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           fi
-          VERSION="R4B-Function-v$NEXT_VERSION"
-          git tag $VERSION
-
-          # Push release branch and tag 
-          echo "⬆️ Pushing release branch and tag to origin"
-          git push origin release --force
-          git push origin $VERSION
-
-          echo "✅ Release branch updated and tag $VERSION pushed successfully!"
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT

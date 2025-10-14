@@ -70,15 +70,6 @@ jobs:
               git checkout origin/dev -- "$func"
             done
 
-            echo "📦 Staging updated folders..."
-            git add "${CHANGED_FUNCS[@]}"
-
-            echo "💾 Committing merged changes..."
-            git commit -m "Merged changes from dev into release for: ${CHANGED_FUNCS[*]}" || echo "ℹ️ Nothing new to commit"
-
-            echo "⬆️ Pushing release branch..."
-            git push origin release --force
-
             echo "🏷 Generating new version tag..."
             LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
             if [ -z "$LATEST_TAG" ]; then
@@ -87,6 +78,15 @@ jobs:
               NUM=$(echo $LATEST_TAG | sed 's/R4B-Function-v//')
               NEXT_VERSION=$((NUM + 1))
             fi
+
+            echo "📦 Staging updated folders..."
+            git add "${CHANGED_FUNCS[@]}"
+
+            echo "💾 Committing merged changes..."
+            git commit -m "New changes from dev - v$NEXT_VERSION" || echo "ℹ️ Nothing new to commit"
+
+            echo "⬆️ Pushing release branch..."
+            git push origin release --force
 
             VERSION="R4B-Function-v$NEXT_VERSION"
             git tag $VERSION

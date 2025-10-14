@@ -23,13 +23,15 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-      
-      # 3️⃣ Login to Artifact Registry via npm script
-      - name: Artifact Registry Login
+
+      # 3️⃣ Secure Artifact Registry Login (no .npmrc file)
+      - name: Artifact Registry Login (Secure)
         run: |
-          echo "🔐 Running Artifact Registry login..."
-          npm run artifactregistry-login
-          echo "✅ Artifact Registry login completed!"
+          echo "🔐 Authenticating npm to Artifact Registry..."
+          npm config set @roger:registry "https://us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/"
+          npm config set //us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:always-auth true
+          npm config set //us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:_authToken "$(gcloud auth print-access-token)"
+          echo "✅ Artifact Registry authentication completed."
 
       # 4️⃣ Setup Terraform
       - name: Setup Terraform
@@ -45,7 +47,7 @@ jobs:
         working-directory: teraform
         run: |
           FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
-          echo "Functions to deploy: [$FUNCTIONS_LIST]"
+          echo "🧩 Functions to deploy: [$FUNCTIONS_LIST]"
           terraform plan \
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
@@ -56,7 +58,7 @@ jobs:
         working-directory: teraform
         run: |
           FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
-          echo "Applying deployment for functions: [$FUNCTIONS_LIST]"
+          echo "🚀 Applying deployment for functions: [$FUNCTIONS_LIST]"
           terraform apply -auto-approve \
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \

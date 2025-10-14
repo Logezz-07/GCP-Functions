@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-   R4B-CodeCheck-Release:
+  R4B-CodeCheck-Release:
     runs-on: ubuntu-latest
 
     steps:
@@ -45,24 +45,31 @@ jobs:
           echo "📦 Staging all files..."
           git add .
 
-          echo "💾 Committing all changes..."
-          git commit -m "New Commit From Dev" || echo "ℹ️ Nothing to commit"
+          # Check if there is anything to commit
+          if ! git diff --cached --quiet; then
+            echo "💾 Committing all changes..."
+            git commit -m "New Commit From Dev"
 
-          echo "⬆️ Pushing release branch..."
-          git push origin release --force
+            echo "⬆️ Pushing release branch..."
+            git push origin release --force
 
-          echo "🏷 Generating new version tag..."
-          LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
-          if [ -z "$LATEST_TAG" ]; then
-            NEXT_VERSION=1
+            echo "🏷 Generating new version tag..."
+            LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
+            if [ -z "$LATEST_TAG" ]; then
+              NEXT_VERSION=1
+            else
+              NUM=$(echo $LATEST_TAG | sed 's/R4B-Function-v//')
+              NEXT_VERSION=$((NUM + 1))
+            fi
+
+            VERSION="R4B-Function-v$NEXT_VERSION"
+            git tag $VERSION
+            git push origin $VERSION
+            echo "✅ Tag $VERSION created and pushed successfully!"
+
           else
-            NUM=$(echo $LATEST_TAG | sed 's/R4B-Function-v//')
-            NEXT_VERSION=$((NUM + 1))
+            echo "ℹ️ Nothing to commit, skipping push and tagging"
+            VERSION=$(git tag --sort=-v:refname | head -n1)
           fi
-
-          VERSION="R4B-Function-v$NEXT_VERSION"
-          git tag $VERSION
-          git push origin $VERSION
-          echo "✅ Tag $VERSION created and pushed successfully!"
 
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT

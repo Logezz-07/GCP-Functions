@@ -31,28 +31,35 @@ jobs:
           npm run check-syntax
           echo "✅ TypeScript syntax check completed successfully!"
 
-      # 5️⃣ Create Release Branch and Tag
-      - name: Create Release Branch and Tag
+      # 5️⃣ Create/Update Release Branch and Push
+      - name: Create/Update Release Branch and Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Configure Git user
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-          # Make sure release is based on latest dev
-          echo "🚀 Creating/Updating Release Branch from Dev"
+          echo "🚀 Fetching latest dev commits"
           git fetch origin dev
-          git checkout -B release origin/dev
 
-          # Only commit if workflow generates changes (e.g., build artifacts)
+          # Force release branch to match latest dev
+          echo "🔄 Resetting release branch to match dev"
+          git checkout -B release
+          git reset --hard origin/dev
+
+          # Stage workflow-generated changes (if any)
           git add .
           if ! git diff --cached --quiet; then
             echo "💾 Committing workflow-generated changes..."
             git commit -m "New Commit From Dev"
-            git push origin release --force
           else
-            echo "⚠️ No new files to commit. Skipping commit & push."
+            echo "ℹ️ No workflow-generated changes to commit."
           fi
+
+          # Push release branch to remote (always)
+          echo "⬆️ Pushing release branch to origin"
+          git push origin release --force
 
           # Generate next version tag
           echo "🏷 Generating new version tag..."
@@ -69,4 +76,5 @@ jobs:
           git push origin $VERSION
           echo "✅ Tag $VERSION created and pushed successfully!"
 
+          # Output version for downstream steps
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT

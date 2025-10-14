@@ -1,4 +1,4 @@
-name: Deploy Cloud Functions with Terraform
+name: R4B-Deploy Cloud Functions
 
 on:
   workflow_dispatch:

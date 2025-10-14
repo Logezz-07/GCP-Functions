@@ -44,18 +44,8 @@ jobs:
           git fetch origin dev
 
           # Force release branch to match latest dev
-          echo "🔄 Resetting release branch to match dev"
           git checkout -B release
           git reset --hard origin/dev
-
-          # Stage and commit workflow-generated changes if any
-          git add .
-          if ! git diff --cached --quiet; then
-            echo "💾 Committing workflow-generated changes..."
-            git commit -m "New Commit From Dev"
-          else
-            echo "ℹ️ No workflow-generated changes to commit. Skipping commit."
-          fi
 
           # Generate next version tag
           echo "🏷 Generating new version tag..."
@@ -69,7 +59,7 @@ jobs:
           VERSION="R4B-Function-v$NEXT_VERSION"
           git tag $VERSION
 
-          # Push release branch and tag **every time**
+          # Push release branch and tag 
           echo "⬆️ Pushing release branch and tag to origin"
           git push origin release --force
           git push origin $VERSION

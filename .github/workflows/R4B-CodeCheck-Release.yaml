@@ -48,14 +48,14 @@ jobs:
           git checkout -B release
           git reset --hard origin/dev
 
-          # Stage workflow-generated changes (if any)
+          # Stage and commit workflow-generated changes if any
           git add .
-          echo "💾 Committing workflow-generated changes..."
-          git commit -m "New Commit From Dev"
-
-          # Push release branch to remote (always)
-          echo "⬆️ Pushing release branch to origin"
-          git push origin release --force
+          if ! git diff --cached --quiet; then
+            echo "💾 Committing workflow-generated changes..."
+            git commit -m "New Commit From Dev"
+          else
+            echo "ℹ️ No workflow-generated changes to commit. Skipping commit."
+          fi
 
           # Generate next version tag
           echo "🏷 Generating new version tag..."
@@ -67,10 +67,12 @@ jobs:
             NEXT_VERSION=$((NUM + 1))
           fi
           VERSION="R4B-Function-v$NEXT_VERSION"
-
           git tag $VERSION
-          git push origin $VERSION
-          echo "✅ Tag $VERSION created and pushed successfully!"
 
-          # Output version for downstream steps
+          # Push release branch and tag **every time**
+          echo "⬆️ Pushing release branch and tag to origin"
+          git push origin release --force
+          git push origin $VERSION
+
+          echo "✅ Release branch updated and tag $VERSION pushed successfully!"
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT

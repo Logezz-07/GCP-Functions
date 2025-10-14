@@ -50,12 +50,8 @@ jobs:
 
           # Stage workflow-generated changes (if any)
           git add .
-          if ! git diff --cached --quiet; then
-            echo "💾 Committing workflow-generated changes..."
-            git commit -m "New Commit From Dev"
-          else
-            echo "ℹ️ No workflow-generated changes to commit."
-          fi
+          echo "💾 Committing workflow-generated changes..."
+          git commit -m "New Commit From Dev"
 
           # Push release branch to remote (always)
           echo "⬆️ Pushing release branch to origin"

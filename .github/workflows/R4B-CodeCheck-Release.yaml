@@ -46,7 +46,7 @@ jobs:
           git add .
 
           echo "💾 Committing all changes..."
-          git commit -m "New Commit From Dev || echo "ℹ️ Nothing to commit"
+          git commit -m "New Commit From Dev" || echo "ℹ️ Nothing to commit"
 
           echo "⬆️ Pushing release branch..."
           git push origin release --force

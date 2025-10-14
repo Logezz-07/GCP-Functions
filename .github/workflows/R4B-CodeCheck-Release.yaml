@@ -41,7 +41,7 @@ jobs:
 
           echo "🚀 Creating Release Branch"
           git fetch origin dev
-          git checkout -B release
+          git checkout -B release origin/dev
 
           echo "📦 Staging all files..."
           git add .

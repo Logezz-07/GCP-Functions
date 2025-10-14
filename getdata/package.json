@@ -1,0 +1,22 @@
+{
+  "name": "getdata",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "artifactregistry-login": "npx google-artifactregistry-auth --repo-config=./.npmrc --credential-config=./.npmrc",
+    "start": "functions-framework --target=helloHttp"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.1.0",
+    "@google-cloud/secret-manager": "^5.6.0",
+    "@roger/r4b-common-nodemodules": "^1.1.7",
+    "axios": "^1.6.7"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

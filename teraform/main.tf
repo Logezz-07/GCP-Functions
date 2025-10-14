@@ -18,7 +18,8 @@ variable "functions" {
   type = list(string)
 }
 variable "npm_token" {
-  type = string
+  description = "NPM token for private packages"
+  type        = string
 }
 
 provider "google" {

@@ -40,6 +40,7 @@ jobs:
           git config user.email "actions@github.com"
 
           echo "🚀 Creating Release Branch"
+          git fetch origin dev
           git checkout -B release
 
           echo "📦 Staging all files..."

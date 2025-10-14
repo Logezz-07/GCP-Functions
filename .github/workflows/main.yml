@@ -27,18 +27,10 @@ jobs:
       # 3️⃣ Secure Artifact Registry Login (no .npmrc file)
       - name: Artifact Registry Login (Secure)
         run: |
-          echo "🔐 Authenticating npm to Artifact Registry..."
-
-          # Set the scoped registry URL
+          npm config set "//us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:always-auth" true
+          npm config set "//us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:_authToken" "$(gcloud auth print-access-token)"
           npm config set @roger:registry "https://us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/"
 
-          # Enable always-auth for the scope
-          npm config set @roger:always-auth true
-
-           # Set auth token for that registry
-           npm config set //us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:_authToken "$(gcloud auth print-access-token)"
-
-           echo "✅ Artifact Registry authentication completed!"
 
 
       # 4️⃣ Setup Terraform

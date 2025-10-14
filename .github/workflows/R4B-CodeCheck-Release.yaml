@@ -1,4 +1,4 @@
-name: R4B-CodeCheck/Release
+name: R4B-CodeCheck and Release
 
 on:
   workflow_dispatch:

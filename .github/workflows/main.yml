@@ -33,7 +33,7 @@ jobs:
           npm config set @roger:registry "https://us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/"
 
           # Enable always-auth for that registry (full URL with trailing slash)
-          npm config set "//us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:always-auth" true
+          npm config set always-auth=true
 
           # Set auth token for that registry dynamically
           npm config set "//us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:_authToken" "$(gcloud auth print-access-token)"

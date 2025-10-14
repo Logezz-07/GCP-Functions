@@ -1,10 +1,9 @@
 terraform {
-
   backend "gcs" {
     bucket = "roger-470808-terraform-state" 
     prefix = "cloud-functions-state"              
   }
-  
+
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -18,6 +17,10 @@ variable "region" {}
 variable "functions" {
   type = list(string)
 }
+variable "npm_token" {
+  description = "NPM token for private packages"
+  type        = string
+}
 
 provider "google" {
   project = var.project_id
@@ -29,14 +32,13 @@ data "google_storage_bucket" "bucket" {
   name = "roger-470808-gcf-source"
 }
 
-
 # Archive function source code
 data "archive_file" "functions" {
   for_each    = toset(var.functions)
   type        = "zip"
   output_path = "/tmp/${each.key}.zip"
   source_dir  = "../${each.key}"  
-  excludes    = ["node_modules","README.md",".gitignore"]
+  excludes    = ["README.md",".gitignore"] # Exclude .npmrc because token comes from env
 }
 
 # Upload each zip to bucket
@@ -49,9 +51,9 @@ resource "google_storage_bucket_object" "function_objects" {
 
 # Create Cloud Functions
 resource "google_cloudfunctions2_function" "functions" {
-  for_each    = toset(var.functions)
-  name        = each.key
-  location    = var.region
+  for_each = toset(var.functions)
+  name     = each.key
+  location = var.region
   description = "Terraform managed Cloud Function: ${each.key}"
 
   build_config {
@@ -63,6 +65,10 @@ resource "google_cloudfunctions2_function" "functions" {
         bucket = data.google_storage_bucket.bucket.name
         object = google_storage_bucket_object.function_objects[each.key].name
       }
+    }
+
+    environment_variables = {
+      NPM_TOKEN = var.npm_token
     }
   }
 

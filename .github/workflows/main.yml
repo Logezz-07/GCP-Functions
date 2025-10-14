@@ -23,18 +23,24 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      # 3️⃣ Login to Artifact Registry via npm script
+      - name: Artifact Registry Login
+        run: |
+          echo "🔐 Running Artifact Registry login..."
+          npm run artifactregistry-login
+          echo "✅ Artifact Registry login completed!"
 
-
-      # 3️⃣ Setup Terraform
+      # 4️⃣ Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # 4️⃣ Terraform Init
+      # 5️⃣ Terraform Init
       - name: Terraform Init
         working-directory: teraform
         run: terraform init
 
-      # 5️⃣ Terraform Plan
+      # 6️⃣ Terraform Plan
       - name: Terraform Plan
         working-directory: teraform
         run: |
@@ -45,7 +51,7 @@ jobs:
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
             -var="functions=[$FUNCTIONS_LIST]"
 
-      # 6️⃣ Terraform Apply
+      # 7️⃣ Terraform Apply
       - name: Terraform Apply
         working-directory: teraform
         run: |

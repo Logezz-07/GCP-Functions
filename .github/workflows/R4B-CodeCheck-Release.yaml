@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  syntax-check-and-release:
+  full-release:
     runs-on: ubuntu-latest
 
     steps:
       # 1️⃣ Checkout Dev Branch
-      - name: Checkout Code
+      - name: Checkout Dev
         uses: actions/checkout@v3
         with:
           ref: dev
@@ -31,72 +31,38 @@ jobs:
           npm run check-syntax
           echo "✅ TypeScript syntax check completed successfully!"
 
-      # 5️⃣ Push to Release Branch with Tag (only if changes in FUNCTIONS_LIST)
-      - name: Push to Release Branch with Tag
+      # 5️⃣ Create Release Branch and Push Everything
+      - name: Create Release Branch and Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FUNCTIONS_LIST: ${{ secrets.FUNCTIONS_LIST }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-          echo "🚀 Fetching remote branches..."
-          git fetch origin dev
-          git fetch origin release
+          echo "🚀 Creating fresh release branch from dev..."
+          git checkout -B release
 
-          # Convert comma-separated FUNCTIONS_LIST to space-separated
-          FUNCTIONS_LIST=$(echo "$FUNCTIONS_LIST" | tr ',' ' ')
-          echo "🔍 Checking for changes in functions: $FUNCTIONS_LIST"
+          echo "📦 Staging all files..."
+          git add .
 
-          CHANGED_FUNCS=()
+          echo "💾 Committing all changes..."
+          git commit -m "Full release from dev - $(date +'%Y-%m-%d %H:%M:%S')" || echo "ℹ️ Nothing new to commit"
 
-          # Check for changes in each function folder
-          for func in $FUNCTIONS_LIST; do
-            if ! git diff --quiet origin/release..origin/dev -- "$func"; then
-              echo "⚡ Changes detected in $func"
-              CHANGED_FUNCS+=("$func")
-            else
-              echo "✅ No changes in $func"
-            fi
-          done
+          echo "⬆️ Pushing release branch..."
+          git push origin release --force
 
-          # Switch to release branch
-          git checkout -B release origin/release
-
-          if [ ${#CHANGED_FUNCS[@]} -gt 0 ]; then
-            echo "🔀 Merging changed functions from dev into release..."
-            for func in "${CHANGED_FUNCS[@]}"; do
-              echo "📂 Merging updates for: $func"
-              git checkout origin/dev -- "$func"
-            done
-
-            echo "🏷 Generating new version tag..."
-            LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
-            if [ -z "$LATEST_TAG" ]; then
-              NEXT_VERSION=1
-            else
-              NUM=$(echo $LATEST_TAG | sed 's/R4B-Function-v//')
-              NEXT_VERSION=$((NUM + 1))
-            fi
-
-            echo "📦 Staging updated folders..."
-            git add "${CHANGED_FUNCS[@]}"
-
-            echo "💾 Committing merged changes..."
-            git commit -m "New changes from dev - v$NEXT_VERSION" || echo "ℹ️ Nothing new to commit"
-
-            echo "⬆️ Pushing release branch..."
-            git push origin release --force
-
-            VERSION="R4B-Function-v$NEXT_VERSION"
-            git tag $VERSION
-            git push origin $VERSION
-            echo "✅ Tag $VERSION created and pushed successfully!"
+          echo "🏷 Generating new version tag..."
+          LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
+          if [ -z "$LATEST_TAG" ]; then
+            NEXT_VERSION=1
           else
-            echo "ℹ️ No changes detected in any function folder. Skipping commit and version increment."
-            LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
-            VERSION=$LATEST_TAG
-            echo "🏷 Current version remains: $VERSION"
+            NUM=$(echo $LATEST_TAG | sed 's/R4B-Function-v//')
+            NEXT_VERSION=$((NUM + 1))
           fi
+
+          VERSION="R4B-Function-v$NEXT_VERSION"
+          git tag $VERSION
+          git push origin $VERSION
+          echo "✅ Tag $VERSION created and pushed successfully!"
 
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT

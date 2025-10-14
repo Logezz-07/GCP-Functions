@@ -3,8 +3,7 @@ const apiRequest = require('@roger/r4b-common-nodemodules').apiClient;
 const logger = require('@roger/r4b-common-nodemodules').logger;
 
 functions.http("helloHttp", async (req, res) => {
-    console.log("webhook invocation started");
-    
+
     console.log("Request Body:", JSON.stringify(req.body, null, 2));
     const sessionId = req.body.sessionInfo?.session?.split("/sessions/").pop() || "unknown-session";
     const tag = req.body.fulfillmentInfo?.tag || "PostDataTransfer";
@@ -58,7 +57,7 @@ functions.http("helloHttp", async (req, res) => {
         Status = apiResult.Status;
         ResponsePayload = apiResult.ResponsePayload;
 
-       
+
         let sessionParams = {};
         if (Status === 200 && apiResult.ReturnCode === "0") {
             sessionParams = { returnCode: "0", message: ResponsePayload?.message };

@@ -29,7 +29,8 @@ jobs:
         id: npm_token
         run: |
           echo "🔐 Generating short-lived NPM token..."
-          echo "NPM_TOKEN=$(gcloud auth print-access-token)" >> $GITHUB_ENV
+          TOKEN=$(gcloud auth print-access-token)
+          echo "npm_token=$TOKEN" >> $GITHUB_OUTPUT
           echo "✅ Token generated."
 
       # 4️⃣ Setup Terraform
@@ -51,7 +52,7 @@ jobs:
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
             -var="functions=[$FUNCTIONS_LIST]" \
-            -var="npm_token=${{ env.NPM_TOKEN }}"
+            -var="npm_token=${{ steps.npm_token.outputs.npm_token }}"
 
       # 7️⃣ Terraform Apply
       - name: Terraform Apply
@@ -63,4 +64,4 @@ jobs:
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
             -var="functions=[$FUNCTIONS_LIST]" \
-            -var="npm_token=${{ env.NPM_TOKEN }}"
+            -var="npm_token=${{ steps.npm_token.outputs.npm_token }}"

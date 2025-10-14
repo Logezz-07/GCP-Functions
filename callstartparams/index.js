@@ -11,7 +11,7 @@ functions.http("helloHttp", async (req, res) => {
   let Status = 1;
   let ResponsePayload = {}
   try {
-    // ---------------------- CallStartApi ---------------------- //
+    console.log("webhook invocation started");
     if (tag === "callStartApi") {
       logger.logConsole("info", `CallStartApi - Invoked`, { sessionId, tag });
       const dnis = sessionParamsFromCX?.Dnis || "NA";

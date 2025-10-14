@@ -21,17 +21,17 @@ jobs:
         with:
           node-version: 20
 
-      # 4️⃣ Install Dependencies
+      # 3️⃣ Install Dependencies
       - name: Install Dependencies
         run: npm ci
 
-      # 5️⃣ Run TypeScript Syntax Check
+      # 4️⃣ Run TypeScript Syntax Check
       - name: Run TypeScript Syntax Check
         run: |
           npm run check-syntax
           echo "✅ TypeScript syntax check completed successfully!"
 
-      # 6️⃣ Push to Release Branch with Tag (only if changes in FUNCTIONS_LIST)
+      # 5️⃣ Push to Release Branch with Tag (only if changes in FUNCTIONS_LIST)
       - name: Push to Release Branch with Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,25 +48,35 @@ jobs:
           FUNCTIONS_LIST=$(echo "$FUNCTIONS_LIST" | tr ',' ' ')
           echo "🔍 Checking for changes in functions: $FUNCTIONS_LIST"
 
-          CHANGE_FOUND=0
+          CHANGED_FUNCS=()
+
+          # Check for changes in each function folder
           for func in $FUNCTIONS_LIST; do
             if ! git diff --quiet origin/release..origin/dev -- "$func"; then
               echo "⚡ Changes detected in $func"
-              CHANGE_FOUND=1
-              break
+              CHANGED_FUNCS+=("$func")
+            else
+              echo "✅ No changes in $func"
             fi
           done
 
-          # Create or switch to release branch based on remote
+          # Switch to release branch
           git checkout -B release origin/release
 
-          if [ $CHANGE_FOUND -eq 1 ]; then
+          if [ ${#CHANGED_FUNCS[@]} -gt 0 ]; then
+            echo "🔀 Merging changed functions from dev into release..."
+            for func in "${CHANGED_FUNCS[@]}"; do
+              echo "📂 Merging updates for: $func"
+              git checkout origin/dev -- "$func"
+            done
 
-            echo "📦 Staging all files..."
-            git add .
+            echo "📦 Staging updated folders..."
+            git add "${CHANGED_FUNCS[@]}"
 
-            echo "💾 Committing changes..."
-            git commit -m "Prepare release branch (removed root-level files)"
+            echo "💾 Committing merged changes..."
+            git commit -m "Merged changes from dev into release for: ${CHANGED_FUNCS[*]}" || echo "ℹ️ Nothing new to commit"
+
+            echo "⬆️ Pushing release branch..."
             git push origin release --force
 
             echo "🏷 Generating new version tag..."
@@ -83,7 +93,7 @@ jobs:
             git push origin $VERSION
             echo "✅ Tag $VERSION created and pushed successfully!"
           else
-            echo "ℹ️ No changes detected in FUNCTIONS_LIST. Skipping commit and version increment."
+            echo "ℹ️ No changes detected in any function folder. Skipping commit and version increment."
             LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
             VERSION=$LATEST_TAG
             echo "🏷 Current version remains: $VERSION"

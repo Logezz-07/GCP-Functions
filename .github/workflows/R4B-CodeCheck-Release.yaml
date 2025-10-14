@@ -39,14 +39,14 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-          echo "🚀 Creating fresh release branch from dev..."
+          echo "🚀 Creating Release Branch"
           git checkout -B release
 
           echo "📦 Staging all files..."
           git add .
 
           echo "💾 Committing all changes..."
-          git commit -m "Full release from dev - $(date +'%Y-%m-%d %H:%M:%S')" || echo "ℹ️ Nothing new to commit"
+          git commit -m "New Commit From Dev"
 
           echo "⬆️ Pushing release branch..."
           git push origin release --force

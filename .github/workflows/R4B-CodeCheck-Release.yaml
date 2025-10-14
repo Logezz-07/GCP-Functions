@@ -40,14 +40,11 @@ jobs:
           git config user.email "actions@github.com"
 
           echo "🚀 Creating Release Branch"
-          git fetch origin dev
-          git checkout -B release origin/dev
+          git checkout -B release 
 
           echo "📦 Staging all files..."
           git add .
 
-          # Check if there is anything to commit
-          if ! git diff --cached --quiet; then
             echo "💾 Committing all changes..."
             git commit -m "New Commit From Dev"
 
@@ -62,15 +59,9 @@ jobs:
               NUM=$(echo $LATEST_TAG | sed 's/R4B-Function-v//')
               NEXT_VERSION=$((NUM + 1))
             fi
-
             VERSION="R4B-Function-v$NEXT_VERSION"
             git tag $VERSION
             git push origin $VERSION
             echo "✅ Tag $VERSION created and pushed successfully!"
-
-          else
-            echo "ℹ️ Nothing to commit, skipping push and tagging"
-            VERSION=$(git tag --sort=-v:refname | head -n1)
-          fi
 
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT

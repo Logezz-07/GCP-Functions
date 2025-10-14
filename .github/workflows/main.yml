@@ -27,11 +27,13 @@ jobs:
       # 3️⃣ Secure Artifact Registry Login 
       - name: Artifact Registry Login (Secure)
         run: |
+          node -v   
+          npm -v    
           # 1️⃣ Set the scoped registry URL
           npm config set @roger:registry "https://us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/"
 
           # 2️⃣ Enable always-auth for that registry (URL based)
-          npm config set "//us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:always-auth" true
+          npm config set "//us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:always-auth=true"
 
           # 3️⃣ Set the auth token
           npm config set "//us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:_authToken" "$(gcloud auth print-access-token)"

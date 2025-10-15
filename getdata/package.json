@@ -10,14 +10,11 @@
     "@google-cloud/functions-framework": "^3.1.0",
     "@roger/r4b-common-nodemodules": "^1.1.7",
     "axios": "^1.6.7",
-    "@google-cloud/secret-manager": "^6.1.0"
-
+    "@google-cloud/secret-manager": "^6.1.1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "typescript": "^5.9.3"
-  }
+  "description": ""
 }
+

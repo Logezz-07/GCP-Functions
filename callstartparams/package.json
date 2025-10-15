@@ -11,7 +11,6 @@
     "@roger/r4b-common-nodemodules": "^1.1.7",
     "axios": "^1.6.7",
     "@google-cloud/secret-manager": "^6.1.0"
-
   },
   "keywords": [],
   "author": "",

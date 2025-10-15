@@ -38,7 +38,7 @@ data "archive_file" "functions" {
   type        = "zip"
   output_path = "/tmp/${each.key}.zip"
   source_dir  = "../${each.key}"  
-  excludes    = ["README.md",".gitignore"] # Exclude .npmrc because token comes from env
+  excludes    = ["README.md",".gitignore",".npmrc"]
 }
 
 # Upload each zip to bucket
@@ -68,7 +68,7 @@ resource "google_cloudfunctions2_function" "functions" {
     }
 
     environment_variables = {
-      NPM_TOKEN = "${var.npm_token}"
+      NPM_TOKEN = var.npm_token
     }
   }
 

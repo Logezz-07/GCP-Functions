@@ -68,7 +68,7 @@ resource "google_cloudfunctions2_function" "functions" {
     }
 
     environment_variables = {
-      NPM_TOKEN = var.npm_token
+      NPM_TOKEN = "${var.npm_token}"
     }
   }
 

@@ -4,7 +4,6 @@
   "main": "index.js",
    "scripts": {
     "artifactregistry-login": "npx google-artifactregistry-auth --repo-config=./.npmrc --credential-config=./.npmrc",
-    "preinstall": "echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc",
     "start": "functions-framework --target=helloHttp"
   },
   "dependencies": {

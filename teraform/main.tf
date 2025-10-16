@@ -38,7 +38,7 @@ data "archive_file" "functions" {
   type        = "zip"
   output_path = "/tmp/${each.key}.zip"
   source_dir  = "../${each.key}"  
-  excludes    = ["node_modules","README.md",".gitignore",".npmrc"]
+  excludes    = ["node_modules","README.md",".gitignore"]
 }
 
 # Upload each zip to bucket

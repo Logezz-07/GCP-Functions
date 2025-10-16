@@ -42,7 +42,8 @@ jobs:
           terraform plan \
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
-            -var="functions=[$FUNCTIONS_LIST]"
+            -var="functions=[$FUNCTIONS_LIST]" \
+            -var="npm_token=${{ secrets.NPM_TOKEN }}" 
 
       # 7️⃣ Terraform Apply
       - name: Terraform Apply
@@ -53,4 +54,5 @@ jobs:
           terraform apply -auto-approve \
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
-            -var="functions=[$FUNCTIONS_LIST]"
+            -var="functions=[$FUNCTIONS_LIST]" \
+            -var="npm_token=${{ secrets.NPM_TOKEN }}"

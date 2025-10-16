@@ -10,10 +10,10 @@ functions.http("helloHttp", async (req, res) => {
   let sessionParams = {};
   let Status = 1;
   let ResponsePayload = {}
+  iiwjierji
   try {
     console.log("webhook invocation started");
     if (tag === "callStartApi") {
-      logger.logConsole("info", `CallStartApi - Invoked`, { sessionId, tag });
       const dnis = sessionParamsFromCX?.Dnis || "NA";
       logger.logWebhookRequest(sessionId, tag, { Dnis: dnis });
       const apiUrl = `https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params`;

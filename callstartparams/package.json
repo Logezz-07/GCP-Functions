@@ -2,8 +2,8 @@
   "name": "callstartparams",
   "version": "1.0.0",
   "main": "index.js",
-   "scripts": {
-    "artifactregistry-login": "npx google-artifactregistry-auth --repo-config=./.npmrc --credential-config=./.npmrc",
+  "scripts": {
+    "preinstall": "echo \"@roger:registry=https://us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/\\n//us-central1-npm.pkg.dev/roger-470808/r4b-common-nodemodules/:_authToken=${NPM_TOKEN}\" > .npmrc",
     "start": "functions-framework --target=helloHttp"
   },
   "dependencies": {

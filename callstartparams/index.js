@@ -10,7 +10,7 @@ functions.http("helloHttp", async (req, res) => {
   let sessionParams = {};
   let Status = 1;
   let ResponsePayload = {}
-  iiwjierji
+
   try {
     console.log("webhook invocation started");
     if (tag === "callStartApi") {

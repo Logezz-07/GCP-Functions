@@ -24,15 +24,6 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # 3️⃣ Generate short-lived NPM token for Artifact Registry
-      - name: Generate NPM token
-        id: npm_token
-        run: |
-          echo "🔐 Generating short-lived NPM token..."
-          TOKEN=$(gcloud auth print-access-token)
-          echo "npm_token=$TOKEN" >> $GITHUB_OUTPUT
-          echo "✅ Token generated."
-
       # 4️⃣ Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -52,7 +43,7 @@ jobs:
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
             -var="functions=[$FUNCTIONS_LIST]" \
-            -var="npm_token=${{ steps.npm_token.outputs.npm_token }}"
+            -var="npm_token=${{ secrets.NPM_TOKEN }}"
 
       # 7️⃣ Terraform Apply
       - name: Terraform Apply
@@ -64,4 +55,4 @@ jobs:
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
             -var="functions=[$FUNCTIONS_LIST]" \
-            -var="npm_token=${{ steps.npm_token.outputs.npm_token }}"
+            -var="npm_token=${{ secrets.NPM_TOKEN }}"

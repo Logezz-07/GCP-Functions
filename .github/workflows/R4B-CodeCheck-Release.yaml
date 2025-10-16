@@ -26,52 +26,50 @@ jobs:
         run: npm ci
 
       # 4️⃣ Run TypeScript Syntax Check
-      - name: Run TypeScript Syntax Check
+      - name: Run Code Check
         run: |
           npm run check-syntax
-          echo "✅ TypeScript syntax check completed successfully!"
+          echo "✅ Code Check Completed Successfully!"
 
-      # 5️⃣ Create/Update Release Branch and Push
+      # 5️⃣ Create/Update Release Branch and Tag
       - name: Create/Update Release Branch and Tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Configure Git user
+          # Configure Git identity
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-          echo "🚀 Fetching latest dev commits"
-          git fetch origin dev
+          echo "🚀 Checking out dev branch and pulling latest changes"
+          git checkout dev
+          git pull origin dev
 
-          # Force release branch to match latest dev
+          echo "🔀 Creating or updating release branch"
           git checkout -B release
-          git reset --hard origin/dev
 
-          # Push release branch
-          echo "⬆️ Pushing to release branch"
+          echo "⬆️ Pushing release branch to origin"
           PUSH_OUTPUT=$(git push origin release --force 2>&1)
           echo "$PUSH_OUTPUT"
 
-          # Only create and push tag if release branch had updates
           if [[ "$PUSH_OUTPUT" == *"Everything up-to-date"* ]]; then
             echo "ℹ️ Release branch already up-to-date. Skipping versioning."
           else
             echo "💾 Release branch updated. Generating new version tag..."
 
             # Generate next version tag
-            echo "🏷 Generating new version tag..."
             LATEST_TAG=$(git tag --list "R4B-Function-v*" --sort=-v:refname | head -n1)
             if [ -z "$LATEST_TAG" ]; then
               NEXT_VERSION=1
             else
-              NUM=$(echo $LATEST_TAG | sed 's/R4B-Function-v//')
+              NUM=$(echo "$LATEST_TAG" | sed 's/R4B-Function-v//')
               NEXT_VERSION=$((NUM + 1))
             fi
             VERSION="R4B-Function-v$NEXT_VERSION"
-            git tag $VERSION
 
-            # Push the new tag
-            git push origin $VERSION
+            echo "🏷 Pushing new version tag: $VERSION"
+            git tag "$VERSION"
+            git push origin "$VERSION"
+
             echo "✅ Release branch updated and tag $VERSION pushed successfully!"
             echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           fi

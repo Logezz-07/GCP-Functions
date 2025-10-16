@@ -1,7 +1,7 @@
 terraform {
   backend "gcs" {
-    bucket = "roger-470808-terraform-state" 
-    prefix = "cloud-functions-state"              
+    bucket = "roger-470808-terraform-state"
+    prefix = "cloud-functions-state"
   }
 
   required_providers {
@@ -17,14 +17,17 @@ variable "region" {}
 variable "functions" {
   type = list(string)
 }
-variable "npm_token" {
-  description = "NPM token for private packages"
-  type        = string
-}
 
 provider "google" {
   project = var.project_id
   region  = var.region
+}
+
+# Secret Manager - fetch NPM password
+data "google_secret_manager_secret_version" "npm_pass" {
+  secret  = "NPM-Auth_Token"
+  project = "205115177972"
+  version = "1"
 }
 
 # Use existing bucket for function source
@@ -37,8 +40,8 @@ data "archive_file" "functions" {
   for_each    = toset(var.functions)
   type        = "zip"
   output_path = "/tmp/${each.key}.zip"
-  source_dir  = "../${each.key}"  
-  excludes    = ["node_modules","README.md",".gitignore",".npmrc"]
+  source_dir  = "../${each.key}"
+  excludes    = ["README.md", ".gitignore", ".npmrc"] # Exclude .npmrc
 }
 
 # Upload each zip to bucket
@@ -67,8 +70,11 @@ resource "google_cloudfunctions2_function" "functions" {
       }
     }
 
-    environment_variables = {
-      NPM_TOKEN = var.npm_token
+    # Inject secret as environment variable for .npmrc
+    secret_environment_variables {
+      key     = "NPM_PASS"
+      secret  = data.google_secret_manager_secret_version.npm_pass.secret
+      version = data.google_secret_manager_secret_version.npm_pass.version
     }
   }
 

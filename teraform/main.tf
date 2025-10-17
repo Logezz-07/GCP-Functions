@@ -1,7 +1,7 @@
 terraform {
   backend "gcs" {
-    bucket = "roger-470808-terraform-state" 
-    prefix = "cloud-functions-state"              
+    bucket = "roger-470808-terraform-state"
+    prefix = "cloud-functions-state"
   }
 
   required_providers {
@@ -17,8 +17,10 @@ variable "region" {}
 variable "functions" {
   type = list(string)
 }
-variable "npm_token" {
-  description = "NPM token for private packages"
+
+# Path to secret file (injected via GitHub Actions)
+variable "registry_pwd_file" {
+  description = "Path to Artifact Registry password file"
   type        = string
 }
 
@@ -27,21 +29,21 @@ provider "google" {
   region  = var.region
 }
 
-# Use existing bucket for function source
+# Get existing storage bucket for source zips
 data "google_storage_bucket" "bucket" {
   name = "roger-470808-gcf-source"
 }
 
-# Archive function source code
+# Create .zip for each Cloud Function source
 data "archive_file" "functions" {
   for_each    = toset(var.functions)
   type        = "zip"
   output_path = "/tmp/${each.key}.zip"
-  source_dir  = "../${each.key}"  
-  excludes    = ["node_modules","README.md",".gitignore"]
+  source_dir  = "../${each.key}"
+  excludes    = ["node_modules", "README.md", ".gitignore"]
 }
 
-# Upload each zip to bucket
+# Upload each .zip to GCS
 resource "google_storage_bucket_object" "function_objects" {
   for_each = toset(var.functions)
   name     = "${each.key}-${data.archive_file.functions[each.key].output_sha}.zip"
@@ -49,11 +51,17 @@ resource "google_storage_bucket_object" "function_objects" {
   source   = data.archive_file.functions[each.key].output_path
 }
 
+# Load the Artifact Registry password from file
+locals {
+  registry_pwd = trim(file(var.registry_pwd_file))
+}
+
 # Create Cloud Functions
 resource "google_cloudfunctions2_function" "functions" {
   for_each = toset(var.functions)
-  name     = each.key
-  location = var.region
+
+  name        = each.key
+  location    = var.region
   description = "Terraform managed Cloud Function: ${each.key}"
 
   build_config {
@@ -68,7 +76,7 @@ resource "google_cloudfunctions2_function" "functions" {
     }
 
     environment_variables = {
-      NPM_TOKEN = var.npm_token
+      ARTIFACT_REGISTRY_PWD = local.registry_pwd
     }
   }
 
@@ -81,7 +89,7 @@ resource "google_cloudfunctions2_function" "functions" {
   }
 }
 
-# Allow public HTTP invoke
+# Allow public invoke if required
 resource "google_cloud_run_service_iam_member" "member" {
   for_each = google_cloudfunctions2_function.functions
 
@@ -93,7 +101,7 @@ resource "google_cloud_run_service_iam_member" "member" {
   depends_on = [google_cloudfunctions2_function.functions]
 }
 
-# Output function URLs
+# Output Function URLs
 output "function_uris" {
   value = {
     for k, f in google_cloudfunctions2_function.functions :

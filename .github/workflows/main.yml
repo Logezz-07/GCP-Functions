@@ -31,7 +31,7 @@ jobs:
       # 4️⃣ Prepare Artifact Registry password file (from GitHub Secret)
       - name: Prepare Artifact Registry password file
         run: |
-          echo "${{ secrets.ARTIFACT_REGISTRY_PWD }}" > registry_pwd.txt
+          echo "${{ secrets.NPM_TOKEN }}" > registry_pwd.txt
           chmod 600 registry_pwd.txt
 
       # 5️⃣ Terraform Init

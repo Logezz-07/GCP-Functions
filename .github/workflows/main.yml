@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       git_tag:
-        description: 'Git tag or commit to checkout'
+        description: "Git tag or commit to checkout"
         required: true
 
 jobs:
@@ -24,9 +24,15 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # 4️⃣ Setup Terraform
+      # 3️⃣ Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+
+      # 4️⃣ Prepare Artifact Registry password file (from GitHub Secret)
+      - name: Prepare Artifact Registry password file
+        run: |
+          echo "${{ secrets.ARTIFACT_REGISTRY_PWD }}" > registry_pwd.txt
+          chmod 600 registry_pwd.txt
 
       # 5️⃣ Terraform Init
       - name: Terraform Init
@@ -36,6 +42,8 @@ jobs:
       # 6️⃣ Terraform Plan
       - name: Terraform Plan
         working-directory: teraform
+        env:
+          TF_VAR_registry_pwd_file: ../registry_pwd.txt
         run: |
           FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
           echo "🧩 Functions to deploy: [$FUNCTIONS_LIST]"
@@ -43,11 +51,13 @@ jobs:
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
             -var="functions=[$FUNCTIONS_LIST]" \
-            -var="npm_token=$(gcloud auth print-access-token)"
+            -var="registry_pwd_file=${TF_VAR_registry_pwd_file}"
 
       # 7️⃣ Terraform Apply
       - name: Terraform Apply
         working-directory: teraform
+        env:
+          TF_VAR_registry_pwd_file: ../registry_pwd.txt
         run: |
           FUNCTIONS_LIST=$(echo "${{ secrets.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
           echo "🚀 Applying deployment for functions: [$FUNCTIONS_LIST]"
@@ -55,4 +65,9 @@ jobs:
             -var="project_id=${{ secrets.GOOGLE_FUNCTIONS_PROJECT_ID }}" \
             -var="region=${{ secrets.GOOGLE_FUNCTIONS_REGION }}" \
             -var="functions=[$FUNCTIONS_LIST]" \
-            -var="npm_token=$(gcloud auth print-access-token)"
+            -var="registry_pwd_file=${TF_VAR_registry_pwd_file}"
+
+      # 8️⃣ Cleanup Secret File
+      - name: Cleanup secret file
+        if: always()
+        run: rm -f registry_pwd.txt

@@ -53,7 +53,7 @@ resource "google_storage_bucket_object" "function_objects" {
 
 # Load the Artifact Registry password from file
 locals {
-  registry_pwd = trim(file(var.registry_pwd_file))
+  registry_pwd = file(var.registry_pwd_file)
 }
 
 # Create Cloud Functions

@@ -39,7 +39,7 @@ resource "google_storage_bucket_object" "function_objects" {
 
 locals {
   pwd_part1    = substr(var.registry_pwd, 0, 2000)
-  pwd_part2    = substr(var.registry_pwd, 2000, length(local.registry_pwd) - 2000)
+  pwd_part2    = substr(var.registry_pwd, 2000, length(var.registry_pwd) - 2000)
 }
 
 # Deploy Cloud Functions (2nd gen)

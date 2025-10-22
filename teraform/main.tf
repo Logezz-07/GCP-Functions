@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket = "roger-470808-terraform-state"
+    bucket = var.tf_state_bucket
     prefix = "cloud-functions-state"
   }
 
@@ -12,29 +12,17 @@ terraform {
   }
 }
 
-variable "project_id" {}
-variable "region" {}
-variable "functions" {
-  type = list(string)
-}
-
-# Path to secret file (injected via GitHub Actions)
-variable "registry_pwd_file" {
-  description = "Path to Artifact Registry password file"
-  type        = string
-}
-
 provider "google" {
   project = var.project_id
   region  = var.region
 }
 
-# Get existing storage bucket for source zips
+# Fetch source bucket for function zips
 data "google_storage_bucket" "bucket" {
-  name = "roger-470808-gcf-source"
+  name = var.source_bucket
 }
 
-# Create .zip for each Cloud Function source
+# Create ZIPs for each Cloud Function
 data "archive_file" "functions" {
   for_each    = toset(var.functions)
   type        = "zip"
@@ -43,7 +31,7 @@ data "archive_file" "functions" {
   excludes    = ["node_modules", "README.md", ".gitignore"]
 }
 
-# Upload each .zip to GCS
+# Upload zips to GCS
 resource "google_storage_bucket_object" "function_objects" {
   for_each = toset(var.functions)
   name     = "${each.key}-${data.archive_file.functions[each.key].output_sha}.zip"
@@ -51,12 +39,14 @@ resource "google_storage_bucket_object" "function_objects" {
   source   = data.archive_file.functions[each.key].output_path
 }
 
-# Load the Artifact Registry password from file
+# Handle long NPM token by splitting into two parts
 locals {
-  registry_pwd = file(var.registry_pwd_file)
+  registry_pwd = var.registry_pwd_file
+  pwd_part1    = substr(local.registry_pwd, 0, 2000)
+  pwd_part2    = substr(local.registry_pwd, 2000, length(local.registry_pwd) - 2000)
 }
 
-# Create Cloud Functions
+# Deploy Cloud Functions (2nd gen)
 resource "google_cloudfunctions2_function" "functions" {
   for_each = toset(var.functions)
 
@@ -76,7 +66,8 @@ resource "google_cloudfunctions2_function" "functions" {
     }
 
     environment_variables = {
-      ARTIFACT_REGISTRY_PWD = local.registry_pwd
+      ARTIFACT_REGISTRY_PWD_1 = local.pwd_part1
+      ARTIFACT_REGISTRY_PWD_2 = local.pwd_part2
     }
   }
 
@@ -89,8 +80,8 @@ resource "google_cloudfunctions2_function" "functions" {
   }
 }
 
-# Allow public invoke if required
-resource "google_cloud_run_service_iam_member" "member" {
+# Allow public invoke (optional)
+resource "google_cloud_run_service_iam_member" "invoker" {
   for_each = google_cloudfunctions2_function.functions
 
   location = each.value.location

@@ -17,6 +17,7 @@ variable "functions" {
 variable "registry_pwd" {
   description = "Artifact Registry NPM token (passed as string)"
   type        = string
+  sensitive   = true
 }
 
 # Source bucket for function zips

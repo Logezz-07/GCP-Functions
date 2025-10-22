@@ -5,5 +5,3 @@
 !**/node_modules/@roger
 !**/node_modules/@roger/**
 
-#ignore npmrc files
-**/.npmrc

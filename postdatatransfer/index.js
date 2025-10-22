@@ -18,9 +18,7 @@ functions.http("helloHttp", async (req, res) => {
             clientSecret: req.headers["clientsecret"]
         };
 
-        if (!secretHeader.token || !secretHeader.expiryTime || !secretHeader.clientId || !secretHeader.clientSecret) {
-            throw new Error("Missing required secret headers");
-        }
+        
         const transferId = sessionParamsFromCX?.CONN_ID || "1234567890abcdef";
         const callingSystem = req.query?.callingSystem || "engage";
 

@@ -1,8 +1,5 @@
 terraform {
-  backend "gcs" {
-    bucket = var.tf_state_bucket
-    prefix = "cloud-functions-state"
-  }
+  backend "gcs" {}  
 
   required_providers {
     google = {
@@ -39,11 +36,10 @@ resource "google_storage_bucket_object" "function_objects" {
   source   = data.archive_file.functions[each.key].output_path
 }
 
-# Handle long NPM token by splitting into two parts
+
 locals {
-  registry_pwd = var.registry_pwd_file
-  pwd_part1    = substr(local.registry_pwd, 0, 2000)
-  pwd_part2    = substr(local.registry_pwd, 2000, length(local.registry_pwd) - 2000)
+  pwd_part1    = substr(var.registry_pwd, 0, 2000)
+  pwd_part2    = substr(var.registry_pwd, 2000, length(local.registry_pwd) - 2000)
 }
 
 # Deploy Cloud Functions (2nd gen)

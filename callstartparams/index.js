@@ -53,9 +53,9 @@ functions.http("helloHttp", async (req, res) => {
         };
       }
     }
-
-    // ---------------------- AniIdentification ---------------------- //
     else if (tag === "AniIdentification") {
+      console.log("hi");
+
       const ani = sessionParamsFromCX?.Ani || "NA";
       logger.logWebhookRequest(sessionId, tag, { Ani: ani });
 

@@ -50,7 +50,7 @@ functions.http("helloHttp", async (req, res) => {
             { keyName: "lastChkPt", transformType: "any", value: sessionParamsFromCX?.lastChkPt || "" }
         ];
 
-        logger.logWebhookRequest(sessionId, tag, payload);
+        //logger.logWebhookRequest(sessionId, tag, payload);
 
         // Call API via apiClient (handles token internally)
         const apiResult = await apiRequest.postRequest({ sessionId, tag, url: apiUrl, headers, data: payload, secretHeader });

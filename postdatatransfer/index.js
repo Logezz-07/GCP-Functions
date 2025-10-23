@@ -54,7 +54,6 @@ functions.http("helloHttp", async (req, res) => {
         Status = apiResult.Status;
         ResponsePayload = apiResult.ResponsePayload;
 
-        // ---------------------- Prepare webhook response ---------------------- //
         let sessionParams = {};
         if (Status === 200 && apiResult.ReturnCode === "0") {
             sessionParams = { returnCode: "0", message: ResponsePayload?.message };

@@ -1,11 +1,10 @@
-const axios = require("axios");
+import axios from "axios";
 const logger = require("./logger");
 
-// @ts-ignore
 let TOKEN = null;
-// @ts-ignore
 let TOKEN_EXPIRY = null;
-const TOKEN_REFRESH_THRESHOLD_MIN = null;
+let TOKEN_API_URL = null;
+const TOKEN_REFRESH_THRESHOLD_MIN = 55; // minutes
 
 
 async function makeRequest({ sessionId, tag, url, method, headers = {}, data = null, params = null }) {
@@ -18,7 +17,7 @@ async function makeRequest({ sessionId, tag, url, method, headers = {}, data = n
         const startTime = Date.now();
 
         try {
-            // @ts-ignore
+
             const response = await axios({ url, method, headers, data, params, timeout: 15000 });
             const executionTimeMs = Date.now() - startTime;
 
@@ -78,7 +77,6 @@ async function getValidToken({ sessionId, tag, secretHeader }) {
         const tokenResult = await makeRequest({
             sessionId,
             tag: `${tag}-token`,
-            // @ts-ignore
             url: TOKEN_API_URL,
             method: "POST",
             headers,
@@ -89,11 +87,11 @@ async function getValidToken({ sessionId, tag, secretHeader }) {
             throw new Error("Failed to fetch token from token API");
         }
 
-        const newToken = tokenResult.ResponsePayload.access_token;
-        const newExpiry = new Date(Date.now() + 55 * 60 * 1000).toISOString();
+        TOKEN = tokenResult.ResponsePayload.access_token;
+        TOKEN_EXPIRY = new Date(Date.now() + 55 * 60 * 1000).toISOString();
 
-        logger.logConsole(sessionId, tag, `New token generated. Valid until ${newExpiry}`);
-        return newToken;
+        logger.logConsole(sessionId, tag, `New token generated. Valid until ${TOKEN_EXPIRY}`);
+        return TOKEN;
     }
 }
 
@@ -102,17 +100,15 @@ async function getValidToken({ sessionId, tag, secretHeader }) {
 // GET
 async function getRequest({ sessionId, tag, url, headers = {}, params = null, secretHeader }) {
     const token = await getValidToken({ sessionId, tag, secretHeader });
-    // @ts-ignore
-    headers.Authorization = `Bearer ${token}`;
-    return makeRequest({ sessionId, tag, url, method: "GET", headers, params });
+    const reqHeaders = { ...headers, Authorization: `Bearer ${token}` };
+    return makeRequest({ sessionId, tag, url, method: "GET", headers: reqHeaders, params });
 }
 
 // POST
 async function postRequest({ sessionId, tag, url, headers = {}, data = null, secretHeader }) {
     const token = await getValidToken({ sessionId, tag, secretHeader });
-    // @ts-ignore
-    headers.Authorization = `Bearer ${token}`;
-    return makeRequest({ sessionId, tag, url, method: "POST", headers, data });
+    const reqHeaders = { ...headers, Authorization: `Bearer ${token}` };
+    return makeRequest({ sessionId, tag, url, method: "POST", headers: reqHeaders, data });
 }
 
 module.exports = { makeRequest, getValidToken, getRequest, postRequest };

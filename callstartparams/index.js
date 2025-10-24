@@ -2,7 +2,10 @@ const functions = require("@google-cloud/functions-framework");
 const apiRequest = require('@roger/r4b-common-nodemodules').apiClient;
 const logger = require('@roger/r4b-common-nodemodules').logger;
 const axios = require("axios");
+
+const clientId = process.env.R4B_AUTH_CLIENT_ID;
 functions.http("helloHttp", async (req, res) => {
+  console.log("clientId:", clientId);
   const sessionId = req.body.sessionInfo?.session.split("/sessions/").pop() || "unknown-session";
   const tag = req.body.fulfillmentInfo?.tag || "Unknown-Tag";
   logger.logWebhookDetails(sessionId, tag);

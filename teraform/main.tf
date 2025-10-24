@@ -73,6 +73,13 @@ resource "google_cloudfunctions2_function" "functions" {
     available_memory   = "256M"
     timeout_seconds    = 60
     ingress_settings   = "ALLOW_INTERNAL_ONLY"
+    
+    secret_environment_variables {
+      key        = "R4B_AUTH_CLIENT_ID"
+      project_id = "205115177972"
+      secret     = "R4B-Auth-ClientId"
+      version    = "latest"
+    }
   }
 }
 

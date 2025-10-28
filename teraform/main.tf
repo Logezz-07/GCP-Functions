@@ -1,5 +1,5 @@
 terraform {
-  backend "gcs" {}  
+  backend "gcs" {}
 
   required_providers {
     google = {
@@ -14,12 +14,12 @@ provider "google" {
   region  = var.region
 }
 
-# Fetch source bucket for function zips
+# Fetch source bucket
 data "google_storage_bucket" "bucket" {
   name = var.source_bucket
 }
 
-# Create ZIPs for each Cloud Function
+# Create ZIPs for each function
 data "archive_file" "functions" {
   for_each    = toset(var.functions)
   type        = "zip"
@@ -36,10 +36,10 @@ resource "google_storage_bucket_object" "function_objects" {
   source   = data.archive_file.functions[each.key].output_path
 }
 
-
+# Artifact Registry password split for build auth
 locals {
-  pwd_part1    = substr(var.registry_pwd, 0, 2000)
-  pwd_part2    = substr(var.registry_pwd, 2000, length(var.registry_pwd) - 2000)
+  pwd_part1 = substr(var.registry_pwd, 0, 2000)
+  pwd_part2 = substr(var.registry_pwd, 2000, length(var.registry_pwd) - 2000)
 }
 
 # Deploy Cloud Functions (2nd gen)
@@ -61,9 +61,11 @@ resource "google_cloudfunctions2_function" "functions" {
       }
     }
 
+    # Build-time environment variables (for Cloud Build)
     environment_variables = {
       ARTIFACT_REGISTRY_PWD_1 = local.pwd_part1
       ARTIFACT_REGISTRY_PWD_2 = local.pwd_part2
+      
     }
   }
 
@@ -73,11 +75,26 @@ resource "google_cloudfunctions2_function" "functions" {
     available_memory   = "256M"
     timeout_seconds    = 60
     ingress_settings   = "ALLOW_INTERNAL_ONLY"
-    
+
+    # Runtime environment variables available via process.env
+    environment_variables = {
+      TOKEN_URL          = var.token_url
+      SCOPE              = var.scope
+      TOKEN_REFRESH_TIME = var.token_refresh_time
+    }
+
+    # Secret environment variables (from Secret Manager)
     secret_environment_variables {
-      key        = "R4B_AUTH_CLIENT_ID"
-      project_id = "205115177972"
-      secret     = "R4B-Auth-ClientId"
+      key        = "CLIENT_ID"
+      project_id = secret_project_id
+      secret     = var.client_id_secret
+      version    = "latest"
+    }
+
+    secret_environment_variables {
+      key        = "CLIENT_SECRET"
+      project_id = secret_project_id
+      secret     = var.client_secret_secret
       version    = "latest"
     }
   }
@@ -95,10 +112,11 @@ resource "google_cloud_run_service_iam_member" "invoker" {
   depends_on = [google_cloudfunctions2_function.functions]
 }
 
-# Output Function URLs
+# Outputs
 output "function_uris" {
   value = {
     for k, f in google_cloudfunctions2_function.functions :
     k => f.service_config[0].uri
   }
 }
+

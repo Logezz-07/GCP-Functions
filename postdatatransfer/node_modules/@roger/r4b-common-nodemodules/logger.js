@@ -28,13 +28,13 @@ function logWebhookRequest(sessionId, tag, payload) {
     }));
 }
 
-function logApiRequest({ sessionId, tag, attempt, url, method, headers, data = null }) {
+function logApiRequest({ sessionId, tag, attempt, url, method, headers, params, data = null }) {
     console.log(JSON.stringify({
         event: "ApiRequest",
         severity: "DEBUG",
         sessionId,
         tag,
-        details: JSON.stringify({ attempt, url, method, headers, data })
+        details: JSON.stringify({ attempt, url, method, headers, params, data })
     }));
 }
 

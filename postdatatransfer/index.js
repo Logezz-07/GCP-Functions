@@ -11,14 +11,9 @@ functions.http("helloHttp", async (req, res) => {
     let ResponsePayload = {};
 
     try {
-        const secretHeader = {
-            token: req.headers["token"],
-            expiryTime: req.headers["expirytime"],
-            clientId: req.headers["clientid"],
-            clientSecret: req.headers["clientsecret"]
-        };
 
-        
+
+
         const transferId = sessionParamsFromCX?.CONN_ID || "1234567890abcdef";
         const callingSystem = req.query?.callingSystem || "engage";
 
@@ -37,7 +32,7 @@ functions.http("helloHttp", async (req, res) => {
 
         // Prepare body payload
         const payload = [
-            { keyName: "svcReferenceId", transformType: "any", value: sessionParamsFromCX?.svcReferenceId || transferId },
+            { keyName: "svcReferenceId", value: sessionParamsFromCX?.svcReferenceId || transferId },
             { keyName: "AGENT_ALERT", transformType: "any", value: sessionParamsFromCX?.AGENT_ALERT || "Default Alert" },
             { keyName: "SemaphoneCR", transformType: "any", value: sessionParamsFromCX?.SemaphoneCR || "DefaultCR" },
             { keyName: "ANI", transformType: "phoneNumber", value: sessionParamsFromCX?.ANI || "0000000000" },
@@ -50,7 +45,7 @@ functions.http("helloHttp", async (req, res) => {
         logger.logWebhookRequest(sessionId, tag, payload);
 
         // Call API via apiClient (handles token internally)
-        const apiResult = await apiRequest.postRequest({ sessionId, tag, url: apiUrl, headers, data: payload, secretHeader });
+        const apiResult = await apiRequest.postRequest({ sessionId, tag, url: apiUrl, headers, data: payload });
         Status = apiResult.Status;
         ResponsePayload = apiResult.ResponsePayload;
 

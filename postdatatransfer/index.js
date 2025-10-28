@@ -1,6 +1,5 @@
-const functions = require("@google-cloud/functions-framework");
-const apiRequest = require('@roger/r4b-common-nodemodules').apiClient;
-const logger = require('@roger/r4b-common-nodemodules').logger;
+import * as functions from "@google-cloud/functions-framework";
+import { apiClient, logger } from "@roger/r4b-common-nodemodules";
 
 functions.http("helloHttp", async (req, res) => {
     const sessionId = req.body.sessionInfo?.session?.split("/sessions/").pop() || "unknown-session";
@@ -45,7 +44,7 @@ functions.http("helloHttp", async (req, res) => {
         logger.logWebhookRequest(sessionId, tag, payload);
 
         // Call API via apiClient (handles token internally)
-        const apiResult = await apiRequest.postRequest({ sessionId, tag, url: apiUrl, headers, data: payload });
+        const apiResult = await apiClient.postRequest({ sessionId, tag, url: apiUrl, headers, data: payload });
         Status = apiResult.Status;
         ResponsePayload = apiResult.ResponsePayload;
 

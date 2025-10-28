@@ -1,5 +1,6 @@
 import axios from "axios";
-const logger = require("./logger");
+import * as logger from "./logger.js";
+
 const TOKEN_API_URL = process.env.TOKEN_URL;
 const TOKEN_REFRESH_TIME = process.env.TOKEN_REFRESH_TIME;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -19,7 +20,6 @@ async function makeRequest({ sessionId, tag, url, method, headers = {}, data = n
         const startTime = Date.now();
 
         try {
-
             const response = await axios({ url, method, headers, data, params, timeout: 15000 });
             const executionTimeMs = Date.now() - startTime;
 
@@ -55,7 +55,6 @@ async function getValidToken({ sessionId, tag }) {
             generateNew = true;
         } else {
             const timeLeftMin = (expiryTimestamp - now) / 60000;
-
             if (timeLeftMin > Number(TOKEN_REFRESH_TIME) || timeLeftMin < 0) {
                 logger.logConsole(sessionId, tag, `Time left ${timeLeftMin.toFixed(1)} min > ${TOKEN_REFRESH_TIME}. Generating new token...`);
                 generateNew = true;
@@ -95,20 +94,14 @@ async function getValidToken({ sessionId, tag }) {
     }
 }
 
-
-
-// GET
-async function getRequest({ sessionId, tag, url, headers = {}, params = null }) {
+export async function getRequest({ sessionId, tag, url, headers = {}, params = null }) {
     const token = await getValidToken({ sessionId, tag });
     const reqHeaders = { ...headers, Authorization: `Bearer ${token}` };
     return makeRequest({ sessionId, tag, url, method: "GET", headers: reqHeaders, params });
 }
 
-// POST
-async function postRequest({ sessionId, tag, url, headers = {}, data = null }) {
+export async function postRequest({ sessionId, tag, url, headers = {}, data = null }) {
     const token = await getValidToken({ sessionId, tag });
     const reqHeaders = { ...headers, Authorization: `Bearer ${token}` };
     return makeRequest({ sessionId, tag, url, method: "POST", headers: reqHeaders, data });
 }
-
-module.exports = { getRequest, postRequest };

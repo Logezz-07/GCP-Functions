@@ -1,7 +1,4 @@
-const logger = require("./logger");
-const apiClient = require("./apiclient");
+import * as logger from "./logger.js";
+import * as apiClient from "./apiclient.js";
 
-module.exports = {
-    logger,
-    apiClient
-};
+export { logger, apiClient };

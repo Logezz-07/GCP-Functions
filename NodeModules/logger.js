@@ -1,4 +1,4 @@
-function logConsole(sessionId, tag, message) {
+export function logConsole(sessionId, tag, message) {
     console.log(JSON.stringify({
         event: "consoleLog",
         severity: "INFO",
@@ -8,7 +8,7 @@ function logConsole(sessionId, tag, message) {
     }));
 }
 
-function logWebhookDetails(sessionId, tag) {
+export function logWebhookDetails(sessionId, tag) {
     console.log(JSON.stringify({
         event: "WebhookDetails",
         severity: "DEBUG",
@@ -18,7 +18,7 @@ function logWebhookDetails(sessionId, tag) {
     }));
 }
 
-function logWebhookRequest(sessionId, tag, payload) {
+export function logWebhookRequest(sessionId, tag, payload) {
     console.log(JSON.stringify({
         event: "WebhookRequest",
         severity: "DEBUG",
@@ -28,7 +28,7 @@ function logWebhookRequest(sessionId, tag, payload) {
     }));
 }
 
-function logApiRequest({ sessionId, tag, attempt, url, method, headers, params, data = null }) {
+export function logApiRequest({ sessionId, tag, attempt, url, method, headers, params, data = null }) {
     console.log(JSON.stringify({
         event: "ApiRequest",
         severity: "DEBUG",
@@ -38,7 +38,7 @@ function logApiRequest({ sessionId, tag, attempt, url, method, headers, params, 
     }));
 }
 
-function logApiResponse({ sessionId, tag, attempt, status, executionTimeMs, response }) {
+export function logApiResponse({ sessionId, tag, attempt, status, executionTimeMs, response }) {
     console.log(JSON.stringify({
         event: "ApiResponse",
         severity: "DEBUG",
@@ -48,7 +48,7 @@ function logApiResponse({ sessionId, tag, attempt, status, executionTimeMs, resp
     }));
 }
 
-function logWebhookResponse(sessionId, tag, response) {
+export function logWebhookResponse(sessionId, tag, response) {
     console.log(JSON.stringify({
         event: "WebhookResponse",
         severity: "DEBUG",
@@ -58,7 +58,7 @@ function logWebhookResponse(sessionId, tag, response) {
     }));
 }
 
-function logErrorResponse({ sessionId, tag, attempt, err }) {
+export function logErrorResponse({ sessionId, tag, attempt, err }) {
     const isTimeout = err?.code === "ECONNABORTED";
     const errorDetails = isTimeout ? "Request timed out after 15 seconds" : (err?.message || String(err));
     const statusCode = err?.response?.status || null;
@@ -71,13 +71,3 @@ function logErrorResponse({ sessionId, tag, attempt, err }) {
         details: JSON.stringify({ attempt, statusCode, errorDetails, stack: err?.stack || null })
     }));
 }
-
-module.exports = {
-    logConsole,
-    logWebhookDetails,
-    logWebhookRequest,
-    logApiRequest,
-    logApiResponse,
-    logWebhookResponse,
-    logErrorResponse
-};

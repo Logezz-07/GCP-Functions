@@ -31,7 +31,7 @@ functions.http("helloHttp", async (req, res) => {
 
         // Prepare body payload
         const payload = [
-            { keyName: "svcReferenceId", value: sessionParamsFromCX?.svcReferenceId || transferId },
+            { keyName: "svcReferenceId", transformType: "any", value: sessionParamsFromCX?.svcReferenceId || transferId },
             { keyName: "AGENT_ALERT", transformType: "any", value: sessionParamsFromCX?.AGENT_ALERT || "Default Alert" },
             { keyName: "SemaphoneCR", transformType: "any", value: sessionParamsFromCX?.SemaphoneCR || "DefaultCR" },
             { keyName: "ANI", transformType: "phoneNumber", value: sessionParamsFromCX?.ANI || "0000000000" },

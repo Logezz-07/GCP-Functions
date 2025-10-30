@@ -1,16 +1,10 @@
-import * as dotenv from "dotenv";
-dotenv.config();
-
 const functions = require("@google-cloud/functions-framework");
 const apiRequest = require('@roger/r4b-common-nodemodules').apiClient;
 const logger = require('@roger/r4b-common-nodemodules').logger;
 const axios = require("axios");
 
-
-
-const clientId = process.env.R4B_AUTH_CLIENT_ID;
 functions.http("helloHttp", async (req, res) => {
-  console.log("clientId:", clientId);
+
   const sessionId = req.body.sessionInfo?.session.split("/sessions/").pop() || "unknown-session";
   const tag = req.body.fulfillmentInfo?.tag || "Unknown-Tag";
   logger.logWebhookDetails(sessionId, tag);
@@ -58,6 +52,23 @@ functions.http("helloHttp", async (req, res) => {
         sessionParams = {
           returnCode: apiResult.ReturnCode || "1",
           response: ResponsePayload,
+        };
+      }
+    }
+    else if (tag === "AccountVerification") {
+      const accountNumber = sessionParamsFromCX?.accountNumber || "";
+      logger.logWebhookRequest(sessionId, tag, { accountNumber });
+      if (/^\d{6}$/.test(accountNumber)) {
+        sessionParams = {
+          AccountStatus: "Verified",
+          VerificationMessage: `Account ${accountNumber} has been verified successfully.`,
+          returnCode: "0",
+        };
+      } else {
+        sessionParams = {
+          AccountStatus: "Invalid",
+          VerificationMessage: "Invalid account number format.",
+          returnCode: "1",
         };
       }
     }

@@ -1,23 +1,26 @@
-name: R4B-CodeCheck-Release
+name: Code-Check and Tagging
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - Dev
+      - QA
+      - Prod
 
 jobs:
-  R4B-CodeCheck-Release:
+  CodeCheck-AutoTag:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repo and fetch all branches/tags
-      - name: Checkout Dev
-        uses: actions/checkout@v3
+      # 1️⃣ Checkout Repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
-          ref: dev
-          fetch-depth: 0  # full history for branch/tag logic
+          fetch-depth: 0  # needed to read previous tags
 
       # 2️⃣ Setup Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -30,43 +33,43 @@ jobs:
         run: |
           npm run check-syntax
           echo "✅ Code Check Completed Successfully!"
-      # 5️⃣ Compare branches and update release/tag if needed
-      - name: Update Release Branch and Tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 5️⃣ Determine Tag Prefix based on Branch
+      - name: Set Tag Prefix
+        id: prefix
         run: |
-          git config user.name "GitHub Actions"
+          BRANCH_NAME=${GITHUB_REF##*/}
+          if [ "$BRANCH_NAME" == "dev" ]; then
+            echo "prefix=Dev" >> $GITHUB_OUTPUT
+          elif [ "$BRANCH_NAME" == "qa" ]; then
+            echo "prefix=QA" >> $GITHUB_OUTPUT
+          elif [ "$BRANCH_NAME" == "prod" ]; then
+            echo "prefix=Prod" >> $GITHUB_OUTPUT
+          else
+            echo "Unknown branch, skipping tag"
+            exit 1
+          fi
+
+      # 6️⃣ Generate Next Version Tag
+      - name: Generate Next Tag
+        id: version
+        run: |
+          PREFIX=${{ steps.prefix.outputs.prefix }}
+          LAST_TAG=$(git tag --list "${PREFIX}-v*" | sort -V | tail -n 1)
+          echo "Last Tag: $LAST_TAG"
+          if [ -z "$LAST_TAG" ]; then
+            NEXT_VERSION="${PREFIX}-v1"
+          else
+            VERSION_NUM=$(echo $LAST_TAG | grep -oE '[0-9]+$')
+            NEXT_VERSION="${PREFIX}-v$((VERSION_NUM + 1))"
+          fi
+          echo "Next Version: $NEXT_VERSION"
+          echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+      # 7️⃣ Create and Push Tag
+      - name: Create and Push Tag
+        run: |
+          git config user.name "github-actions"
           git config user.email "actions@github.com"
-          # Check if remote release branch exists
-          if git ls-remote --heads origin release | grep -q release; then
-            echo "🚀 Remote release branch exists. Fetching dev and release..."
-            git fetch origin dev release --tags
-            echo "🚀 Checking for changes between dev and release..."
-            if git diff --quiet origin/release..origin/dev; then
-              echo "ℹ️ No changes detected between dev and release. Everything is up to date."
-              exit 0
-            else
-              echo "💾 Changes detected. Updating release branch..."
-              git checkout -B release origin/dev
-              git push origin release
-            fi
-          else
-            echo "🚀 Remote release branch does not exist. Creating it from dev..."
-            git fetch origin dev --tags
-            git checkout -b release origin/dev
-            git push origin release
-          fi
-          # Generate next version tag (for both cases)
-          LATEST_TAG=$(git tag --list "Cloud-Function-v*" --sort=-v:refname | head -n1)
-          if [ -z "$LATEST_TAG" ]; then
-            NEXT_VERSION=1
-          else
-            NUM=$(echo "$LATEST_TAG" | sed 's/Cloud-Function-v//')
-            NEXT_VERSION=$((NUM + 1))
-          fi
-          VERSION="Cloud-Function-v$NEXT_VERSION"
-          echo "🏷 Pushing new version tag: $VERSION"
-          git tag "$VERSION"
-          git push origin "$VERSION"
-          echo "✅ Release branch updated and tag $VERSION pushed successfully!"
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}

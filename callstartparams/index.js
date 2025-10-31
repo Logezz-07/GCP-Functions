@@ -46,7 +46,7 @@ functions.http("helloHttp", async (req, res) => {
           offerlanguageMenu: dnisParams.language?.offerLanguageMenu || "NA",
           predctiveEnd: dnisParams.predictiveInd || "NA",
           validAni: aniParams.validANI || "NA",
-          
+          returnCode: "0",
         };
       } else {
         sessionParams = {

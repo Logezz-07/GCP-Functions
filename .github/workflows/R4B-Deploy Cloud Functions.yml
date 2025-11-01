@@ -3,20 +3,22 @@ name: R4B-Deploy Cloud Functions
 on:
   workflow_dispatch:
     inputs:
-      git_tag:
-        description: "Git tag or commit to checkout"
-        required: true
-      dry_run:
-        description: "Run as Dry Run (Terraform Plan only)?"
-        required: true
-        type: boolean
       environment:
         description: "Select environment to deploy"
         required: true
         type: choice
         options:
           - Dev
+          - QA
           - Prod
+      dry_run:
+        description: "Run as Dry Run (Terraform Plan only)?"
+        required: true
+        type: boolean
+      git_tag:
+        description: "Git tag or commit to checkout"
+        required: true
+     
 jobs:
   deploy:
     runs-on: ubuntu-latest

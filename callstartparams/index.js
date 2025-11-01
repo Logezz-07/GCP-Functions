@@ -1,7 +1,7 @@
 const functions = require("@google-cloud/functions-framework");
 const apiRequest = require('@roger/r4b-common-nodemodules').apiClient;
 const logger = require('@roger/r4b-common-nodemodules').logger;
-const axios = require("axios");
+
 
 functions.http("helloHttp", async (req, res) => {
 

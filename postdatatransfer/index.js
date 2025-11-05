@@ -41,7 +41,7 @@ functions.http("helloHttp", async (req, res) => {
 
         logger.logWebhookRequest(sessionId, tag, payload);
 
-        // Call API via apiClient (handles token internally)
+        
         const apiResult = await apiClient.postRequest({ sessionId, tag, url: apiUrl, headers, data: payload });
         Status = apiResult.Status;
         ResponsePayload = apiResult.ResponsePayload;

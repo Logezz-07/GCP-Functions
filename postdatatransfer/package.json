@@ -8,6 +8,7 @@
     "start": "functions-framework --target=helloHttp"
   },
   "dependencies": {
+    "@google-cloud/functions-framework": "^3.5.1",
     "@roger/r4b-common-nodemodules": "^1.2.0"
   },
   "keywords": [],

@@ -1,4 +1,5 @@
-import { apiClient, logger, functions, getIvaConfigs } from "@roger/r4b-common-nodemodules";
+import { apiClient, logger, getIvaConfigs } from "@roger/r4b-common-nodemodules";
+import * as functions from "@google-cloud/functions-framework";
 
 functions.http("helloHttp", async (req, res) => {
     const sessionId = req.body.sessionInfo?.session?.split("/sessions/").pop() || "unknown-session";
@@ -41,7 +42,7 @@ functions.http("helloHttp", async (req, res) => {
 
         logger.logWebhookRequest(sessionId, tag, payload);
 
-        
+
         const apiResult = await apiClient.postRequest({ sessionId, tag, url: apiUrl, headers, data: payload });
         Status = apiResult.Status;
         ResponsePayload = apiResult.ResponsePayload;

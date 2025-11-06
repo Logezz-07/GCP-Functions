@@ -1,5 +1,5 @@
+import { apiClient, logger, getIvaConfigs } from "@roger/r4b-common-nodemodules";
 import * as functions from "@google-cloud/functions-framework";
-import { apiClient, logger } from "@roger/r4b-common-nodemodules";
 
 functions.http("helloHttp", async (req, res) => {
     const sessionId = req.body.sessionInfo?.session?.split("/sessions/").pop() || "unknown-session";
@@ -10,9 +10,8 @@ functions.http("helloHttp", async (req, res) => {
     let ResponsePayload = {};
 
     try {
-
-
-
+        const config = await getIvaConfigs({ sessionId, tag });
+        logger.logConsole(sessionId, tag, `IVA Config: ${JSON.stringify(config.ResponsePayload)}`);
         const transferId = sessionParamsFromCX?.CONN_ID || "1234567890abcdef";
         const callingSystem = req.query?.callingSystem || "engage";
 
@@ -43,7 +42,7 @@ functions.http("helloHttp", async (req, res) => {
 
         logger.logWebhookRequest(sessionId, tag, payload);
 
-        // Call API via apiClient (handles token internally)
+
         const apiResult = await apiClient.postRequest({ sessionId, tag, url: apiUrl, headers, data: payload });
         Status = apiResult.Status;
         ResponsePayload = apiResult.ResponsePayload;

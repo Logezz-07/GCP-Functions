@@ -25,7 +25,7 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -35,7 +35,7 @@ jobs:
       - name: Validate config.json format
         run: |
           echo "🔍 Checking iva-configs/config.json for valid JSON..."
-          cat IVA-Configs/config.json | jq empty
+          cat iva-configs/config.json | jq empty
           echo "✅ JSON validation passed!"
 
       # 3️⃣ Authenticate to Google Cloud
@@ -48,30 +48,37 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # 5️⃣ Terraform Init
+      # 5️⃣ Terraform Init (Conditional Backend)
       - name: Terraform Init
-        working-directory: IVA-Configs/teraform
+        working-directory: iva-configs/terraform
         run: |
           ENVIRONMENT=$(echo "${{ github.event.inputs.environment }}" | tr '[:upper:]' '[:lower:]')
-          echo "Initializing Terraform backend for environment: $ENVIRONMENT"
-          terraform init \
-            -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
-            -backend-config="prefix=iva-config-${ENVIRONMENT}-state"
+
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "Running in dry run mode. Backend disabled."
+            terraform init -backend=false
+          else
+            echo "Running in apply mode. Using remote GCS backend."
+            terraform init \
+              -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
+              -backend-config="prefix=iva-config-${ENVIRONMENT}-state"
+          fi
 
       # 6️⃣ Terraform Plan
       - name: Terraform Plan
-        working-directory: IVA-Configs/teraform
+        working-directory: iva-configs/terraform
         run: |
           echo "Running Terraform Plan for IVA config upload..."
           terraform plan \
             -out=tfplan.out \
             -var="project_id=${{ vars.PROJECT_ID }}" \
+            -var="region=${{ vars.REGION }}" \
             -var="bucket_name=${{ vars.CONFIG_BUCKET_NAME }}"
 
       # 7️⃣ Terraform Apply (only if dry_run=false)
       - name: Terraform Apply
         if: ${{ github.event.inputs.dry_run == 'false' }}
-        working-directory: IVA-Configs/teraform
+        working-directory: iva-configs/terraform
         run: |
           echo "Applying Terraform Plan..."
           terraform apply -auto-approve tfplan.out

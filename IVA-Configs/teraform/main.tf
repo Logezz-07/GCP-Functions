@@ -5,8 +5,6 @@ terraform {
       version = ">= 5.0.0"
     }
   }
-
-  # 👇 This line will be toggled on/off by the GitHub Action
   backend "gcs" {}
 }
 
@@ -19,6 +17,7 @@ resource "google_storage_bucket_object" "iva_config" {
   bucket       = var.bucket_name
   source       = var.config_path
   content_type = "application/json"
+  detect_md5hash = filemd5(var.config_path)
 }
 
 output "uploaded_file_name" {

@@ -1,3 +1,15 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.0.0"
+    }
+  }
+
+  # 👇 This line will be toggled on/off by the GitHub Action
+  backend "gcs" {}
+}
+
 provider "google" {
   project = var.project_id
 }

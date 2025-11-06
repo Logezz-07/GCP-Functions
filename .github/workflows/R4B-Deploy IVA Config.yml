@@ -35,7 +35,7 @@ jobs:
       - name: Validate config.json format
         run: |
           echo "🔍 Checking iva-configs/config.json for valid JSON..."
-          cat iva-configs/config.json | jq empty
+          cat IVA-Configs/config.json | jq empty
           echo "✅ JSON validation passed!"
 
       # 3️⃣ Authenticate to Google Cloud
@@ -50,7 +50,7 @@ jobs:
 
       # 5️⃣ Terraform Init
       - name: Terraform Init
-        working-directory: iva-configs/terraform
+        working-directory: IVA-Configs/teraform
         run: |
           ENVIRONMENT=$(echo "${{ github.event.inputs.environment }}" | tr '[:upper:]' '[:lower:]')
           echo "Initializing Terraform backend for environment: $ENVIRONMENT"
@@ -60,7 +60,7 @@ jobs:
 
       # 6️⃣ Terraform Plan
       - name: Terraform Plan
-        working-directory: iva-configs/terraform
+        working-directory: IVA-Configs/teraform
         run: |
           echo "Running Terraform Plan for IVA config upload..."
           terraform plan \
@@ -71,7 +71,7 @@ jobs:
       # 7️⃣ Terraform Apply (only if dry_run=false)
       - name: Terraform Apply
         if: ${{ github.event.inputs.dry_run == 'false' }}
-        working-directory: iva-configs/terraform
+        working-directory: IVA-Configs/teraform
         run: |
           echo "Applying Terraform Plan..."
           terraform apply -auto-approve tfplan.out

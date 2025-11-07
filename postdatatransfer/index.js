@@ -10,8 +10,8 @@ functions.http("helloHttp", async (req, res) => {
     let ResponsePayload = {};
 
     try {
-        const config = await getIvaConfigs({ sessionId, tag });
-        logger.logConsole(sessionId, tag, `IVA Config: ${JSON.stringify(config.ResponsePayload)}`);
+        const config = await getIvaConfigs({ sessionId, tag }).ResponsePayload;
+
         const transferId = sessionParamsFromCX?.CONN_ID || "1234567890abcdef";
         const callingSystem = req.query?.callingSystem || "engage";
 
@@ -54,7 +54,7 @@ functions.http("helloHttp", async (req, res) => {
             sessionParams = { returnCode: apiResult.ReturnCode || "1", response: ResponsePayload };
         }
 
-        const webhookResponse = { sessionInfo: { parameters: sessionParams } };
+        const webhookResponse = { sessionInfo: { parameters: { ...config, ...sessionParams } } };
         logger.logWebhookResponse(sessionId, tag, webhookResponse);
 
         res.setHeader("Content-Type", "application/json");

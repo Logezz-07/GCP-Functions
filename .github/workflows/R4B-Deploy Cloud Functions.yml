@@ -18,7 +18,7 @@ on:
       git_tag:
         description: "Git tag or commit to checkout"
         required: true
-     
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
 
     steps:
       # 1️⃣ Checkout repo
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.git_tag }}
@@ -46,39 +46,49 @@ jobs:
         working-directory: teraform
         run: |
           ENVIRONMENT=$(echo "${{ github.event.inputs.environment }}" | tr '[:upper:]' '[:lower:]')
-          echo " Initializing Terraform backend for environment: $ENVIRONMENT"
-          terraform init \
+          echo "⚙️ Initializing Terraform backend for environment: $ENVIRONMENT"
+
+          terraform init -reconfigure \
             -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
             -backend-config="prefix=cloud-functions-${ENVIRONMENT}-state"
 
-      # 5️⃣ Terraform Plan
+      # 5️⃣ Terraform Plan (DRY version)
       - name: Terraform Plan
         working-directory: teraform
         run: |
           FUNCTIONS_LIST=$(echo "${{ vars.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
-          echo " Running Terraform Plan for environment: ${{ github.event.inputs.environment }}"
-          terraform plan \
-            -out=tfplan.out \
-            -var="project_id=${{ vars.PROJECT_ID }}" \
-            -var="region=${{ vars.REGION }}" \
-            -var="functions=[$FUNCTIONS_LIST]" \
-            -var="registry_pwd=${{ secrets.NPM_PASSWORD }}" \
-            -var="source_bucket=${{ vars.SOURCE_BUCKET }}" \
-            -var="secret_project_id=${{ vars.GOOGLE_SECRET_PROJECT_ID }}" \
-            -var="token_url=${{ vars.TOKEN_URL }}" \
-            -var="scope=${{ vars.SCOPE }}" \
-            -var="token_refresh_time=${{ vars.TOKEN_REFRESH_TIME }}" \
-            -var="client_id_secret=${{ vars.CLIENT_ID_KEY }}" \
-            -var="client_secret_secret=${{ vars.CLIENT_SECRET_KEY }}"
 
-      # 6️⃣ Terraform Apply (Only if dry_run is false)
+          # Common var block (reusable for plan and apply)
+          TF_VARS="\
+            -var=\"project_id=${{ vars.PROJECT_ID }}\" \
+            -var=\"region=${{ vars.REGION }}\" \
+            -var=\"functions=[$FUNCTIONS_LIST]\" \
+            -var=\"registry_pwd=${{ secrets.NPM_PASSWORD }}\" \
+            -var=\"source_bucket=${{ vars.SOURCE_BUCKET }}\" \
+            -var=\"secret_project_id=${{ vars.GOOGLE_SECRET_PROJECT_ID }}\" \
+            -var=\"token_url=${{ vars.TOKEN_URL }}\" \
+            -var=\"scope=${{ vars.SCOPE }}\" \
+            -var=\"token_refresh_time=${{ vars.TOKEN_REFRESH_TIME }}\" \
+            -var=\"client_id_secret=${{ vars.CLIENT_ID_KEY }}\" \
+            -var=\"client_secret_secret=${{ vars.CLIENT_SECRET_KEY }}\" \
+            -var=\"config_bucket_name=${{ vars.CONFIG_BUCKET_NAME }}\" \
+            -var=\"config_file_path=${{ vars.CONFIG_FILE_PATH }}\" \
+          "
+
+          echo "🧾 Running Terraform Plan for environment: ${{ github.event.inputs.environment }}"
+
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "🧪 Dry Run mode enabled — no state update, no apply."
+            terraform plan -lock=false -input=false $TF_VARS
+          else
+            echo "☁️ Apply mode — generating deployment plan."
+            terraform plan -out=tfplan.out -lock=true -input=false $TF_VARS
+          fi
+
+      # 6️⃣ Terraform Apply (only if dry_run=false)
       - name: Terraform Apply
         if: ${{ github.event.inputs.dry_run == 'false' }}
         working-directory: teraform
         run: |
-          if [ "${{ github.event.inputs.dry_run }}" = "false" ]; then
-          echo "Dry run is false — applying Terraform plan..."
+          echo "🚀 Applying Terraform plan for Cloud Functions..."
           terraform apply -auto-approve tfplan.out
-          else
-          echo "Dry run mode enabled — skipping terraform apply."
-          fi

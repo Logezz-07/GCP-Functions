@@ -81,6 +81,8 @@ resource "google_cloudfunctions2_function" "functions" {
       TOKEN_URL          = var.token_url
       SCOPE              = var.scope
       TOKEN_REFRESH_TIME = var.token_refresh_time
+      GCS_CONFIG_PATH = var.config_file_path
+      GCS_BUCKET_NAME = var.config_bucket_name
     }
 
     # Secret environment variables (from Secret Manager)

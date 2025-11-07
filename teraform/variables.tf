@@ -3,6 +3,16 @@ variable "project_id" {
   type        = string
 }
 
+variable "config_bucket_name" {
+  description = "GCP config bucket name"
+  type        = string
+}
+
+variable "config_file_path" {
+  description = "GCP config_file_path"
+  type        = string
+}
+
 variable "region" {
   description = "GCP Region"
   type        = string

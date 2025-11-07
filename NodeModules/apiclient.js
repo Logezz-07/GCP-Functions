@@ -6,7 +6,8 @@ const TOKEN_REFRESH_TIME = process.env.TOKEN_REFRESH_TIME;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const SCOPE = process.env.SCOPE;
-const TIMEOUT_MS = Number(process.env.API_TIMEOUT_MS)
+const TIMEOUT_MS = Number(process.env.API_TIMEOUT_MS);
+
 let TOKEN = null;
 let TOKEN_EXPIRY_TIME = null;
 

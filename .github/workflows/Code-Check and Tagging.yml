@@ -16,60 +16,69 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0  # Fetch all tags for versioning
 
-      # 2️⃣ Setup Node.js
+      # 2️⃣ IVA Config JSON Validation
+      - name: IVA-Config-Check
+        run: |
+          echo "🔍 Validating IVA Config JSON..."
+          if [ -f "IVA-Configs/config.json" ]; then
+            cat IVA-Configs/config.json | jq empty
+            echo "✅ IVA Config JSON validation passed!"
+          else
+            echo "❌ IVA Config JSON not found in IVA-Configs/config.json"
+            exit 1
+          fi
+
+      # 3️⃣ IVA Code Check (Setup Node.js + Install + Run)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # 3️⃣ Install Dependencies
-      - name: Install Dependencies
-        run: npm ci
-
-      # 4️⃣ Run TypeScript Syntax Check
-      - name: Run Code Check
+      - name: IVA-Code-Check
         run: |
+          echo "📦 Installing dependencies..."
+          npm ci
+          echo "🔍 Running syntax check..."
           npm run check-syntax
-          echo "✅ Code Check Completed Successfully!"
+          echo "✅ Code syntax check completed successfully!"
 
-      # 5️⃣ Determine Tag Prefix based on Branch
-      - name: Set Tag Prefix
-        id: prefix
+      # 4️⃣ Create Next Tag Version
+      - name: Create Next Tag
+        id: tag
         run: |
           BRANCH_NAME=${GITHUB_REF##*/}
           if [ "$BRANCH_NAME" == "Dev" ]; then
-            echo "prefix=Dev" >> $GITHUB_OUTPUT
+            PREFIX="Dev"
           elif [ "$BRANCH_NAME" == "QA" ]; then
-            echo "prefix=QA" >> $GITHUB_OUTPUT
+            PREFIX="QA"
           elif [ "$BRANCH_NAME" == "Prod" ]; then
-            echo "prefix=Prod" >> $GITHUB_OUTPUT
+            PREFIX="Prod"
           else
-            echo "Unknown branch, skipping tag"
+            echo "❌ Unknown branch: $BRANCH_NAME"
             exit 1
           fi
 
-      # 6️⃣ Generate Next Version Tag
-      - name: Generate Next Tag
-        id: version
-        run: |
-          PREFIX=${{ steps.prefix.outputs.prefix }}
           LAST_TAG=$(git tag --list "${PREFIX}-v*" | sort -V | tail -n 1)
-          echo "Last Tag: $LAST_TAG"
+          echo "🔖 Last Tag: $LAST_TAG"
+
           if [ -z "$LAST_TAG" ]; then
             NEXT_VERSION="${PREFIX}-v1"
           else
-            VERSION_NUM=$(echo $LAST_TAG | grep -oE '[0-9]+$')
+            VERSION_NUM=$(echo "$LAST_TAG" | grep -oE '[0-9]+$')
             NEXT_VERSION="${PREFIX}-v$((VERSION_NUM + 1))"
           fi
-          echo "Next Version: $NEXT_VERSION"
+
+          echo "🏷️ Next Tag: $NEXT_VERSION"
           echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
 
-      # 7️⃣ Create and Push Tag
-      - name: Create and Push Tag
+      # 5️⃣ Push Tag
+      - name: Push Tag
         run: |
+          echo "🚀 Pushing new tag to repository..."
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git tag ${{ steps.version.outputs.version }}
-          git push origin ${{ steps.version.outputs.version }}
+          git tag ${{ steps.tag.outputs.version }}
+          git push origin ${{ steps.tag.outputs.version }}
+          echo "✅ Successfully pushed tag: ${{ steps.tag.outputs.version }}"

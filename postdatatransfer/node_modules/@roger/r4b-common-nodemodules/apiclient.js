@@ -6,7 +6,7 @@ const TOKEN_REFRESH_TIME = process.env.TOKEN_REFRESH_TIME;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const SCOPE = process.env.SCOPE;
-
+const TIMEOUT_MS = Number(process.env.API_TIMEOUT_MS)
 let TOKEN = null;
 let TOKEN_EXPIRY_TIME = null;
 
@@ -20,7 +20,7 @@ async function makeRequest({ sessionId, tag, url, method, headers = {}, data = n
         const startTime = Date.now();
 
         try {
-            const response = await axios({ url, method, headers, data, params, timeout: 15000 });
+            const response = await axios({ url, method, headers, data, params, timeout:TIMEOUT_MS });
             const executionTimeMs = Date.now() - startTime;
 
             logger.logApiResponse({ sessionId, tag, attempt, status: response.status, executionTimeMs, response: response.data });

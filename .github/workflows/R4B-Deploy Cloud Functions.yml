@@ -43,7 +43,7 @@ jobs:
 
       # Terraform Init
       - name: Terraform Init
-        working-directory: teraform
+        working-directory: CloudFunctions/terraform
         run: |
           ENVIRONMENT=$(echo "${{ github.event.inputs.environment }}" | tr '[:upper:]' '[:lower:]')
           echo "⚙️ Initializing Terraform backend for environment: $ENVIRONMENT"
@@ -54,7 +54,7 @@ jobs:
 
       # Terraform Plan
       - name: Terraform Plan
-        working-directory: teraform
+        working-directory: CloudFunctions/terraform
         run: |
           FUNCTIONS_LIST=$(echo "${{ vars.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
 
@@ -88,7 +88,7 @@ jobs:
       # Terraform Apply
       - name: Terraform Apply
         if: ${{ github.event.inputs.dry_run == 'false' }}
-        working-directory: teraform
+        working-directory: CloudFunctions/terraform
         run: |
           echo "🚀 Applying Terraform plan for Cloud Functions..."
           terraform apply -auto-approve tfplan.out

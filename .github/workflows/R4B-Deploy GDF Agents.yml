@@ -4,19 +4,21 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Select environment to restore"
+        description: "Select Environment To Restore"
         required: true
         type: choice
         options:
           - Dev
           - QA
           - Prod
-      dry_run:
-        description: "Run as Dry Run "
+
+      agent_display_name:
+        description: "Agent Name To Restore (Eg: R4B-IVA-**)"
         required: true
-        type: boolean
+        type: string
+
       git_tag:
-        description: "Git tag or commit to checkout"
+        description: "Git Tag To Checkout (Eg: GDF-Dev-v**)"
         required: true
 
 jobs:
@@ -27,18 +29,26 @@ jobs:
     env:
       PROJECT_ID: ${{ vars.PROJECT_ID }}
       REGION: ${{ vars.REGION }}
-      DIALOGFLOW_REGION: ${{ vars.REGION }}
-      AGENT_DISPLAY_NAME: ${{ vars.AGENT_DISPLAY_NAME }}
-      TOOL_DISPLAY_NAME: ${{ vars.TOOL_DISPLAY_NAME }}
-      DATASTORE_ID: ${{ vars.DATASTORE_ID }}
-      TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+      AGENT_DISPLAY_NAME: ${{ github.event.inputs.agent_display_name }}
 
     steps:
-      # Checkout repository
+      # Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.git_tag }}
+
+      # Validate Agent 
+      - name: Validate Agent 
+        run: |
+          echo "🔍 Checking: ConversationalAgents/${AGENT_DISPLAY_NAME}"
+          if [ ! -d "ConversationalAgents/${AGENT_DISPLAY_NAME}" ]; then
+            echo "❌ ERROR: Agent does NOT exist."
+            echo "📂 Available agents:"
+            ls ConversationalAgents/
+            exit 1
+          fi
+          echo "✅ Agent found."
 
       # Authenticate to Google Cloud
       - name: Authenticate to Google Cloud
@@ -46,129 +56,39 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Setup Terraform
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.8
-
-      # Terraform Init
-      - name: Terraform Init
-        working-directory: teraform
-        run: |
-          ENVIRONMENT=$(echo "${{ github.event.inputs.environment }}" | tr '[:upper:]' '[:lower:]')
-          echo "⚙️ Initializing Terraform backend for environment: $ENVIRONMENT"
-          terraform init -reconfigure \
-            -backend-config="bucket=${TF_STATE_BUCKET}" \
-            -backend-config="prefix=dialogflow-${ENVIRONMENT}-state"
-
-      # Terraform Plan
-      - name: Terraform Plan
-        id: tfplan
-        working-directory: teraform
-        run: |
-          echo "🧾 Running Terraform Plan for Dialogflow CX Agent + Tool setup..."
-          TF_VARS="\
-            -var=project_id=${PROJECT_ID} \
-            -var=region=${REGION} \
-            -var=dialogflow_region=${DIALOGFLOW_REGION} \
-            -var=agent_display_name=${AGENT_DISPLAY_NAME} \
-            -var=tool_display_name=${TOOL_DISPLAY_NAME} \
-            -var=existing_data_store_id=${DATASTORE_ID} \
-          "
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            echo "🧪 Dry Run mode — Terraform plan only, no apply."
-            terraform plan -lock=false -input=false $TF_VARS
-            exit 0
-          else
-            echo "☁️ Apply mode — generating plan."
-            terraform plan -out=tfplan.out -lock=true -input=false $TF_VARS
-          fi
-
-      # Terraform Apply (only if not dry_run)
-      - name: Terraform Apply
-        if: ${{ github.event.inputs.dry_run == 'false' }}
-        working-directory: teraform
-        run: |
-          echo "🚀 Applying Terraform configuration (Dialogflow CX Agent + Tool)..."
-          terraform apply -auto-approve tfplan.out
-
-      # Capture Terraform Outputs
-      - name: Capture Terraform Outputs
-        if: ${{ github.event.inputs.dry_run == 'false' }}
-        id: extract
-        working-directory: teraform
-        run: |
-          echo "📥 Extracting Terraform outputs..."
-          terraform output -json > tf-output.json
-          AGENT_ID=$(jq -r '.agent_name.value' tf-output.json)
-          TOOL_NAME=$(jq -r '.tool_name.value' tf-output.json)
-          echo "agent_id=$AGENT_ID" >> $GITHUB_OUTPUT
-          echo "tool_name=$TOOL_NAME" >> $GITHUB_OUTPUT
-          echo "✅ Captured Agent ID: $AGENT_ID"
-          echo "✅ Captured Tool Name: $TOOL_NAME"
-
-      # Update Tool JSONs
-      - name: Update Tool JSONs before restore
-        if: ${{ github.event.inputs.dry_run == 'false' }}
-        run: |
-          echo "🛠 Updating tool configuration files to match target environment..."
-          TOOLS_DIR="tools"
-          TOOL_NAME=$(jq -r '.tool_name.value' teraform/tf-output.json)
-          echo "📥 Loaded Tool Name from Terraform output: $TOOL_NAME"
-          if [ -d "$TOOLS_DIR" ]; then
-            for folder in $TOOLS_DIR/R4B-DS-*; do
-              [ -d "$folder" ] || continue
-              json_file=$(find "$folder" -maxdepth 1 -name "*.json" | head -n 1)
-              [ -f "$json_file" ] || continue
-              echo "🧩 Updating → $json_file"
-              jq --arg tool_name "$TOOL_NAME" \
-                 --arg project "$PROJECT_ID" \
-                 --arg datastore "projects/$PROJECT_ID/locations/us/collections/default_collection/dataStores/${DATASTORE_ID}" \
-                 '
-                 .name = $tool_name |
-                 .dataStoreSpec.dataStoreConnections[0].dataStore = $datastore
-                 ' "$json_file" > tmp.json && mv tmp.json "$json_file"
-              echo "✅ Updated tool config: name=$TOOL_NAME, datastore=$DATASTORE_ID"
-            done
-          else
-            echo "⚠️ No tools directory found. Skipping tool update."
-          fi
-
       # Install cxcli globally
       - name: Install cxcli globally
-        if: ${{ github.event.inputs.dry_run == 'false' }}
         run: |
-          echo "⬇️ Installing cxcli globally..."
+          echo "⬇️ Installing cxcli..."
           curl -L -o cxcli.tar.gz https://github.com/xavidop/dialogflow-cx-cli/releases/download/v1.239.0/cxcli_Linux_x86_64.tar.gz
           tar -xzf cxcli.tar.gz
           sudo mv cxcli /usr/local/bin/
-          echo "✅ cxcli installed successfully"
-          which cxcli
           cxcli version
+          echo "✅ cxcli installed successfully."
 
-      # Build agent.zip (INCLUDE updated tools folder)
-      - name: Build agent.zip (including tools)
-        if: ${{ github.event.inputs.dry_run == 'false' }}
+      # Build agent.zip
+      - name: Build agent.zip
+        working-directory: ConversationalAgents
         run: |
-          echo "📦 Building agent.zip (including updated tools folder)..."
-          zip -r agent.zip . \
+          echo "📦 Building agent.zip..."
+          zip -r agent.zip "${AGENT_DISPLAY_NAME}" \
             -x ".git/*" \
             -x ".github/*" \
-            -x "teraform/*" \
             -x "*.zip"
-          echo "✅ agent.zip created successfully with tools included:"
-          ls -lh agent.zip
+          echo "✅ agent.zip created."
 
       # Restore Dialogflow CX Agent
       - name: Restore Dialogflow CX Agent
-        if: ${{ github.event.inputs.dry_run == 'false' }}
+        working-directory: ConversationalAgents
         run: |
-          echo "🚀 Restoring Dialogflow CX Agent to ${{ github.event.inputs.environment }}"
-          echo "📍 PROJECT_ID=${PROJECT_ID}, REGION=${REGION}, AGENT_ID=${AGENT_DISPLAY_NAME}"
+          echo "🚀 Restoring Dialogflow CX Agent..."
+          echo "📍 PROJECT: ${PROJECT_ID}, REGION: ${REGION}, AGENT: ${AGENT_DISPLAY_NAME}"
+
           cxcli agent restore "${AGENT_DISPLAY_NAME}" \
             --project-id "${PROJECT_ID}" \
             --location-id "${REGION}" \
-            --input agent.zip \
+            --input "agent.zip" \
             --output-format json \
             --verbose
+
+          echo "✅ Restore completed successfully."

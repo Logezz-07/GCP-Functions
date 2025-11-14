@@ -12,7 +12,6 @@ terraform {
 provider "google" {
   project = var.project_id
   region  = var.region
-  credentials = file("C:/Users/logeshwaran.b/OneDrive - Servion Global Solution Private Limited/Desktop/R4B/CloudFunctions/ServiceAccount-SecretKeys.json")
 }
 
 # Fetch source bucket

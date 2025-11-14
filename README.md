@@ -1,0 +1,97 @@
+
+# 📘 R4B Repository – Code Architecture & Contribution Standards
+
+**Author:** **Pavithra N**  
+**Contact:** **pavithra.n@servion.com**    
+**Organization:** **Servion Global Solutions**
+
+**Developed By :** **Logesh B**
+
+## 📌 Introduction
+
+The **R4B Repository** is the centralized codebase for hosting, developing, and deploying key modules of the R4B self-service applications. These include Cloud Functions, Conversational Agents, IVA configurations, NLU resources, and shared Node.js utilities.
+
+This structure is designed with enterprise-level governance, enabling:
+
+- Scalable multi-module development  
+- Clear separation of components  
+- Pull-request–based change management  
+- Automated CI/CD workflows  
+- Environment lifecycle (Dev → QA → Prod)  
+- Version-controlled updates across services  
+
+## 📂 Repository Structure Overview
+
+```
+/
+├── .github/workflows/
+├── 1. Workflows/
+├── 2. CloudFunctions/
+├── 3. ConversationalAgents/
+├── 4. Iva-Configs/
+├── 5. NLU-Configs/
+└── 6. CommonNodeModules/
+```
+
+## 📁 Folder-Level Details
+
+### 📦 `.github/workflows/`
+Contains all automation workflows for:
+- CI/CD  
+- Cloud Function deployments  
+- Agent deployments   
+- Auto version tagging  
+
+
+### `1. CloudFunctions/`
+Google Cloud Function source code:
+- Function modules    
+- Shared logic  
+- Webhook templates  
+
+### `2. ConversationalAgents/`
+Dialogflow CX agent files:
+- Flows  
+- Pages  
+- Routes  
+- Exported agent
+
+### `3. Iva-Configs/`
+IVA configuration files: 
+- Global IVA configs with stucture of JSON parameters  
+
+### `6. CommonNodeModules/`
+Shared Node.js modules for:
+- Logging    
+- API Clients 
+- Config loaders  
+
+## 🔄 Branching & Contribution Standards
+
+### Branch Protection
+Environment branches (Dev, QA, Prod) are protected.  
+**All changes must go through Pull Requests.**
+
+### Developer Workflow
+
+1. Checkout feature branch from Dev:
+```
+git checkout -b dev-cloudfunctions-update origin/Dev
+```
+2. Restore only the required folder:
+```
+git restore --source=origin/Dev "CloudFunctions" (Required Folder)
+```
+3. Modify required folder.
+
+4. Push branch:
+```
+git push origin dev-cloudfunction-update
+```
+5. Create PR:
+```
+dev-cloudfunction-update → Dev
+```
+6. CI/CD runs automatically.
+
+7. Merge after review.

@@ -1,0 +1,58 @@
+name: R4B-Deploy Node Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select environment to deploy"
+        required: true
+        type: choice
+        options:
+          - Dev
+          - QA
+          - Prod
+      git_tag:
+        description: "Git tag or commit to checkout"
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      # Checkout repo
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.git_tag }}
+
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      # Publish NodeModules package
+      - name: Publish NodeModules to Artifact Registry
+        working-directory: NodeModules
+        env:
+          PROJECT_ID: ${{ vars.PROJECT_ID }}
+          REGION: ${{ vars.REGION }}
+          NPM_PASSWORD: ${{ secrets.NPM_PASSWORD }}
+        run: |
+          echo "🔹 Registry URL: https://${{ vars.REGION }}-npm.pkg.dev/${{ vars.PROJECT_ID }}/r4b-common-nodemodules/"
+          echo "🚀 Setting up npm authentication..."
+          echo "@roger:registry=https://$REGION-npm.pkg.dev/$PROJECT_ID/r4b-common-nodemodules/" > .npmrc
+          echo "//$REGION-npm.pkg.dev/$PROJECT_ID/r4b-common-nodemodules/:_password=${NPM_PASSWORD}" >> .npmrc
+          echo "//$REGION-npm.pkg.dev/$PROJECT_ID/r4b-common-nodemodules/:username=_json_key_base64" >> .npmrc
+          echo "//$REGION-npm.pkg.dev/$PROJECT_ID/r4b-common-nodemodules/:email=not.valid@email.com" >> .npmrc
+          echo "//$REGION-npm.pkg.dev/$PROJECT_ID/r4b-common-nodemodules/:always-auth=true" >> .npmrc
+
+          echo "🚀 Publishing NodeModules package..."
+          npm publish
+
+      # Cleanup .npmrc (always run)
+      - name: Cleanup .npmrc
+        if: always()
+        run: rm -f NodeModules/.npmrc

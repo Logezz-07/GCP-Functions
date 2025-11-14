@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: Rogers Account Verification API
+  version: 1.0.0
+servers:
+  - url: https://us-central1-roger-470808.cloudfunctions.net
+paths:
+  /callstartparams:
+    post:
+      summary: Verify a 6-digit Rogers account number.
+      description: Validates the provided 6-digit account number and returns verification status.
+      operationId: verifyAccount
+      parameters:
+        - in: header
+          name: X-SESSION
+          description: Dialogflow session ID
+          required: false
+          schema:
+            $ref: "@dialogflow/sessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fulfillmentInfo:
+                  type: object
+                  properties:
+                    tag:
+                      type: string
+                      example: AccountVerification
+                      default: AccountVerification
+                sessionInfo:
+                  type: object
+                  properties:
+                    session:
+                      type: string
+                      description: Dialogflow CX session path
+                      example: "projects/demo/locations/us-central1/agents/1234/sessions/abcd1234"
+                    parameters:
+                      type: object
+                      properties:
+                        accountNumber:
+                          type: string
+                          description: 6-digit Rogers account number
+                          x-agent-input-parameter: accountNumber
+                          example: "111111"
+                        Ani:
+                          type: string
+                          description: Ani Of the Caller
+                          x-agent-input-parameter: Ani
+                          example: "11111"
+                        
+      responses:
+        '200':
+          description: Successful account verification
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionInfo:
+                    type: object
+                    properties:
+                      parameters:
+                        type: object
+                        properties:
+                          AccountStatus:
+                            type: string
+                            example: Verified
+                          VerificationMessage:
+                            type: string
+                            example: "Account 833512 has been verified successfully."
+                          returnCode:
+                            type: string
+                            example: "0"

@@ -1,0 +1,59 @@
+{
+  "name": "9baa1345-e217-48a0-b04b-52d9e2b9ab0e",
+  "displayName": "Tries2",
+  "form": {
+  
+  },
+  "entryFulfillment": {
+  
+  },
+  "transitionRoutes": [ {
+    "condition": "$session.params.stderror = \"noinput\"",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I'm sorry. I'm still having trouble understanding you. We may have a bad connection. If I still can't understand you I'm afraid I'll have to end this call. Lets try again." ]
+        },
+        "languageCode": "en"
+      }, {
+        "text": {
+          "text": [ "Lo lamento. Todavía tengo problemas para entenderte. Es posible que tengamos una mala conexión. Si todavía no puedo entenderte, me temo que tendré que finalizar esta llamada." ]
+        },
+        "languageCode": "es-us"
+      } ],
+      "setParameterActions": [ {
+        "parameter": "NI_Counter",
+        "value": "$sys.func.ADD($session.params.NI_Counter,1)"
+      } ],
+      "nextActionOverride": {
+      
+      }
+    },
+    "targetPage": "End Flow",
+    "name": "22cc86ef-161c-433e-a0b5-2381a7c41a05"
+  }, {
+    "condition": "$session.params.stderror = \"nomatch\"",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I'm sorry. I still didn't get that . Lets try again ." ]
+        },
+        "languageCode": "en"
+      }, {
+        "text": {
+          "text": [ "Lo lamento. Todavía no entendí eso. Intentemoslo de nuevo ." ]
+        },
+        "languageCode": "es-us"
+      } ],
+      "setParameterActions": [ {
+        "parameter": "NM_Counter",
+        "value": "$sys.func.ADD($session.params.NM_Counter,1)"
+      } ],
+      "nextActionOverride": {
+      
+      }
+    },
+    "targetPage": "End Flow",
+    "name": "d0ba817d-7dce-45a4-85ab-38aa5ae5b53e"
+  } ]
+}

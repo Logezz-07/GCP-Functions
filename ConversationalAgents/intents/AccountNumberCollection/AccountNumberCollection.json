@@ -1,0 +1,10 @@
+{
+  "name": "58ad0808-0f5f-4fda-9fe3-f834c4d6fb24",
+  "displayName": "AccountNumberCollection",
+  "parameters": [ {
+    "id": "AccountNumber",
+    "entityType": "@AccountNumber"
+  } ],
+  "priority": 500000,
+  "numTrainingPhrases": 24
+}

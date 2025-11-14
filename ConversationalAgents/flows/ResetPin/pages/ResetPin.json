@@ -1,0 +1,29 @@
+{
+  "name": "cd73e1c2-b3f0-4c94-b5af-06bab5e0bb49",
+  "displayName": "ResetPin",
+  "form": {
+  
+  },
+  "entryFulfillment": {
+    "messages": [ {
+      "text": {
+        "text": [ "Okay, I believe this is related to a PIN change. We've sent you an SMS with a link  lease enter your otp ?", "$session.params.VerificationMessage" ]
+      },
+      "languageCode": "en"
+    } ]
+  },
+  "transitionRoutes": [ {
+    "intent": "AccountNumberCollection",
+    "triggerFulfillment": {
+      "setParameterActions": [ {
+        "parameter": "ExitType",
+        "value": "Agent"
+      }, {
+        "parameter": "Ani",
+        "value": "OTP"
+      } ]
+    },
+    "targetPage": "End Session",
+    "name": "aa4e8078-62e1-4236-813c-e39151db6928"
+  } ]
+}

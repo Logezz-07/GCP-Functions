@@ -1,0 +1,59 @@
+{
+  "name": "315c6810-d5fa-4d73-b853-25576aa9164e",
+  "actions": [ {
+    "agentUtterance": {
+      "text": "Hi, I am Rogers Technical Support Assistant. May I know your name?"
+    }
+  }, {
+    "userUtterance": {
+      "text": "I'm Alex."
+    }
+  }, {
+    "agentUtterance": {
+      "text": "Nice to meet you, Alex! How may I help you today?"
+    }
+  }, {
+    "userUtterance": {
+      "text": "My WiFi is not working."
+    }
+  }, {
+    "agentUtterance": {
+      "text": "Try restarting your router and checking your cable connections. And Could you please provide your 6-digit Rogers account number for verification?"
+    }
+  }, {
+    "userUtterance": {
+      "text": "123456"
+    }
+  }, {
+    "agentUtterance": {
+      "text": "Thank you! I’ll connect you to a Rogers support representative to assist you further."
+    }
+  }, {
+    "flowInvocation": {
+      "flow": "ResetPin",
+      "inputActionParameters": {
+      
+      },
+      "outputActionParameters": {
+      
+      }
+    }
+  } ],
+  "playbookInput": {
+    "precedingConversationSummary": "To help customer for FAQ related queries ",
+    "actionParameters": {
+    
+    }
+  },
+  "playbookOutput": {
+    "executionSummary": "Successfully transferd to agent",
+    "actionParameters": {
+    
+    }
+  },
+  "displayName": "Successful flow",
+  "retrievalStrategy": "DEFAULT",
+  "tokenCount": 289,
+  "conversationState": "OUTPUT_STATE_OK",
+  "languageCode": "en"
+}

@@ -1,0 +1,59 @@
+{
+  "name": "53284ed0-3978-49c4-b1de-82c4eb7a039f",
+  "displayName": "LanguageSelection",
+  "form": {
+  
+  },
+  "entryFulfillment": {
+  
+  },
+  "transitionRoutes": [ {
+    "condition": "$session.params.npaLanguage != null AND $session.params.npaLanguage != \"\" AND $session.params.npaLanguage = en-US",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "Thank you for calling Rogers" ]
+        },
+        "languageCode": "en"
+      } ],
+      "setParameterActions": [ {
+        "parameter": "Language",
+        "value": "EN"
+      } ]
+    },
+    "targetPage": "AccountConfirmation",
+    "name": "d00871e3-4cd6-4058-9ed6-1a80152a63da"
+  }, {
+    "condition": "$session.params.dnisLang != null AND $session.params.dnisLang != \"\" AND $session.params.dnisLang = en-US",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "Thank you for calling Rogers" ]
+        },
+        "languageCode": "en"
+      } ],
+      "setParameterActions": [ {
+        "parameter": "Language",
+        "value": "EN"
+      } ]
+    },
+    "targetPage": "AccountConfirmation",
+    "name": "d396e6d5-359e-45b9-aa9c-4615db7915dc"
+  }, {
+    "condition": "$session.params.dnisLang = null OR $session.params.npaLanguage = \"\" OR $session.params.npaLanguage = null OR $session.params.dnisLang = \"\"",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "Thank you for calling Rogers" ]
+        },
+        "languageCode": "en"
+      } ],
+      "setParameterActions": [ {
+        "parameter": "Language",
+        "value": "EN"
+      } ]
+    },
+    "targetPage": "NLU",
+    "name": "8a711c6e-39a5-4dcd-b5cc-cbcecfdf2ed7"
+  } ]
+}

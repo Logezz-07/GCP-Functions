@@ -1,0 +1,49 @@
+{
+  "name": "b9f407f4-d6d2-47d1-bb36-8260f9b0a918",
+  "actions": [ {
+    "agentUtterance": {
+      "text": "Hi, I am Rogers Technical Support Assistant. May I know your name?"
+    }
+  }, {
+    "userUtterance": {
+      "text": "sorry"
+    }
+  }, {
+    "agentUtterance": {
+      "text": "Sorry, I didn’t quite get that. Could you please rephrase?"
+    }
+  }, {
+    "userUtterance": {
+      "text": "don't know "
+    }
+  }, {
+    "agentUtterance": {
+      "text": "I’m still having trouble understanding. Could you try once more?"
+    }
+  }, {
+    "userUtterance": {
+      "text": "ok"
+    }
+  }, {
+    "agentUtterance": {
+      "text": "You’ve exceeded the maximum number of attempts. Please contact Rogers customer service directly."
+    }
+  } ],
+  "playbookInput": {
+    "precedingConversationSummary": "Stand Error for all the questions",
+    "actionParameters": {
+    
+    }
+  },
+  "playbookOutput": {
+    "executionSummary": "After Max tries the session would be ended ",
+    "actionParameters": {
+    
+    }
+  },
+  "displayName": "StandardError flow",
+  "retrievalStrategy": "DEFAULT",
+  "tokenCount": 206,
+  "conversationState": "OUTPUT_STATE_OK",
+  "languageCode": "en"
+}

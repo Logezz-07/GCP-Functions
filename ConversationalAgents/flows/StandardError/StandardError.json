@@ -1,0 +1,86 @@
+{
+  "name": "09306164-bc83-4773-a9f7-ef7ea92b482c",
+  "displayName": "StandardError",
+  "transitionRoutes": [ {
+    "condition": "$session.params.tries = 1",
+    "triggerFulfillment": {
+    
+    },
+    "targetPage": "Tries1",
+    "name": "e99be885-f184-4aef-a5ba-bbddbc1533ba"
+  }, {
+    "condition": "$session.params.tries = 2",
+    "triggerFulfillment": {
+    
+    },
+    "targetPage": "Tries2",
+    "name": "5290358d-a43d-47b3-8780-625b7cdddb73"
+  }, {
+    "condition": "$session.params.tries \u003e= 3",
+    "triggerFulfillment": {
+    
+    },
+    "targetPage": "Tries3",
+    "name": "1f00c504-d0b4-44fb-b398-18453edc0a62"
+  } ],
+  "eventHandlers": [ {
+    "event": "sys.no-match-default",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I didn't get that. Can you say it again?", "I missed what you said. What was that?", "Sorry, could you say that again?", "Sorry, can you say that again?", "Can you say that again?", "Sorry, I didn't get that. Can you rephrase?", "Sorry, what was that?", "One more time?", "What was that?", "Say that one more time?", "I didn't get that. Can you repeat?", "I missed that, say that again?" ]
+        },
+        "languageCode": "en"
+      } ]
+    },
+    "name": "d7656a31-3cab-4f34-8170-c350593e5f5d"
+  }, {
+    "event": "sys.no-input-default",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I didn't get that. Can you say it again?", "I missed what you said. What was that?", "Sorry, could you say that again?", "Sorry, can you say that again?", "Can you say that again?", "Sorry, I didn't get that. Can you rephrase?", "Sorry, what was that?", "One more time?", "What was that?", "Say that one more time?", "I didn't get that. Can you repeat?", "I missed that, say that again?" ]
+        },
+        "languageCode": "en"
+      } ]
+    },
+    "name": "5fe667be-4e23-40ac-b297-8c6dbc8ea06b"
+  } ],
+  "nluSettings": {
+    "modelType": "MODEL_TYPE_ADVANCED",
+    "classificationThreshold": 0.30000001,
+    "modelTrainingMode": "MODEL_TRAINING_MODE_AUTOMATIC",
+    "multiIntentSettings": {
+    
+    }
+  },
+  "advancedSettings": {
+    "enabled": true,
+    "dtmfSettings": {
+      "enabled": true,
+      "interdigitTimeoutDuration": {
+        "seconds": 5
+      },
+      "endpointingTimeoutDuration": {
+        "seconds": 5
+      }
+    }
+  },
+  "nluSettingsList": [ {
+    "modelType": "MODEL_TYPE_ADVANCED",
+    "classificationThreshold": 0.30000001,
+    "modelTrainingMode": "MODEL_TRAINING_MODE_AUTOMATIC",
+    "multiIntentSettings": {
+    
+    },
+    "languageCode": "en"
+  }, {
+    "modelType": "MODEL_TYPE_ADVANCED",
+    "classificationThreshold": 0.30000001,
+    "modelTrainingMode": "MODEL_TRAINING_MODE_AUTOMATIC",
+    "multiIntentSettings": {
+    
+    },
+    "languageCode": "fr-ca"
+  } ]
+}

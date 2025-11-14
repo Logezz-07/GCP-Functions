@@ -1,0 +1,41 @@
+{
+  "name": "30ad9a2d-a5ec-461b-94ba-3f98b71962ac",
+  "displayName": "TechSupport",
+  "description": "the tool which is used to fetch for data store related to FAQ Rogers technical queries",
+  "dataStoreSpec": {
+    "dataStoreConnections": [ {
+      "dataStoreType": "UNSTRUCTURED",
+      "dataStore": "projects/205115177972/locations/us/collections/default_collection/dataStores/techsupport_1761806163595",
+      "documentProcessingMode": "DOCUMENTS",
+      "engineType": "CHAT_ENGINE",
+      "connectorConfig": {
+      
+      },
+      "createTime": {
+        "seconds": 1761806171,
+        "nanos": 130000000
+      },
+      "displayName": "TechSupport",
+      "dialogflowAddTime": {
+        "seconds": 1761806171,
+        "nanos": 130000000
+      }
+    } ],
+    "models": {
+      "summarizationModel": {
+        "model": "default"
+      },
+      "rewriterModel": {
+        "model": "default"
+      }
+    },
+    "groundingSettings": {
+    
+    },  
+    "payloadSettings": {
+    
+    },
+    "mode": "MODE_DEFAULT"
+  },
+  "toolType": "CUSTOMIZED_TOOL"
+}

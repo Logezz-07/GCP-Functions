@@ -1,0 +1,23 @@
+{
+  "name": "13dbcd72-3948-4339-9e10-9726a32b38ff",
+  "displayName": "TechSupport",
+  "form": {
+  
+  },
+  "entryFulfillment": {
+    "messages": [ {
+      "text": {
+        "text": [ "Okay, i believe it is related to technical support . let me know your query ?" ]
+      },
+      "languageCode": "en"
+    } ]
+  },
+  "transitionRoutes": [ {
+    "condition": "true",
+    "triggerFulfillment": {
+    
+    },
+    "name": "128b208f-3f06-46b1-97d7-921773396be5",
+    "targetPlaybook": "R4B-TechSupport-FAQ"
+  } ]
+}

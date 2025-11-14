@@ -1,0 +1,115 @@
+{
+  "name": "00000000-0000-0000-0000-000000000000",
+  "displayName": "Default Start Flow",
+  "description": "A start flow created along with the agent",
+  "transitionRoutes": [ {
+    "intent": "Default Welcome Intent",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "Salut !", "Bonjour !", "Salutations !", "Bienvenue !" ]
+        },
+        "languageCode": "fr"
+      }, {
+        "text": {
+          "text": [ "Salut !", "Bonjour !", "Salutations !", "Bienvenue !" ]
+        },
+        "languageCode": "fr-ca"
+      } ]
+    },
+    "name": "91c22705-c798-41fb-8061-b105f019409c"
+  }, {
+    "condition": "$session.params.ExitType = Agent",
+    "triggerFulfillment": {
+    
+    },
+    "targetPage": "Escalate",
+    "name": "cd8b3b8f-f6ef-4b71-b575-a769d6126049"
+  } ],
+  "eventHandlers": [ {
+    "event": "sys.no-match-default",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I didn't get that. Can you say it again?", "I missed what you said. What was that?", "Sorry, could you say that again?", "Sorry, can you say that again?", "Can you say that again?", "Sorry, I didn't get that. Can you rephrase?", "Sorry, what was that?", "One more time?", "What was that?", "Say that one more time?", "I didn't get that. Can you repeat?", "I missed that, say that again?" ]
+        },
+        "languageCode": "en"
+      }, {
+        "text": {
+          "text": [ "J'ai du mal à comprendre cette question.", "J'ai mal compris votre demande.", "Je n'ai pas saisi ce que vous avez dit.", "Je crois que je ne vous suis pas.", "Je ne comprends pas de quoi vous me parlez." ]
+        },
+        "languageCode": "fr"
+      }, {
+        "text": {
+          "text": [ "J'ai du mal à comprendre cette question.", "J'ai mal compris votre demande.", "Je n'ai pas saisi ce que vous avez dit.", "Je crois que je ne vous suis pas.", "Je ne comprends pas de quoi vous me parlez." ]
+        },
+        "languageCode": "fr-ca"
+      } ]
+    },
+    "name": "8e9a8219-19d7-436e-8995-b1caffebcd0b"
+  }, {
+    "event": "sys.no-input-default",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I didn't get that. Can you say it again?", "I missed what you said. What was that?", "Sorry, could you say that again?", "Sorry, can you say that again?", "Can you say that again?", "Sorry, I didn't get that. Can you rephrase?", "Sorry, what was that?", "One more time?", "What was that?", "Say that one more time?", "I didn't get that. Can you repeat?", "I missed that, say that again?" ]
+        },
+        "languageCode": "en"
+      }, {
+        "text": {
+          "text": [ "J'ai du mal à comprendre cette question.", "J'ai mal compris votre demande.", "Je n'ai pas saisi ce que vous avez dit.", "Je crois que je ne vous suis pas.", "Je ne comprends pas de quoi vous me parlez." ]
+        },
+        "languageCode": "fr"
+      }, {
+        "text": {
+          "text": [ "J'ai du mal à comprendre cette question.", "J'ai mal compris votre demande.", "Je n'ai pas saisi ce que vous avez dit.", "Je crois que je ne vous suis pas.", "Je ne comprends pas de quoi vous me parlez." ]
+        },
+        "languageCode": "fr-ca"
+      } ]
+    },
+    "name": "95aaf7aa-c34b-4ab7-9da0-14eec5671df8"
+  }, {
+    "event": "Start",
+    "triggerFulfillment": {
+      "setParameterActions": [ {
+        "parameter": "Ani",
+        "value": "1010000061"
+      }, {
+        "parameter": "Dnis",
+        "value": "8335293704"
+      }, {
+        "parameter": "ConversationId",
+        "value": "R4B-Test-IVA-Logezz"
+      }, {
+        "parameter": "tries",
+        "value": 0
+      }, {
+        "parameter": "session id",
+        "value": "$request.session-id"
+      } ]
+    },
+    "name": "3ec54e3f-9147-4138-8ec9-877b7e9392b7",
+    "targetPlaybook": "R4B-TechSupport-FAQ"
+  } ],
+  "nluSettings": {
+    "modelType": "MODEL_TYPE_ADVANCED",
+    "classificationThreshold": 0.30000001,
+    "modelTrainingMode": "MODEL_TRAINING_MODE_AUTOMATIC"
+  },
+  "advancedSettings": {
+    "enabled": true
+  },
+  "nluSettingsList": [ {
+    "modelType": "MODEL_TYPE_ADVANCED",
+    "classificationThreshold": 0.30000001,
+    "modelTrainingMode": "MODEL_TRAINING_MODE_AUTOMATIC",
+    "customConfigKey": "39b8a96c-8d37-41c7-86d4-732dd9f5e4fb",
+    "languageCode": "en"
+  }, {
+    "modelType": "MODEL_TYPE_ADVANCED",
+    "classificationThreshold": 0.30000001,
+    "modelTrainingMode": "MODEL_TRAINING_MODE_AUTOMATIC",
+    "customConfigKey": "39b8a96c-8d37-41c7-86d4-732dd9f5e4fb",
+    "languageCode": "fr-ca"
+  } ]
+}

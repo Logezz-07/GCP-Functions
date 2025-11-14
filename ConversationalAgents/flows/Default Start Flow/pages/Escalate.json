@@ -1,0 +1,23 @@
+{
+  "name": "f8238497-6d72-4641-bc10-05308ed5b2af",
+  "displayName": "Escalate",
+  "form": {
+  
+  },
+  "entryFulfillment": {
+  
+  },
+  "transitionRoutes": [ {
+    "condition": "True",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "We’re connecting you to a customer representative for further assistance." ]
+        },
+        "languageCode": "en"
+      } ]
+    },
+    "targetPage": "End Session",
+    "name": "bfe67209-fd35-482b-bfe4-81df4e9948bc"
+  } ]
+}

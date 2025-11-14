@@ -1,0 +1,217 @@
+{
+  "trainingPhrases": [ {
+    "parts": [ {
+      "text": "I will provide my account number as "
+    }, {
+      "text": "852963741",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "Account number "
+    }, {
+      "text": "654987321",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "It is "
+    }, {
+      "text": "741852963",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "Let me share my account number "
+    }, {
+      "text": "321654987",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "My customer ID is "
+    }, {
+      "text": "456123789",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "The number is "
+    }, {
+      "text": "9876543210",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "I have the account number "
+    }, {
+      "text": "776655443",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "Can I give you my account number "
+    }, {
+      "text": "234234234?",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "Account number is "
+    }, {
+      "text": "999888777",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "That is account number "
+    }, {
+      "text": "787878787",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "Account number "
+    }, {
+      "text": "101010101",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "Use account number "
+    }, {
+      "text": "555666777",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "It is "
+    }, {
+      "text": "123123123",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "My account ID is "
+    }, {
+      "text": "443322110",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "I want to provide my account number "
+    }, {
+      "text": "998877665",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "The account number is "
+    }, {
+      "text": "112233445",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "My number is "
+    }, {
+      "text": "564738291",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "Here is my account number: "
+    }, {
+      "text": "987654321",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "The account number is "
+    }, {
+      "text": "123456789",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "My account number is "
+    }, {
+      "text": "322339485",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "mine is "
+    }, {
+      "text": "209389209",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "209389209",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "account number is "
+    }, {
+      "text": "209389209",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  }, {
+    "parts": [ {
+      "text": "my account number is "
+    }, {
+      "text": "322339485",
+      "parameterId": "AccountNumber"
+    } ],
+    "repeatCount": 1,
+    "languageCode": "en"
+  } ]
+}

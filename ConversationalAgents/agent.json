@@ -1,0 +1,78 @@
+{
+  "displayName": "R4B_IVA",
+  "defaultLanguageCode": "en",
+  "supportedLanguageCodes": [ "fr", "fr-ca" ],
+  "timeZone": "America/Los_Angeles",
+  "enableLogging": true,
+  "projectNumber": 205115177972,
+  "speechToTextSettings": {
+  
+  },
+  "startFlow": "Default Start Flow",
+  "enableStackdriverLogging": true,
+  "advancedSettings": {
+    "enabled": true,
+    "audioExportGcsDestination": {
+    
+    },
+    "speechSettings": {
+      "endpointerSensitivity": 90,
+      "noSpeechTimeout": {
+        "seconds": 5
+      },
+      "models": [ {
+        "key": "en",
+        "value": "telephony"
+      } ]
+    },
+    "playbackInterruptionSettings": {
+      "allowPlaybackInterruption": true
+    },
+    "dtmfSettings": {
+      "enabled": true,
+      "finishDigit": "#",
+      "interdigitTimeoutDuration": {
+        "seconds": 5
+      },
+      "endpointingTimeoutDuration": {
+        "seconds": 5
+      },
+      "disableSpeechDetection": true
+    },
+    "loggingSettings": {
+      "enableStackdriverLogging": true,
+      "enableInteractionLogging": true
+    },
+    "speechAdaptationSettings": {
+    
+    }
+  },
+  "speakerIdSettings": {
+  
+  },
+  "textToSpeechSettings": {
+    "synthesizeSpeechConfigs": [ {
+      "key": "en",
+      "value": {
+        "speakingRate": 1,
+        "pitch": 2,
+        "voice": {
+          "name": "en-US-Neural2-F",
+          "ssmlGender": "SSML_VOICE_GENDER_FEMALE"
+        }
+      }
+    } ]
+  },
+  "genAppBuilderSettings": {
+    "engine": "projects/205115177972/locations/us/collections/default_collection/engines/96f763fc-6670-49ce-a6c3-c8a6026842a1-chat-1761806716"
+  },
+  "duplexSettings": {
+  
+  },
+  "answerFeedbackSettings": {
+  
+  },
+  "webClientSettings": {
+    "boxBorderRadius": "0"
+  }
+}

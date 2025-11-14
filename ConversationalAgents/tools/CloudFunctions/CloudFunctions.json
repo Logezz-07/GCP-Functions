@@ -1,0 +1,9 @@
+{
+  "name": "672f154d-b8d0-454f-9ed0-c757a26fb7b3",
+  "displayName": "CloudFunctions",
+  "description": "Tool is used to hit the api for account status",
+  "openApiSpec": {
+    "ignoreUnknownFields": true
+  },
+  "toolType": "CUSTOMIZED_TOOL"
+}

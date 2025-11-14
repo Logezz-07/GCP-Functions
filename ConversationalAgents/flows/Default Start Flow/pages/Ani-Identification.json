@@ -1,0 +1,77 @@
+{
+  "name": "0f24c8e5-5f76-4dff-99c6-2451901b0be5",
+  "displayName": "Ani-Identification",
+  "form": {
+  
+  },
+  "entryFulfillment": {
+  
+  },
+  "transitionRoutes": [ {
+    "condition": "$session.params.identifiedCustomer = true",
+    "triggerFulfillment": {
+      "setParameterActions": [ {
+        "parameter": "NumOfAccounts",
+        "value": "$sys.func.COUNT($session.params.AccountList)"
+      } ]
+    },
+    "targetPage": "LanguageSelection",
+    "name": "ba93a615-1080-4829-8ac0-426c7e6197f4"
+  }, {
+    "condition": "$session.params.returnCode = \"1\"",
+    "triggerFulfillment": {
+    
+    },
+    "targetPage": "Escalate",
+    "name": "3052fb42-1201-4549-83f1-67bb6d945079"
+  }, {
+    "condition": "$session.params.identifiedCustomer = false",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I can't seem to find an account associated with that number. for now, let's continue." ]
+        },
+        "languageCode": "en"
+      } ]
+    },
+    "targetPage": "NLU",
+    "name": "adac941f-d636-43d6-9834-550ff4fdf551"
+  } ],
+  "eventHandlers": [ {
+    "event": "webhook.error",
+    "triggerFulfillment": {
+    
+    },
+    "name": "ea765443-c7d0-4075-a2ce-22759c4f1bd7"
+  }, {
+    "event": "webhook.error.bad-request",
+    "triggerFulfillment": {
+    
+    },
+    "name": "1100e1ad-7c86-457e-90af-fb44d786867f"
+  }, {
+    "event": "webhook.error.not-found",
+    "triggerFulfillment": {
+    
+    },
+    "name": "68d5ac15-8491-4bda-b5fd-94fa7f06775c"
+  }, {
+    "event": "webhook.error.rejected",
+    "triggerFulfillment": {
+    
+    },
+    "name": "ce09e758-33a9-4f0e-bf20-382f476f4633"
+  }, {
+    "event": "webhook.error.timeout",
+    "triggerFulfillment": {
+    
+    },
+    "name": "0f525835-b11d-4a70-8f25-e0adfa4a2bf0"
+  }, {
+    "event": "webhook.error.unavailable",
+    "triggerFulfillment": {
+    
+    },
+    "name": "3486a24a-e2f5-43ed-8183-7732d7fd45c7"
+  } ]
+}

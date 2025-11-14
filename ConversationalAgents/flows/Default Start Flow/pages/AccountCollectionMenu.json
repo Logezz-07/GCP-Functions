@@ -1,0 +1,96 @@
+{
+  "name": "b7940577-31a5-4ec3-9918-eee2640fb572",
+  "displayName": "AccountCollectionMenu",
+  "form": {
+  
+  },
+  "entryFulfillment": {
+    "messages": [ {
+      "text": {
+        "text": [ "Please say or enter the account number you are calling about." ]
+      },
+      "languageCode": "en"
+    } ]
+  },
+  "transitionRoutes": [ {
+    "intent": "AccountNumberCollection",
+    "condition": "$sys.func.MATCH($session.params.AccountList, $session.params.AccountNumber) != -1",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "Thank you. I have now found your account" ]
+        },
+        "languageCode": "en"
+      } ],
+      "setParameterActions": [ {
+        "parameter": "Number",
+        "value": "$sys.func.MATCH($session.params.AccountList, $session.params.AccountNumber)"
+      } ]
+    },
+    "targetPage": "NLU",
+    "name": "bf42ec37-235f-4c53-8be5-b8a59c874d2b"
+  }, {
+    "intent": "AccountNumberCollection",
+    "condition": "$sys.func.MATCH($session.params.AccountList, $session.params.AccountNumber) = -1 AND $session.params.AccountNumber != null",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I can't seem to find an account associated with that number. for now, let's continue." ]
+        },
+        "languageCode": "en"
+      } ]
+    },
+    "targetPage": "NLU",
+    "name": "6af5bb1d-2f4c-4a5a-a4de-6ea2ab2a0997"
+  }, {
+    "intent": "AccountNumberCollection",
+    "condition": "$session.params.AccountNumber = null OR $session.params.AccountNumber = \"\"",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "came to third " ]
+        },
+        "languageCode": "en"
+      } ],
+      "setParameterActions": [ {
+        "parameter": "tries",
+        "value": "$sys.func.ADD($sys.func.TO_NUMBER($session.params.tries),1)"
+      }, {
+        "parameter": "stderror",
+        "value": "nomatch"
+      }, {
+        "parameter": "nope",
+        "value": "$session.params.AccountNumber"
+      } ]
+    },
+    "targetFlow": "StandardError",
+    "name": "2e1b6a0a-f694-4550-af60-3bc2c037f9c7"
+  } ],
+  "eventHandlers": [ {
+    "targetFlow": "StandardError",
+    "event": "sys.no-input-default",
+    "triggerFulfillment": {
+      "setParameterActions": [ {
+        "parameter": "tries",
+        "value": "$sys.func.ADD($sys.func.TO_NUMBER($session.params.tries),1)"
+      }, {
+        "parameter": "stderror",
+        "value": "noinput"
+      } ]
+    },
+    "name": "7bb1eca3-e0d0-4047-9d4c-1ad2f41091ed"
+  }, {
+    "targetFlow": "StandardError",
+    "event": "sys.no-match-default",
+    "triggerFulfillment": {
+      "setParameterActions": [ {
+        "parameter": "tries",
+        "value": "$sys.func.ADD($sys.func.TO_NUMBER($session.params.tries),1)"
+      }, {
+        "parameter": "stderror",
+        "value": "nomatch"
+      } ]
+    },
+    "name": "0c068e00-a9ff-44ff-abe2-f6bead1d748f"
+  } ]
+}

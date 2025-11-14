@@ -1,0 +1,59 @@
+{
+  "name": "6ef73ce0-7a19-493a-82d2-c2faddd07674",
+  "displayName": "Tries1",
+  "form": {
+  
+  },
+  "entryFulfillment": {
+  
+  },
+  "transitionRoutes": [ {
+    "condition": "$session.params.stderror = \"noinput\"",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I'm sorry, I didn't get that . " ]
+        },
+        "languageCode": "en"
+      }, {
+        "text": {
+          "text": [ "Lo siento no le entendí." ]
+        },
+        "languageCode": "es-us"
+      } ],
+      "setParameterActions": [ {
+        "parameter": "NI_Counter",
+        "value": "$sys.func.ADD($session.params.NI_Counter,1)"
+      } ],
+      "nextActionOverride": {
+      
+      }
+    },
+    "targetPage": "End Flow",
+    "name": "1e379495-aa63-4374-b3f3-e63c4fd0555e"
+  }, {
+    "condition": "$session.params.stderror = \"nomatch\"",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I'm sorry, I didn't get that ." ]
+        },
+        "languageCode": "en"
+      }, {
+        "text": {
+          "text": [ "Lo siento no le entendí." ]
+        },
+        "languageCode": "es-us"
+      } ],
+      "setParameterActions": [ {
+        "parameter": "NM_Counter",
+        "value": "$sys.func.ADD($session.params.NM_Counter,1)"
+      } ],
+      "nextActionOverride": {
+      
+      }
+    },
+    "targetPage": "End Flow",
+    "name": "17379d01-025d-4df1-9765-a1a031370ceb"
+  } ]
+}

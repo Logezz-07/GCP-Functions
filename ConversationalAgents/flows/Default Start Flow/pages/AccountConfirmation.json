@@ -1,0 +1,44 @@
+{
+  "name": "767df783-ea98-4015-a09e-913f23f1b536",
+  "displayName": "AccountConfirmation",
+  "form": {
+  
+  },
+  "transitionRoutes": [ {
+    "condition": "$sys.func.COUNT($session.params.AccountList) = 1",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "Alright, I have found an account that matched the phone number you are using." ]
+        },
+        "languageCode": "en"
+      } ]
+    },
+    "targetPage": "AccountCollectionMenu",
+    "name": "faaa3af4-446b-47d3-af87-95437e66a09b"
+  }, {
+    "condition": "$sys.func.COUNT($session.params.AccountList) \u003e 1",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "Alright, I have found Multiple accounts related to the number you are using." ]
+        },
+        "languageCode": "en"
+      } ]
+    },
+    "targetPage": "AccountCollectionMenu",
+    "name": "f99685e0-aeb3-4bc2-8491-9e1332f90018"
+  }, {
+    "condition": "$sys.func.COUNT($session.params.AccountList) = 0",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I couldn't find an account that matched the phone number you are using." ]
+        },
+        "languageCode": "en"
+      } ]
+    },
+    "targetPage": "Escalate",
+    "name": "0659196f-c392-4cc1-8874-9f2a2a602e1f"
+  } ]
+}

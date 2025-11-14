@@ -1,0 +1,37 @@
+{
+  "name": "84134083-1ea7-4a54-81a9-4981337be7b4",
+  "displayName": "Call-Start-Params",
+  "form": {
+  
+  },
+  "entryFulfillment": {
+  
+  },
+  "transitionRoutes": [ {
+    "condition": "$session.params.returnCode = \"1\"",
+    "triggerFulfillment": {
+    
+    },
+    "targetPage": "Escalate",
+    "name": "f73e9a4f-24b2-40f8-b3b5-ba7e71eb67ca"
+  }, {
+    "condition": "$session.params.aniLookup = true AND $session.params.returnCode = \"0\"",
+    "triggerFulfillment": {
+    
+    },
+    "targetPage": "Ani-Identification",
+    "name": "1020c6cc-9bb7-4112-b65c-54c235f2c4f3"
+  }, {
+    "condition": "$session.params.aniLookup = false AND $session.params.returnCode = \"0\"",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "Thank you for calling Rogers" ]
+        },
+        "languageCode": "en"
+      } ]
+    },
+    "targetPage": "NLU",
+    "name": "1e7954a2-d617-42e1-b632-8bf675568202"
+  } ]
+}

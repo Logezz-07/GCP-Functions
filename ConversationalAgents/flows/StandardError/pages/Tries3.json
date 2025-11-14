@@ -1,0 +1,89 @@
+{
+  "name": "1495815d-28d5-43f5-8e87-5a31a0b14f9c",
+  "displayName": "Tries3",
+  "form": {
+  
+  },
+  "entryFulfillment": {
+  
+  },
+  "transitionRoutes": [ {
+    "condition": "$session.params.stderror = \"noinput\"",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I'm sorry .I'm still having trouble understanding you . please try your call again later. Goodbye" ]
+        },
+        "languageCode": "en"
+      }, {
+        "text": {
+          "text": [ "Lo siento. Todavía tengo problemas para entenderte. Por favor intenta llamar nuevamente más tarde. Adiós." ]
+        },
+        "languageCode": "es-us"
+      }, {
+        "payload": {
+          "Execute_Request": {
+            "Data": {
+              "Params": {
+                "NI_Count": "$session.params.NI_Counter",
+                "NM_Count": "$session.params.NM_Counter",
+                "NoMatchFlag": "$session.params.NoMatchFlag",
+                "value": "NA"
+              }
+            },
+            "Event_Name": "$session.params.EventName"
+          }
+        },
+        "languageCode": "es-us"
+      } ],
+      "setParameterActions": [ {
+        "parameter": "NI_Counter",
+        "value": "$sys.func.ADD($session.params.NI_Counter,1)"
+      } ],
+      "nextActionOverride": {
+      
+      }
+    },
+    "targetPage": "End Session",
+    "name": "a5939bc2-2bbe-450a-ac4a-972a4649d483"
+  }, {
+    "condition": "$session.params.stderror = \"nomatch\"",
+    "triggerFulfillment": {
+      "messages": [ {
+        "text": {
+          "text": [ "I'm sorry .I'm still having trouble understanding you . please hold while i transfer your call . your call is important to us . please remain on the line and a service representative will be with you ." ]
+        },
+        "languageCode": "en"
+      }, {
+        "text": {
+          "text": [ "Lo siento. Todavía tengo problemas para entenderte. Por favor espera mientras transfiero tu llamada. Tu llamada es importante para nosotros . permanezca en la línea y un representante de servicio estará con usted." ]
+        },
+        "languageCode": "es-us"
+      }, {
+        "payload": {
+          "Execute_Request": {
+            "Data": {
+              "Params": {
+                "NI_Count": "$session.params.NI_Counter",
+                "NM_Count": "$session.params.NM_Counter",
+                "NoMatchFlag": "$session.params.NoMatchFlag",
+                "value": "NA"
+              }
+            },
+            "Event_Name": "$session.params.EventName"
+          }
+        },
+        "languageCode": "es-us"
+      } ],
+      "setParameterActions": [ {
+        "parameter": "NM_Counter",
+        "value": "$sys.func.ADD($session.params.NM_Counter,1)"
+      } ],
+      "nextActionOverride": {
+      
+      }
+    },
+    "targetPage": "End Session",
+    "name": "33f2cead-67c6-4561-afd0-0a0e2faa192f"
+  } ]
+}

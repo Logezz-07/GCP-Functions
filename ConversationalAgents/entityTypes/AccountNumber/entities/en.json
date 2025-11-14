@@ -1,0 +1,8 @@
+{
+  "entities": [ {
+    "value": "\\d{9}$",
+    "synonyms": [ "\\d{9}$" ],
+    "languageCode": "en",
+    "dtmfPattern": "\\d{9}$"
+  } ]
+}

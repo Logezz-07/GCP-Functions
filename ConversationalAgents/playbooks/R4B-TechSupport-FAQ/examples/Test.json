@@ -1,0 +1,63 @@
+{
+  "name": "0b512b9c-7250-48d4-aa1b-f071ee05d74c",
+  "actions": [ {
+    "agentUtterance": {
+      "text": "Please provide your 6-digit Rogers account number."
+    }
+  }, {
+    "userUtterance": {
+      "text": "123456"
+    }
+  }, {
+    "toolUse": {
+      "tool": "CloudFunctions",
+      "action": "verifyAccount",
+      "inputActionParameters": {
+        "requestBody": {
+          "fulfillmentInfo": {
+            "tag": "AccountVerification"
+          },
+          "sessionInfo": {
+            "parameters": {
+              "Ani": "11111",
+              "accountNumber": "111111"
+            },
+            "session": "test"
+          }
+        }
+      },
+      "outputActionParameters": {
+        "200": {
+          "sessionInfo": {
+            "parameters": {
+              "AccountStatus": "Invalid",
+              "VerificationMessage": "Invalid account number format.",
+              "returnCode": "1"
+            }
+          }
+        }
+      }
+    }
+  }, {
+    "agentUtterance": {
+      "text": "Thank you! I’ll connect you to a Rogers support representative."
+    }
+  } ],
+  "playbookInput": {
+    "precedingConversationSummary": "Test",
+    "actionParameters": {
+    
+    }
+  },
+  "playbookOutput": {
+    "executionSummary": "Success",
+    "actionParameters": {
+    
+    }
+  },
+  "displayName": "Test",
+  "retrievalStrategy": "DEFAULT",
+  "tokenCount": 267,
+  "conversationState": "OUTPUT_STATE_OK",
+  "languageCode": "en"
+}

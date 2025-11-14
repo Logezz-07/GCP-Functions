@@ -1,0 +1,26 @@
+{
+  "name": "98f7963b-1ef4-4561-84e1-9d45ffa0028d",
+  "displayName": "MakePayment",
+  "form": {
+  
+  },
+  "entryFulfillment": {
+    "messages": [ {
+      "text": {
+        "text": [ "Okay, i believe it is related to bill payment." ]
+      },
+      "languageCode": "en"
+    } ]
+  },
+  "transitionRoutes": [ {
+    "condition": "true",
+    "triggerFulfillment": {
+      "setParameterActions": [ {
+        "parameter": "ExitType",
+        "value": "Agent"
+      } ]
+    },
+    "targetFlow": "Default Start Flow",
+    "name": "871e0e1d-136c-4ba4-8c9e-56f254087e09"
+  } ]
+}

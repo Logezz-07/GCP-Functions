@@ -15,7 +15,7 @@ jobs:
     environment: ${{ github.ref_name }}
 
     env:
-      WEBHOOKS_DIR: "webhooks"
+      WEBHOOKS_DIR: "ConversationalAgents/webhooks"
       PROJECT_ID: ${{ vars.PROJECT_ID }}
       REGION: ${{ vars.REGION }}
       ENVIRONMENT: ${{ github.ref_name }}
@@ -59,8 +59,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🚀 Committing webhook updates for ${ENVIRONMENT}..."
-          git fetch origin ${ENVIRONMENT} --tags
-          git checkout ${ENVIRONMENT}
           git add $WEBHOOKS_DIR/*.json
           git commit -m "Updated webhook URLs for ${ENVIRONMENT} (${PROJECT_ID})" || echo "No changes to commit"
           git push origin ${ENVIRONMENT}

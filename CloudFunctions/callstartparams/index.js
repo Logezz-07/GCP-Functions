@@ -26,7 +26,7 @@ functions.http("helloHttp", async (req, res) => {
         transactionDateTime: "2024-11-07T10:23:00",
         ivrSubscriptionKey: "f9422c1450c747aaaca69253a489f3c6",
       };
-      
+
       const apiResult = await apiRequest.getRequest({ sessionId, tag, url: apiUrl, headers });
       Status = apiResult.Status;
       ResponsePayload = apiResult.ResponsePayload;
@@ -96,7 +96,7 @@ functions.http("helloHttp", async (req, res) => {
         phoneNumber: ani,
         predictiveInd: "Y",
       };
-
+      let config = null;
       const apiResult = await apiRequest.getRequest({ sessionId, tag, url: apiUrl, headers, params });
       Status = apiResult.Status;
       ResponsePayload = apiResult.ResponsePayload;

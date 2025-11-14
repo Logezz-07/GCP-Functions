@@ -125,7 +125,6 @@ functions.http("helloHttp", async (req, res) => {
       }
     }
 
-    // ---------------------- Webhook Response ---------------------- //
     const webhookResponse = { sessionInfo: { parameters: { ...sessionParams } } };
     logger.logWebhookResponse(sessionId, tag, webhookResponse);
     res.setHeader("Content-Type", "application/json");

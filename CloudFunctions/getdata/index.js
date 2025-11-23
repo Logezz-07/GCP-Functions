@@ -27,7 +27,7 @@ functions.http("helloHttp", async (req, res) => {
 
         const apiUrl = `https://dev1-cct.rogers.com/dev01-cctdtapi/data-transfer/1.0.0/datatransfer/${transferId}?callingSystem=${callingSystem}`;
 
-        // headers
+
         const headers = {
             "Content-Type": "application/json",
             cdr: "112432245667775757",
@@ -37,6 +37,7 @@ functions.http("helloHttp", async (req, res) => {
             transactionDateTime: new Date().toISOString(),
             ivrSubscriptionKey: "f9422c1450c747aaaca69253a489f3c6"
         };
+
 
         const payload = [
             { keyName: "svcReferenceId", transformType: "any", value: sessionParamsFromCX?.svcReferenceId || transferId },

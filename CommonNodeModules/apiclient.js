@@ -8,6 +8,7 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const SCOPE = process.env.SCOPE;
 const TIMEOUT_MS = Number(process.env.API_TIMEOUT_MS);
 let len = null;
+let nk =null;
 let TOKEN = null;
 let TOKEN_EXPIRY_TIME = null;
 

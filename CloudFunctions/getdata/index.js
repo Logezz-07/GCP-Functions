@@ -38,7 +38,6 @@ functions.http("helloHttp", async (req, res) => {
             ivrSubscriptionKey: "f9422c1450c747aaaca69253a489f3c6"
         };
 
-        // Prepare body payload
         const payload = [
             { keyName: "svcReferenceId", transformType: "any", value: sessionParamsFromCX?.svcReferenceId || transferId },
             { keyName: "AGENT_ALERT", transformType: "any", value: sessionParamsFromCX?.AGENT_ALERT || "Default Alert" },

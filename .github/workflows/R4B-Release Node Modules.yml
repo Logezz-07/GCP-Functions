@@ -1,4 +1,4 @@
-name: R4B-CodeCheck-CommonNodeModules
+name: R4B-Release Node Modules
 
 on:
   push:
@@ -30,24 +30,35 @@ jobs:
       - name: Syntax Check for CommonNodeModules
         working-directory: CommonNodeModules
         run: |
-          echo "Installing dependencies..."
+          echo "📦 Installing dependencies..."
           npm ci
           echo "🔍 Running syntax check..."
           npm run check-syntax
           echo "✅ Syntax check done."
 
-      # Create Next Tag
+      # Create Environment-Specific Next Tag
       - name: Create Next Tag
         id: tag
         run: |
-          PREFIX="NodeModules"
+          BRANCH_NAME=${GITHUB_REF##*/}
+
+          if [ "$BRANCH_NAME" == "Dev" ]; then
+            PREFIX="NodeModules-Dev"
+          elif [ "$BRANCH_NAME" == "QA" ]; then
+            PREFIX="NodeModules-QA"
+          elif [ "$BRANCH_NAME" == "Prod" ]; then
+            PREFIX="NodeModules-Prod"
+          else
+            echo "❌ Unknown branch: $BRANCH_NAME"
+            exit 1
+          fi
 
           LAST_TAG=$(git tag --list "${PREFIX}-v*" | sort -V | tail -n 1)
 
           if [ -z "$LAST_TAG" ]; then
             NEXT_VERSION="${PREFIX}-v1"
           else
-            VERSION_NUM=$(echo "$LAST_TAG" | grep -oE '[0-9]+$')
+            VERSION_NUM=$(echo "$LAST_TAG" | grep -oE '[0-9]+$")
             NEXT_VERSION="${PREFIX}-v$((VERSION_NUM + 1))"
           fi
 

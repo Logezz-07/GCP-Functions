@@ -1,4 +1,4 @@
-name: R4B-CodeCheck-IVA-Configs
+name: R4B-Release IVA Config
 
 on:
   push:
@@ -32,11 +32,22 @@ jobs:
             exit 1
           fi
 
-      # 2️⃣ Create Next Tag
+      # 2️⃣ Create Environment-Specific Next Tag
       - name: Create Next Tag
         id: tag
         run: |
-          PREFIX="IVA-Config"
+          BRANCH_NAME=${GITHUB_REF##*/}
+
+          if [ "$BRANCH_NAME" == "Dev" ]; then
+            PREFIX="IVA-Config-Dev"
+          elif [ "$BRANCH_NAME" == "QA" ]; then
+            PREFIX="IVA-Config-QA"
+          elif [ "$BRANCH_NAME" == "Prod" ]; then
+            PREFIX="IVA-Config-Prod"
+          else
+            echo "❌ Unknown branch: $BRANCH_NAME"
+            exit 1
+          fi
 
           LAST_TAG=$(git tag --list "${PREFIX}-v*" | sort -V | tail -n 1)
 

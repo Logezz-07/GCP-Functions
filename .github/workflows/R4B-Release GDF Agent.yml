@@ -1,4 +1,4 @@
-name: GDF-Agent Auto Tagging
+name: R4B-Release GDF Agent
 
 on:
   push:

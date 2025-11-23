@@ -1,0 +1,74 @@
+name: R4B-Release Cloud Functions
+
+on:
+  push:
+    branches:
+      - Dev
+      - QA
+      - Prod
+    paths:
+      - "CloudFunctions/**"
+
+jobs:
+  CodeCheck-AutoTag:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout Repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Run NPM checks INSIDE CloudFunctions
+      - name: Code Check (npm)
+        working-directory: CloudFunctions
+        run: |
+          echo "📦 Installing dependencies..."
+          npm ci
+          echo "🔍 Running syntax check..."
+          npm run check-syntax
+          echo "✅ Code syntax check completed successfully!"
+
+      # Create Next Tag Version (runs at repo root)
+      - name: Create Next Tag
+        id: tag
+        run: |
+          BRANCH_NAME=${GITHUB_REF##*/}
+          if [ "$BRANCH_NAME" == "Dev" ]; then
+            PREFIX="Dev"
+          elif [ "$BRANCH_NAME" == "QA" ]; then
+            PREFIX="QA"
+          elif [ "$BRANCH_NAME" == "Prod" ]; then
+            PREFIX="Prod"
+          else
+            echo "Unknown branch: $BRANCH_NAME"
+            exit 1
+          fi
+
+          LAST_TAG=$(git tag --list "${PREFIX}-v*" | sort -V | tail -n 1)
+
+          if [ -z "$LAST_TAG" ]; then
+            NEXT_VERSION="${PREFIX}-v1"
+          else
+            VERSION_NUM=$(echo "$LAST_TAG" | grep -oE '[0-9]+$')
+            NEXT_VERSION="${PREFIX}-v$((VERSION_NUM + 1))"
+          fi
+
+          echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+      # Push Tag (must run from repo root)
+      - name: Push Tag
+        run: |
+          echo "🚀 Pushing tag to repository..."
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git tag ${{ steps.tag.outputs.version }}
+          git push origin ${{ steps.tag.outputs.version }}
+          echo "🏷 Tag pushed: ${{ steps.tag.outputs.version }}"

@@ -1,4 +1,4 @@
-name: Code-Check and Tagging
+name: R4B-Release IVA Config
 
 on:
   push:
@@ -7,48 +7,45 @@ on:
       - QA
       - Prod
     paths:
-      - "CloudFunctions/**"
+      - "IVA-Configs/**"
 
 jobs:
   CodeCheck-AutoTag:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout Repository
+      # Checkout Repo
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Setup Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      # Run NPM checks INSIDE CloudFunctions
-      - name: Code Check (npm)
-        working-directory: CloudFunctions
+      # 1️⃣ Single Required JSON Validation (ONLY config.json)
+      - name: IVA-Config-Check
         run: |
-          echo "📦 Installing dependencies..."
-          npm ci
-          echo "🔍 Running syntax check..."
-          npm run check-syntax
-          echo "✅ Code syntax check completed successfully!"
+          echo "🔍 Validating IVA Config JSON (config.json)..."
+          if [ -f "IVA-Configs/config.json" ]; then
+            cat IVA-Configs/config.json | jq empty
+            echo "✅ config.json validation passed!"
+          else
+            echo "❌ config.json NOT FOUND at: IVA-Configs/config.json"
+            exit 1
+          fi
 
-      # Create Next Tag Version (runs at repo root)
+      # 2️⃣ Create Environment-Specific Next Tag
       - name: Create Next Tag
         id: tag
         run: |
           BRANCH_NAME=${GITHUB_REF##*/}
+
           if [ "$BRANCH_NAME" == "Dev" ]; then
-            PREFIX="Dev"
+            PREFIX="IVA-Config-Dev"
           elif [ "$BRANCH_NAME" == "QA" ]; then
-            PREFIX="QA"
+            PREFIX="IVA-Config-QA"
           elif [ "$BRANCH_NAME" == "Prod" ]; then
-            PREFIX="Prod"
+            PREFIX="IVA-Config-Prod"
           else
-            echo "Unknown branch: $BRANCH_NAME"
+            echo "❌ Unknown branch: $BRANCH_NAME"
             exit 1
           fi
 
@@ -57,18 +54,21 @@ jobs:
           if [ -z "$LAST_TAG" ]; then
             NEXT_VERSION="${PREFIX}-v1"
           else
-            VERSION_NUM=$(echo "$LAST_TAG" | grep -oE '[0-9]+$')
+            VERSION_NUM=$(echo "$LAST_TAG" | grep -oE '[0-9]+$")
             NEXT_VERSION="${PREFIX}-v$((VERSION_NUM + 1))"
           fi
 
           echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "🏷 Next Tag: $NEXT_VERSION"
 
-      # Push Tag (must run from repo root)
+      # 3️⃣ Push Tag
       - name: Push Tag
         run: |
-          echo "🚀 Pushing tag to repository..."
+          echo "🚀 Pushing Tag to repo..."
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+
           git tag ${{ steps.tag.outputs.version }}
           git push origin ${{ steps.tag.outputs.version }}
+
           echo "🏷 Tag pushed: ${{ steps.tag.outputs.version }}"

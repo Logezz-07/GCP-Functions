@@ -42,11 +42,11 @@ jobs:
         run: |
           BRANCH_NAME=${GITHUB_REF##*/}
           if [ "$BRANCH_NAME" == "Dev" ]; then
-            PREFIX="Dev"
+            PREFIX="CloudFunctions-Dev"
           elif [ "$BRANCH_NAME" == "QA" ]; then
-            PREFIX="QA"
+            PREFIX="CloudFunctions-QA"
           elif [ "$BRANCH_NAME" == "Prod" ]; then
-            PREFIX="Prod"
+            PREFIX="CloudFunctions-Prod"
           else
             echo "Unknown branch: $BRANCH_NAME"
             exit 1

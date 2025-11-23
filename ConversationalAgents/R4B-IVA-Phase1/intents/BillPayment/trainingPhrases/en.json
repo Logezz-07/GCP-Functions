@@ -7,13 +7,13 @@
     "languageCode": "en"
   }, {
     "parts": [ {
-      "text": "Make a payment for my business account"
+      "text": "Make a payment for my account"
     } ],
     "repeatCount": 1,
     "languageCode": "en"
   }, {
     "parts": [ {
-      "text": "I need to pay my latest invoice"
+      "text": "I need to pay my invoice"
     } ],
     "repeatCount": 1,
     "languageCode": "en"

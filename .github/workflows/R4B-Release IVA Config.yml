@@ -7,7 +7,7 @@ on:
       - QA
       - Prod
     paths:
-      - "IVA-Configs/**"
+      - "Iva-Configs/**"
 
 jobs:
   CodeCheck-AutoTag:
@@ -54,7 +54,7 @@ jobs:
           if [ -z "$LAST_TAG" ]; then
             NEXT_VERSION="${PREFIX}-v1"
           else
-            VERSION_NUM=$(echo "$LAST_TAG" | grep -oE '[0-9]+$")
+            VERSION_NUM=$(echo "$LAST_TAG" | grep -oE '[0-9]+$')
             NEXT_VERSION="${PREFIX}-v$((VERSION_NUM + 1))"
           fi
 

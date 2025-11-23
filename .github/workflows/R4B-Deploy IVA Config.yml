@@ -43,7 +43,7 @@ jobs:
 
       # Terraform Init
       - name: Terraform Init
-        working-directory: IVA-Configs/teraform
+        working-directory: Iva-Configs/terraform
         run: |
           ENVIRONMENT=$(echo "${{ github.event.inputs.environment }}" | tr '[:upper:]' '[:lower:]')
           echo "Initializing Terraform backend for environment: $ENVIRONMENT"
@@ -53,7 +53,7 @@ jobs:
 
       # Terraform Plan (with common TF_VARS block)
       - name: Terraform Plan
-        working-directory: IVA-Configs/teraform
+        working-directory: Iva-Configs/terraform
         run: |
           echo "🧾 Running Terraform Plan for IVA Config upload..."
           
@@ -74,7 +74,7 @@ jobs:
       # Terraform Apply (only if dry_run=false)
       - name: Terraform Apply
         if: ${{ github.event.inputs.dry_run == 'false' }}
-        working-directory: IVA-Configs/teraform
+        working-directory: Iva-Configs/terraform
         run: |
           echo "🚀 Applying Terraform Plan for IVA Config..."
           terraform apply -auto-approve tfplan.out

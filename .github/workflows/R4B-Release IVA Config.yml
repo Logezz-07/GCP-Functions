@@ -1,0 +1,63 @@
+name: R4B-CodeCheck-IVA-Configs
+
+on:
+  push:
+    branches:
+      - Dev
+      - QA
+      - Prod
+    paths:
+      - "IVA-Configs/**"
+
+jobs:
+  CodeCheck-AutoTag:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout Repo
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 1️⃣ Single Required JSON Validation (ONLY config.json)
+      - name: IVA-Config-Check
+        run: |
+          echo "🔍 Validating IVA Config JSON (config.json)..."
+          if [ -f "IVA-Configs/config.json" ]; then
+            cat IVA-Configs/config.json | jq empty
+            echo "✅ config.json validation passed!"
+          else
+            echo "❌ config.json NOT FOUND at: IVA-Configs/config.json"
+            exit 1
+          fi
+
+      # 2️⃣ Create Next Tag
+      - name: Create Next Tag
+        id: tag
+        run: |
+          PREFIX="IVA-Config"
+
+          LAST_TAG=$(git tag --list "${PREFIX}-v*" | sort -V | tail -n 1)
+
+          if [ -z "$LAST_TAG" ]; then
+            NEXT_VERSION="${PREFIX}-v1"
+          else
+            VERSION_NUM=$(echo "$LAST_TAG" | grep -oE '[0-9]+$")
+            NEXT_VERSION="${PREFIX}-v$((VERSION_NUM + 1))"
+          fi
+
+          echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "🏷 Next Tag: $NEXT_VERSION"
+
+      # 3️⃣ Push Tag
+      - name: Push Tag
+        run: |
+          echo "🚀 Pushing Tag to repo..."
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git tag ${{ steps.tag.outputs.version }}
+          git push origin ${{ steps.tag.outputs.version }}
+
+          echo "🏷 Tag pushed: ${{ steps.tag.outputs.version }}"

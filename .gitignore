@@ -5,10 +5,6 @@
 !**/node_modules/@roger
 !**/node_modules/@roger/**
 
-# !**/node_modules/@google-cloud
-# !**/node_modules/@google-cloud/**
-
-
 
 .env
 

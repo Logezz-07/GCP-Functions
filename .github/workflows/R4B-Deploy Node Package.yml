@@ -35,7 +35,7 @@ jobs:
 
       # Publish NodeModules package
       - name: Publish NodeModules to Artifact Registry
-        working-directory: NodeModules
+        working-directory: CommonNodeModules
         env:
           PROJECT_ID: ${{ vars.PROJECT_ID }}
           REGION: ${{ vars.REGION }}
@@ -55,4 +55,4 @@ jobs:
       # Cleanup .npmrc (always run)
       - name: Cleanup .npmrc
         if: always()
-        run: rm -f NodeModules/.npmrc
+        run: rm -f CommonNodeModules/.npmrc

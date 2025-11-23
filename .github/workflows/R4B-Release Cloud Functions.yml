@@ -1,4 +1,4 @@
-name: Code-Check and Tagging
+name: R4B-Release Cloud Functions
 
 on:
   push:

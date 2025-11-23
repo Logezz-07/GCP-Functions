@@ -1,4 +1,4 @@
-name: R4B-Restore Dialogflow CX Agent
+name: R4B-Deploy GDF Agent
 
 on:
   workflow_dispatch:

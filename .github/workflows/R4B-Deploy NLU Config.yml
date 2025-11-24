@@ -1,4 +1,4 @@
-name: R4B-Deploy IVA Config
+name: R4B-Deploy NLU Config
 
 on:
   workflow_dispatch:
@@ -11,70 +11,83 @@ on:
           - Dev
           - QA
           - Prod
+
       dry_run:
-        description: "Run as Dry Run "
+        description: "Run as Dry Run"
         required: true
         type: boolean
+
       git_tag:
         description: "Git tag or commit to checkout"
         required: true
 
 jobs:
-  deploy-config:
+  deploy-nlu-config:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
 
     steps:
-      # Checkout repository
+      # 1️⃣ Checkout the selected tag
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.git_tag }}
 
-      # Authenticate to Google Cloud
+      # 2️⃣ Validate the CSV exists
+      - name: Validate NLU CSV
+        run: |
+          if [ ! -f "NLU-Configs/nlu-config.csv" ]; then
+            echo "❌ ERROR: NLU CSV not found at NLU-Configs/nlu-config.csv"
+            exit 1
+          fi
+          echo "✅ nlu-config.csv found."
+
+      # 3️⃣ Authenticate to Google Cloud
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Setup Terraform
+      # 4️⃣ Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # Terraform Init
+      # 5️⃣ Terraform Init
       - name: Terraform Init
-        working-directory: IVA-Configs/terraform
+        working-directory: NLU-Configs/terraform
         run: |
-          ENVIRONMENT=$(echo "${{ github.event.inputs.environment }}" | tr '[:upper:]' '[:lower:]')
-          echo "Initializing Terraform backend for environment: $ENVIRONMENT"
+          ENV=$(echo "${{ github.event.inputs.environment }}" | tr '[:upper:]' '[:lower:]')
+
+          echo "Initializing Terraform backend for NLU ($ENV)..."
+
           terraform init -reconfigure \
             -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
-            -backend-config="prefix=iva-config-${ENVIRONMENT}-state"
+            -backend-config="prefix=nlu-config-${ENV}-state"
 
-      # Terraform Plan (with common TF_VARS block)
+      # 6️⃣ Terraform Plan
       - name: Terraform Plan
-        working-directory: IVA-Configs/terraform
+        working-directory: NLU-Configs/terraform
         run: |
-          echo "🧾 Running Terraform Plan for IVA Config upload..."
-          
+          echo "🧾 Running Terraform Plan for nlu-config.csv upload..."
+
           TF_VARS="\
             -var=\"project_id=${{ vars.PROJECT_ID }}\" \
             -var=\"bucket_name=${{ vars.CONFIG_BUCKET_NAME }}\" \
-            -var=\"config_path=../config.json\" \
+            -var=\"csv_path=../R4B-NLU-Config.csv\" \
           "
-          
+
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            echo "Dry Run mode enabled — comparing local config.json with remote GCS (no state updates)..."
+            echo "🧪 Dry run enabled — plan only."
             terraform plan -lock=false -input=false $TF_VARS
           else
-            echo "Apply mode — preparing full Terraform plan for IVA Config upload."
+            echo "☁ Apply mode — generating plan."
             terraform plan -out=tfplan.out -lock=true -input=false $TF_VARS
           fi
 
-      # Terraform Apply (only if dry_run=false)
+      # 7️⃣ Terraform Apply
       - name: Terraform Apply
         if: ${{ github.event.inputs.dry_run == 'false' }}
-        working-directory: IVA-Configs/terraform
+        working-directory: NLU-Configs/terraform
         run: |
-          echo "🚀 Applying Terraform Plan for IVA Config..."
+          echo "🚀 Applying Terraform plan for NLU config..."
           terraform apply -auto-approve tfplan.out

@@ -1,0 +1,127 @@
+name: R4B-Release NLU Config
+
+on:
+  push:
+    branches:
+      - Dev
+      - QA
+      - Prod
+    paths:
+      - "NLU-Configs/**"
+
+jobs:
+  CodeCheck-AutoTag:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout Repo
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2️⃣ SMART CSV VALIDATION
+      - name: Validate NLU CSV Files
+        working-directory: NLU-Configs
+        run: |
+          echo "🔍 Validating CSV files in NLU-Configs/ ..."
+          shopt -s nullglob
+          CSV_FILES=(*.csv)
+          if [ ${#CSV_FILES[@]} -eq 0 ]; then
+            echo "❌ No CSV files found in NLU-Configs/"
+            exit 1
+          fi
+          for FILE in "${CSV_FILES[@]}"; do
+            echo "📄 Validating: $FILE ..."
+
+            # Check file not empty
+            if [ ! -s "$FILE" ]; then
+              echo "❌ ERROR: File is empty → $FILE"
+              exit 1
+            fi
+            # Detect expected column count from header
+            HEADER=$(head -n 1 "$FILE" | tr -d '\r')
+            EXPECTED_COLS=$(echo "$HEADER" | awk -F',' '{print NF}')
+
+            if [ "$EXPECTED_COLS" -lt 2 ]; then
+              echo "❌ ERROR: Invalid CSV header in $FILE"
+              echo "Header: $HEADER"
+              exit 1
+            fi
+            echo "✔ Expected Column Count: $EXPECTED_COLS"
+
+            # Validate every row
+            LINE_NO=1
+            while IFS= read -r line || [ -n "$line" ]; do
+              LINE_NO=$((LINE_NO + 1))
+
+              # Skip header row
+              if [ $LINE_NO -eq 2 ]; then
+                continue
+              fi
+
+              # Reject empty rows
+              if [[ -z "$line" ]]; then
+                echo "❌ ERROR: Empty row at line $LINE_NO in $FILE"
+                exit 1
+              fi
+
+              # Column count check
+              COLS=$(echo "$line" | awk -F',' '{print NF}')
+              if [ "$COLS" -ne "$EXPECTED_COLS" ]; then
+                echo "❌ ERROR: Column mismatch at line $LINE_NO in $FILE"
+                echo "Expected: $EXPECTED_COLS columns"
+                echo "Found:    $COLS columns"
+                echo "Line: $line"
+                exit 1
+              fi
+
+              # Empty field check
+              if echo "$line" | awk -F',' '{for(i=1;i<=NF;i++) if($i=="") exit 1}'; then
+                true
+              else
+                echo "❌ ERROR: Empty column found at line $LINE_NO in $FILE"
+                echo "Line: $line"
+                exit 1
+              fi
+            done < "$FILE"
+            echo "✅ VALID: $FILE"
+          done
+
+      # 3️⃣ Generate ENV-Specific Tag
+      - name: Create Next Tag
+        id: tag
+        run: |
+          BRANCH_NAME=${GITHUB_REF##*/}
+
+          if [ "$BRANCH_NAME" == "Dev" ]; then
+            PREFIX="NLU-Config-Dev"
+          elif [ "$BRANCH_NAME" == "QA" ]; then
+            PREFIX="NLU-Config-QA"
+          elif [ "$BRANCH_NAME" == "Prod" ]; then
+            PREFIX="NLU-Config-Prod"
+          else
+            echo "❌ Unknown branch: $BRANCH_NAME"
+            exit 1
+          fi
+
+          LAST_TAG=$(git tag --list "${PREFIX}-v*" | sort -V | tail -n 1)
+
+          if [ -z "$LAST_TAG" ]; then
+            NEXT_VERSION="${PREFIX}-v1"
+          else
+            VERSION_NUM=$(echo "$LAST_TAG" | grep -oE '[0-9]+$')
+            NEXT_VERSION="${PREFIX}-v$((VERSION_NUM + 1))"
+          fi
+          echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "🏷 Next Tag: $NEXT_VERSION"
+
+      # 4️⃣ Push Tag to Repo
+      - name: Push Tag
+        run: |
+          echo "🚀 Pushing tag..."
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git tag ${{ steps.tag.outputs.version }}
+          git push origin ${{ steps.tag.outputs.version }}
+          echo "🏷 Tag pushed: ${{ steps.tag.outputs.version }}"

@@ -70,10 +70,10 @@ jobs:
         run: |
           echo "🧾 Running Terraform Plan for nlu-config.csv upload..."
 
-          TF_VARS="\
-            -var=\"project_id=${{ vars.PROJECT_ID }}\" \
-            -var=\"bucket_name=${{ vars.CONFIG_BUCKET_NAME }}\" \
-            -var=\"csv_path=../R4B-NLU-Config.csv\" \
+          TF_VARS="
+            -var=project_id=${{ vars.PROJECT_ID }} \
+            -var=bucket_name=${{ vars.CONFIG_BUCKET_NAME }} \
+            -var=csv_path=../R4B-NLU-Config.csv \
           "
 
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then

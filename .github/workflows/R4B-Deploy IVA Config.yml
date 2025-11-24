@@ -57,10 +57,10 @@ jobs:
         run: |
           echo "🧾 Running Terraform Plan for IVA Config upload..."
           
-          TF_VARS="\
-            -var=\"project_id=${{ vars.PROJECT_ID }}\" \
-            -var=\"bucket_name=${{ vars.CONFIG_BUCKET_NAME }}\" \
-            -var=\"config_path=../config.json\" \
+          TF_VARS="
+            -var=project_id=${{ vars.PROJECT_ID }} \
+            -var=bucket_name=${{ vars.CONFIG_BUCKET_NAME }} \
+            -var=config_path=../config.json \
           "
           
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then

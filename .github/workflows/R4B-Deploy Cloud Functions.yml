@@ -59,20 +59,20 @@ jobs:
           FUNCTIONS_LIST=$(echo "${{ vars.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
 
           # Common var block (reusable for plan and apply)
-          TF_VARS="\
-            -var=\"project_id=${{ vars.PROJECT_ID }}\" \
-            -var=\"region=${{ vars.REGION }}\" \
-            -var=\"functions=[$FUNCTIONS_LIST]\" \
-            -var=\"registry_pwd=${{ secrets.NPM_PASSWORD }}\" \
-            -var=\"source_bucket=${{ vars.SOURCE_BUCKET }}\" \
-            -var=\"secret_project_id=${{ vars.GOOGLE_SECRET_PROJECT_ID }}\" \
-            -var=\"token_url=${{ vars.TOKEN_URL }}\" \
-            -var=\"scope=${{ vars.SCOPE }}\" \
-            -var=\"token_refresh_time=${{ vars.TOKEN_REFRESH_TIME }}\" \
-            -var=\"client_id_secret=${{ vars.CLIENT_ID_KEY }}\" \
-            -var=\"client_secret_secret=${{ vars.CLIENT_SECRET_KEY }}\" \
-            -var=\"config_bucket_name=${{ vars.CONFIG_BUCKET_NAME }}\" \
-            -var=\"config_file_path=${{ vars.CONFIG_FILE_PATH }}\" \
+          TF_VARS="
+            -var=project_id=${{ vars.PROJECT_ID }} \
+            -var=region=${{ vars.REGION }} \
+            -var=functions=[$FUNCTIONS_LIST] \
+            -var=registry_pwd=${{ secrets.NPM_PASSWORD }} \
+            -var=source_bucket=${{ vars.SOURCE_BUCKET }} \
+            -var=secret_project_id=${{ vars.GOOGLE_SECRET_PROJECT_ID }} \
+            -var=token_url=${{ vars.TOKEN_URL }} \
+            -var=scope=${{ vars.SCOPE }} \
+            -var=token_refresh_time=${{ vars.TOKEN_REFRESH_TIME }} \
+            -var=client_id_secret=${{ vars.CLIENT_ID_KEY }} \
+            -var=client_secret_secret=${{ vars.CLIENT_SECRET_KEY }} \
+            -var=config_bucket_name=${{ vars.CONFIG_BUCKET_NAME }} \
+            -var=config_file_path=${{ vars.CONFIG_FILE_PATH }} \
           "
 
           echo "🧾 Running Terraform Plan for environment: ${{ github.event.inputs.environment }}"

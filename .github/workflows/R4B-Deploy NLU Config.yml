@@ -36,8 +36,8 @@ jobs:
       # 2️⃣ Validate the CSV exists
       - name: Validate NLU CSV
         run: |
-          if [ ! -f "NLU-Configs/nlu-config.csv" ]; then
-            echo "❌ ERROR: NLU CSV not found at NLU-Configs/nlu-config.csv"
+          if [ ! -f "NLU-Configs/R4B-NLU-Config.csv" ]; then
+            echo "❌ ERROR: NLU CSV not found at NLU-Configs/R4B-NLU-Config.csv"
             exit 1
           fi
           echo "✅ nlu-config.csv found."

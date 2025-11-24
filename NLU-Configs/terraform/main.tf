@@ -15,9 +15,9 @@ provider "google" {
 resource "google_storage_bucket_object" "nlu_config" {
   name         = "R4B-NLU-Config.csv"
   bucket       = var.bucket_name
-  source       = var.config_path
+  source       = var.csv_path
   content_type = "text/csv"
-  detect_md5hash = filemd5(var.config_path)
+  detect_md5hash = filemd5(var.csv_path)
 }
 
 output "uploaded_file_name" {

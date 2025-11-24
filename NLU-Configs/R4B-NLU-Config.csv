@@ -274,7 +274,7 @@ S.No,AppTag,LOB,AuthReq,ImmediateTxf,ClarfierQuestion,NextAction
 273,change-vague,SHARED_MAIN_MENU_FWS,Y,N,In.order.to.get.you.to.the.right.place.can.you.tell.me.a.little.more.about.why.youre.calling.You.can.say.things.like.add.someone.to.auto.policy.or.change.billing.address.on.homeowners.policy,POLICY_CHANGE
 274,claims_adjuster-request,SHARED_MM_BW,N,N,NA,CLAIMS_ROADSIDE_ASST
 275,claims_adjuster-request,BW_PROD_BW,N,N,NA,BW_PROD_CLAIMS
-276,claims_adjuster-request,FOREMOST_AGENT_FOREMOSTN,N,NA,CLAIMS
+276,claims_adjuster-request,FOREMOST_AGENT_FOREMOSTN,N,N,NA,CLAIMS
 277,claims_adjuster-request,FARM_PL_FAS,N,N,NA,FOREMOST _CLAIMS
 278,claims_adjuster-request,SHARED_MM_FARMERSERVICE,N,N,NA,CLAIMS_ROADSIDE_ASST
 279,claims_adjuster-request,FARMER_SALES_FARMER_TRAINING,N,N,NA,CLAIMS_ROADSIDE_ASST

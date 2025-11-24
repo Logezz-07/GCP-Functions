@@ -1,0 +1,25 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.0.0"
+    }
+  }
+  backend "gcs" {}
+}
+
+provider "google" {
+  project = var.project_id
+}
+
+resource "google_storage_bucket_object" "nlu_config" {
+  name         = "R4B-NLU-Config.csv"
+  bucket       = var.bucket_name
+  source       = var.config_path
+  content_type = "text/csv"
+  detect_md5hash = filemd5(var.config_path)
+}
+
+output "uploaded_file_name" {
+  value = google_storage_bucket_object.nlu_config.name
+}

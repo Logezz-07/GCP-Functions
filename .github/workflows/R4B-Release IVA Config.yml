@@ -7,7 +7,7 @@ on:
       - QA
       - Prod
     paths:
-      - "Iva-Configs/**"
+      - "IVA-Configs/**"
 
 jobs:
   CodeCheck-AutoTag:
@@ -24,11 +24,11 @@ jobs:
       - name: IVA-Config-Check
         run: |
           echo "🔍 Validating IVA Config JSON (config.json)..."
-          if [ -f "Iva-Configs/config.json" ]; then
-            cat Iva-Configs/config.json | jq empty
+          if [ -f "IVA-Configs/config.json" ]; then
+            cat IVA-Configs/config.json | jq empty
             echo "✅ config.json validation passed!"
           else
-            echo "❌ config.json NOT FOUND at: Iva-Configs/config.json"
+            echo "❌ config.json NOT FOUND at: IVA-Configs/config.json"
             exit 1
           fi
 

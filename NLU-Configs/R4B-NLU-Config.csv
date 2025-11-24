@@ -114,7 +114,6 @@ S.No,AppTag,LOB,AuthReq,ImmediateTxf,ClarfierQuestion,NextAction
 113,alert-vague,21V,Y,N,NA,POLICY_CHANGE
 114,alert-vague,21_VANITY_FF_AUTO_SERVICE,Y,N,NA,POLICY_CHANGE
 115,alert-vague,21SV,Y,N,NA,POLICY_CHANGE
-116,alert-vague,21SM,Y,N,NA,POLICY_CHANGE
 117,alert-vague,SHARED_MAIN_MENU_FWS,Y,N,NA,POLICY_CHANGE
 118,application-get_help,SHARED_MM_BW,Y,N,In.order.to.get.you.to.the.right.place.can.you.tell.me.a.little.more.about.why.youre.calling.You.can.say.things.like.help.with.a.policy.application.or.help.with.getting.a.quote,POLICY_CHANGE
 119,application-get_help,BW_PROD_BW,Y,N,In.order.to.get.you.to.the.right.place.can.you.tell.me.a.little.more.about.why.youre.calling.You.can.say.things.like.help.with.a.policy.application.or.help.with.getting.a.quote,POLICY_QUESTION 

@@ -1,31 +1,28 @@
 import axios from "axios";
 import * as logger from "./logger.js";
 
-const TOKEN_API_URL = process.env.TOKEN_URL;
-const TOKEN_REFRESH_TIME = process.env.TOKEN_REFRESH_TIME;
+// load from terraform secret env
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-const SCOPE = process.env.SCOPE;
-const TIMEOUT_MS = Number(process.env.API_TIMEOUT_MS);
-let len = null;
-let nk =null;
+
+//storing it in memory for reuse
 let TOKEN = null;
 let TOKEN_EXPIRY_TIME = null;
 
-async function makeRequest({ sessionId, tag, url, method, headers = {}, data = null, params = null }) {
+async function makeRequest({ sessionId, tag, attempt, url, method, headers = {}, data = null, params = null, timeoutMs }) {
     let responsePayload = null;
     let status = null;
     let returnCode = "1";
 
-    for (let attempt = 1; attempt <= 2; attempt++) {
-        logger.logApiRequest({ sessionId, tag, attempt, url, method, headers, params, data });
+    for (let attemptCount = 1; attemptCount <= Number(attempt); attemptCount++) {
+        logger.logApiRequest({ sessionId, tag, attemptCount, url, method, headers, params, data });
         const startTime = Date.now();
 
         try {
-            const response = await axios({ url, method, headers, data, params, timeout: TIMEOUT_MS });
+            const response = await axios({ url, method, headers, data, params, timeout: Number(timeoutMs) });
             const executionTimeMs = Date.now() - startTime;
 
-            logger.logApiResponse({ sessionId, tag, attempt, status: response.status, executionTimeMs, response: response.data });
+            logger.logApiResponse({ sessionId, tag, attemptCount, status: response.status, executionTimeMs, response: response.data });
 
             status = response.status;
             responsePayload = response.data;
@@ -33,7 +30,7 @@ async function makeRequest({ sessionId, tag, url, method, headers = {}, data = n
 
             if (status === 200 || returnCode === "0") break; // success
         } catch (err) {
-            logger.logErrorResponse({ sessionId, tag, attempt, err });
+            logger.logErrorResponse({ sessionId, tag, attemptCount, err });
             returnCode = err.response?.data?.returnCode || "1";
             status = err.response?.status || null;
             responsePayload = err.response?.data || { message: err.message };
@@ -43,7 +40,14 @@ async function makeRequest({ sessionId, tag, url, method, headers = {}, data = n
     return { Status: status, ReturnCode: returnCode, ResponsePayload: responsePayload };
 }
 
-async function getValidToken({ sessionId, tag }) {
+async function getValidToken({ sessionId, tag, ivaConfig }) {
+
+    const tokenUrl = ivaConfig.TOKEN_URL;
+    const scope = ivaConfig.SCOPE;
+    const refreshTime = Number(ivaConfig.REFRESH_TIME_MIN);
+    const timeoutMs = Number(ivaConfig.TIME_OUT_MS);
+    const attempt = Number(ivaConfig.API_ATTEMPTS);
+
     const now = Date.now();
     let generateNew = false;
 
@@ -57,8 +61,8 @@ async function getValidToken({ sessionId, tag }) {
             generateNew = true;
         } else {
             const timeLeftMin = (expiryTimestamp - now) / 60000;
-            if (timeLeftMin > Number(TOKEN_REFRESH_TIME) || timeLeftMin < 0) {
-                logger.logConsole(sessionId, tag, `Time left ${timeLeftMin.toFixed(1)} min > ${TOKEN_REFRESH_TIME}. Generating new token...`);
+            if (timeLeftMin > Number(refreshTime) || timeLeftMin < 0) {
+                logger.logConsole(sessionId, tag, `Time left ${timeLeftMin.toFixed(1)} min > ${refreshTime}. Generating new token...`);
                 generateNew = true;
             } else {
                 logger.logConsole(sessionId, tag, `Using existing token. Time left: ${timeLeftMin.toFixed(1)} min`);
@@ -70,7 +74,7 @@ async function getValidToken({ sessionId, tag }) {
     if (generateNew) {
         const formData = new URLSearchParams();
         formData.append("client_id", CLIENT_ID);
-        formData.append("scope", SCOPE);
+        formData.append("scope", scope);
         formData.append("client_secret", CLIENT_SECRET);
         formData.append("grant_type", "client_credentials");
 
@@ -78,10 +82,12 @@ async function getValidToken({ sessionId, tag }) {
         const tokenResult = await makeRequest({
             sessionId,
             tag: `${tag}-token`,
-            url: TOKEN_API_URL,
+            attempt,
+            url: tokenUrl,
             method: "POST",
             headers,
             data: formData.toString(),
+            timeoutMs
         });
 
         if (!tokenResult.ResponsePayload?.access_token) {
@@ -96,14 +102,16 @@ async function getValidToken({ sessionId, tag }) {
     }
 }
 
-export async function getRequest({ sessionId, tag, url, headers = {}, params = null }) {
-    const token = await getValidToken({ sessionId, tag });
+
+export async function getRequest({ sessionId, tag, url, headers = {}, params = null, ivaConfig }) {
+    const token = await getValidToken({ sessionId, tag, ivaConfig });
     const reqHeaders = { ...headers, Authorization: `Bearer ${token}` };
-    return makeRequest({ sessionId, tag, url, method: "GET", headers: reqHeaders, params });
+    return makeRequest({ sessionId, tag, attempt: ivaConfig.API_ATTEMPTS, url, method: "GET", headers: reqHeaders, params, timeoutMs: ivaConfig.TIME_OUT_MS });
 }
 
-export async function postRequest({ sessionId, tag, url, headers = {}, data = null }) {
-    const token = await getValidToken({ sessionId, tag });
+export async function postRequest({ sessionId, tag, url, headers = {}, data = null, ivaConfig }) {
+    const token = await getValidToken({ sessionId, tag, ivaConfig });
     const reqHeaders = { ...headers, Authorization: `Bearer ${token}` };
-    return makeRequest({ sessionId, tag, url, method: "POST", headers: reqHeaders, data });
+    return makeRequest({ sessionId, tag, attempt: ivaConfig.API_ATTEMPTS, url, method: "POST", headers: reqHeaders, data, timeoutMs: ivaConfig.TIME_OUT_MS });
 }
+

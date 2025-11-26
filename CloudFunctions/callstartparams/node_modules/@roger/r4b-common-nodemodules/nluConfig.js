@@ -1,6 +1,6 @@
 import { Storage } from "@google-cloud/storage";
 import * as logger from "./logger.js";
-const csv = require("csvtojson");
+import csv from "csvtojson";
 
 const storage = new Storage();
 const BUCKET_NAME = process.env.GCS_BUCKET_NAME;

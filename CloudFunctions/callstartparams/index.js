@@ -1,11 +1,8 @@
-const functions = require("@google-cloud/functions-framework");
-const {
-  apiClient,
-  logger,
-  getIvaConfigs,
-  preloadNluConfig,
+import * as functions from "@google-cloud/functions-framework";
+import {
+  apiClient, logger, getIvaConfigs, preloadNluConfig,
   getNluConfigByKey
-} = require("@roger/r4b-common-nodemodules");
+} from "@roger/r4b-common-nodemodules";
 
 functions.http("helloHttp", async (req, res) => {
 

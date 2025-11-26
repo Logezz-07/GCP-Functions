@@ -28,7 +28,7 @@ export function logWebhookRequest(sessionId, tag, payload) {
     }));
 }
 
-export function logApiRequest({ sessionId, tag, attempt, url, method, headers, params, data = null }) {
+export function logApiRequest({ sessionId, tag, attemptCount, url, method, headers, params, data = null }) {
     const maskedHeaders = maskSensitiveData(headers);
     const maskedData = maskSensitiveData(data);
     const maskedParams = maskSensitiveData(params);
@@ -37,17 +37,17 @@ export function logApiRequest({ sessionId, tag, attempt, url, method, headers, p
         severity: "DEBUG",
         sessionId,
         tag,
-        details: JSON.stringify({ attempt, url, method, maskedHeaders, maskedParams, maskedData })
+        details: JSON.stringify({ attemptCount, url, method, maskedHeaders, maskedParams, maskedData })
     }));
 }
 
-export function logApiResponse({ sessionId, tag, attempt, status, executionTimeMs, response }) {
+export function logApiResponse({ sessionId, tag, attemptCount, status, executionTimeMs, response }) {
     console.log(JSON.stringify({
         event: "ApiResponse",
         severity: "DEBUG",
         sessionId,
         tag,
-        details: JSON.stringify({ attempt, status, executionTimeMs, response })
+        details: JSON.stringify({ attemptCount, status, executionTimeMs, response })
     }));
 }
 
@@ -61,7 +61,7 @@ export function logWebhookResponse(sessionId, tag, response) {
     }));
 }
 
-export function logErrorResponse({ sessionId, tag, attempt, err }) {
+export function logErrorResponse({ sessionId, tag, attemptCount, err }) {
     const isTimeout = err?.code === "ECONNABORTED";
     const errorDetails = isTimeout ? "Request timed out after 15 seconds" : (err?.message || String(err));
     const statusCode = err?.response?.status || null;
@@ -71,7 +71,7 @@ export function logErrorResponse({ sessionId, tag, attempt, err }) {
         severity: "ERROR",
         sessionId,
         tag,
-        details: JSON.stringify({ attempt, statusCode, errorDetails, stack: err?.stack || null })
+        details: JSON.stringify({ attemptCount, statusCode, errorDetails, stack: err?.stack || null })
     }));
 }
 

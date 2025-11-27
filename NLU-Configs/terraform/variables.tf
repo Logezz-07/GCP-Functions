@@ -8,7 +8,7 @@ variable "bucket_name" {
   type        = string
 }
 
-variable "config_path" {
+variable "csv_path" {
   description = "Relative path to IVA config file"
   type        = string
   default     = "../R4B-NLU-Config.csv"

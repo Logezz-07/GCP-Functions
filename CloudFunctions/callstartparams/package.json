@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "artifactregistry-login": "npx google-artifactregistry-auth --repo-config=./.npmrc --credential-config=./.npmrc",
     "start": "functions-framework --target=helloHttp"
   },
   "dependencies": {
     "@google-cloud/functions-framework": "^3.5.1",
     "@google-cloud/secret-manager": "^6.1.1",
-    "@roger/r4b-common-nodemodules": "^1.1.7",
+    "@roger/r4b-common-nodemodules": "^1.2.4",
     "axios": "^1.6.7",
     "dotenv": "^17.2.3"
   },

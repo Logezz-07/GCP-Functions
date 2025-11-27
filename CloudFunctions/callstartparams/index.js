@@ -1,147 +1,117 @@
-const functions = require("@google-cloud/functions-framework");
-const apiRequest = require('@roger/r4b-common-nodemodules').apiClient;
-const logger = require('@roger/r4b-common-nodemodules').logger;
-
+import * as functions from "@google-cloud/functions-framework";
+import {
+  apiClient, logger, getIvaConfigs, preloadNluConfig,
+  getNluConfigByKey
+} from "@roger/r4b-common-nodemodules";
 
 functions.http("helloHttp", async (req, res) => {
 
-  const sessionId = req.body.sessionInfo?.session.split("/sessions/").pop() || "unknown-session";
+
+  const params = req.body.sessionInfo?.parameters || {};
   const tag = req.body.fulfillmentInfo?.tag || "Unknown-Tag";
+  const sessionId = params.sessionId || "unknown-session";
+
   logger.logWebhookDetails(sessionId, tag);
-  const sessionParamsFromCX = req.body.sessionInfo?.parameters || {};
-  let sessionParams = {};
-  let Status = 1;
-  let ResponsePayload = {}
+  if (tag === "getCallStartParams") {
+    let Status = 500;
+    let ResponsePayload = {};
+    let sessionParams = {};
+    try {
+      const Dnis = params.Dnis || "NA";
+      const Ani = params.Ani || "NA";
+      logger.logWebhookRequest(sessionId, tag, { Dnis, Ani });
 
-  try {
-    if (tag === "callStartApi") {
-      const dnis = sessionParamsFromCX?.Dnis || "NA";
-      logger.logWebhookRequest(sessionId, tag, { Dnis: dnis });
-      const apiUrl = `https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params`;
+      // Load IVA Config
+      const ivaResultConfig = await getIvaConfigs({ sessionId, tag });
+      const ivaConfig = ivaResultConfig.ResponsePayload;
+
+      const apiUrl = ivaConfig[tag].replace("${Dnis}", Dnis).replace("${Ani}", Ani);
+      const time = new Date().toISOString()
       const headers = {
-        cdr: "112432245667775757",
-        clientSystem: "IVR",
-        brand: "FIDO",
-        transactionId: "454545323",
-        transactionDateTime: "2024-11-07T10:23:00",
-        ivrSubscriptionKey: "f9422c1450c747aaaca69253a489f3c6",
+        cdr: sessionId,
+        clientSystem: ivaConfig.CLIENT_SYSTEM,
+        brand: ivaConfig.BRAND,
+        transactionId: `${sessionId}-${time}`,
+        transactionDateTime: time,
+        ivrSubscriptionKey: ivaConfig.IVR_SUBSCRIPTION_KEY
       };
 
-      const apiResult = await apiRequest.getRequest({ sessionId, tag, url: apiUrl, headers });
-      Status = apiResult.Status;
-      ResponsePayload = apiResult.ResponsePayload;
-
-      if (Status === 200 && apiResult.ReturnCode === "0") {
-        const dnisParams = ResponsePayload.dnisParams || {};
-        const aniParams = ResponsePayload.aniParams || {};
-        sessionParams = {
-          SearchBusinessContact: dnisParams.icmSearch?.searchBusinessContact || "NA",
-          HomeContact: dnisParams.icmSearch?.searchHomeContact || "NA",
-          MobileContact: dnisParams.icmSearch?.searchMobileContact || "NA",
-          aniConfirm: dnisParams.aniConfirm || "NA",
-          aniLookup: dnisParams?.aniLookup || "NA",
-          dnisLang: dnisParams.language?.offerLanguageMenu || "NA",
-          identifyAccount: dnisParams.identifyAccount || "NA",
-          npaLanguage: aniParams.npaLanguage || "NA",
-          offerlanguageMenu: dnisParams.language?.offerLanguageMenu || "NA",
-          predctiveEnd: dnisParams.predictiveInd || "NA",
-          validAni: aniParams.validANI || "NA",
-          returnCode: "0",
-        };
-      } else {
-        sessionParams = {
-          returnCode: apiResult.ReturnCode || "1",
-          response: ResponsePayload,
-        };
+      // Parallel Tasks — API Call + NLU Preload
+      const [apiSettle, nluSettle] = await Promise.allSettled([
+        apiClient.getRequest({
+          sessionId, tag, url: apiUrl, headers, ivaConfig
+        }),
+        preloadNluConfig({ sessionId, tag })
+      ]);
+      if (nluSettle.status === "rejected") {
+        logger.logConsole(sessionId, tag, "NLU preload failed (continuing)");
       }
-    }
-    else if (tag === "AccountVerification") {
-      const accountNumber = sessionParamsFromCX?.accountNumber || "";
-      logger.logWebhookRequest(sessionId, tag, { accountNumber });
-      if (/^\d{6}$/.test(accountNumber)) {
-        sessionParams = {
-          AccountStatus: "Verified",
-          VerificationMessage: `Account ${accountNumber} has been verified successfully.`,
-          returnCode: "0",
-        };
+      if (apiSettle.status === "fulfilled") {
+        const apiResult = apiSettle.value;
+        Status = apiResult.Status;
+        ResponsePayload = apiResult.ResponsePayload;
       } else {
-        sessionParams = {
-          AccountStatus: "Invalid",
-          VerificationMessage: "Invalid account number format.",
-          returnCode: "1",
-        };
+        logger.logConsole(sessionId, tag, "API request failed ");
       }
-    }
-    else if (tag === "AniIdentification") {
-      console.log("hi");
-
-      const ani = sessionParamsFromCX?.Ani || "NA";
-      logger.logWebhookRequest(sessionId, tag, { Ani: ani });
-
-      const apiUrl = "https://dev1-cct.rogers.com/dev01-identification/ivr-identification-ms/idc/data";
-      const headers = {
-        cdr: "112432245667775757",
-        clientSystem: "IVR",
-        brand: "FIDO",
-        transactionId: "4545453232",
-        transactionDateTime: "2024-11-07T10:23:00",
-        ivrSubscriptionKey: "f9422c1450c747aaaca69253a489f3c6",
-      };
-
-      const params = {
-        brand: "FIDO",
-        searchHomeContact: "Y",
-        searchMobileContact: "Y",
-        searchBusinessContact: "Y",
-        phoneNumber: ani,
-        predictiveInd: "Y",
-      };
-      let config = null;
-      const apiResult = await apiRequest.getRequest({ sessionId, tag, url: apiUrl, headers, params });
-      Status = apiResult.Status;
-      ResponsePayload = apiResult.ResponsePayload;
-      if (Status === 200 && ResponsePayload.identifiedCustomer) {
-        const accountList = [];
-        ResponsePayload.idcData?.primaryContacts?.forEach((contact) => {
-          contact.customers?.forEach((customer) => {
-            customer.accounts?.forEach((account) => {
-              if (account.accountNumber) {
-                accountList.push(account.accountNumber.slice(-4));
-              }
-            });
-          });
-        });
+      if (Status === 200) {
+        const d = ResponsePayload.dnisParams || {};
+        const a = ResponsePayload.aniParams || {};
+        //parse and set session params
         sessionParams = {
-          returnCode: "0",
-          identifiedCustomer: ResponsePayload.identifiedCustomer,
-          AccountList: accountList,
+          SearchBusinessContact: d.icmSearch?.searchBusinessContact || "NA",
+          HomeContact: d.icmSearch?.searchHomeContact || "NA",
+          MobileContact: d.icmSearch?.searchMobileContact || "NA",
+          aniConfirm: d.aniConfirm || "NA",
+          aniLookup: d?.aniLookup || "NA",
+          dnisLang: d.language?.offerLanguageMenu || "NA",
+          identifyAccount: d.identifyAccount || "NA",
+          npaLanguage: a.npaLanguage || "NA",
+          offerlanguageMenu: d.language?.offerLanguageMenu || "NA",
+          predctiveEnd: d.predictiveInd || "NA",
+          validAni: a.validANI || "NA",
+          returnCode: "0"
         };
-
       } else {
         sessionParams = {
           returnCode: "1",
-          response: ResponsePayload,
+          response: ResponsePayload
         };
       }
+      // Spread IVA config values + session params
+      const finalParams = {
+        ...ivaConfig,
+        ...sessionParams
+      };
+      const webhookResponse = {
+        sessionInfo: { parameters: finalParams }
+      };
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.status(200).json(webhookResponse);
+    } catch (err) {
+      logger.logErrorResponse({ sessionId, tag, attempt: 1, err });
+      const webhookResponse = {
+        sessionInfo: {
+          parameters: {
+            returnCode: "1",
+            errorDetails: err.message || String(err)
+          }
+        }
+      };
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.setHeader("Content-Type", "application/json");
+      res.status(200).send(webhookResponse);
     }
-
-    const webhookResponse = { sessionInfo: { parameters: { ...sessionParams } } };
-    logger.logWebhookResponse(sessionId, tag, webhookResponse);
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).send(webhookResponse);
-  } catch (err) {
-    logger.logErrorResponse({ sessionId, tag, attempt: 1, err });
-
-    const returnCode = "1";
-    const errorDetails =
-      err.code === "ECONNABORTED"
-        ? "Request timed out after 15 seconds"
-        : err.message || String(err);
-
+  }
+  else {
+    logger.logConsole(sessionId, tag, "Invalid tag for this function");
     const webhookResponse = {
-      sessionInfo: { parameters: { returnCode, errorDetails } },
+      sessionInfo: {
+        parameters: {
+          returnCode: "1",
+          errorDetails: "Invalid tag for this function"
+        }
+      }
     };
-
     logger.logWebhookResponse(sessionId, tag, webhookResponse);
     res.setHeader("Content-Type", "application/json");
     res.status(200).send(webhookResponse);

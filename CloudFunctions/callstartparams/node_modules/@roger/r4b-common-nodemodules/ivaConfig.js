@@ -1,7 +1,8 @@
 import { Storage } from "@google-cloud/storage";
 import * as logger from "./logger.js";
+import fallbackConfig from "./config.json" with { type: "json" };
 
-const fallbackConfig = require("./config.json");
+
 const storage = new Storage();
 const BUCKET_NAME = process.env.GCS_BUCKET_NAME;
 const CONFIG_PATH = process.env.GCS_CONFIG_PATH;

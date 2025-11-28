@@ -30,6 +30,7 @@ async function makeRequest({ sessionId, tag, attempt, url, method, headers = {},
 
             if (status === 200 || returnCode === "0") break; // success
         } catch (err) {
+            
             logger.logErrorResponse({ sessionId, tag, attemptCount, err });
             returnCode = err.response?.data?.returnCode || "1";
             status = err.response?.status || null;

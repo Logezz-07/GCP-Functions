@@ -65,13 +65,14 @@ export function logErrorResponse({ sessionId, tag, attemptCount, err }) {
     const isTimeout = err?.code === "ECONNABORTED";
     const errorDetails = isTimeout ? "Request timed out after 15 seconds" : (err?.message || String(err));
     const statusCode = err?.response?.status || null;
+    const responsePayload = err?.response?.data || null;
 
     console.error(JSON.stringify({
         event: "ErrorResponse",
         severity: "ERROR",
         sessionId,
         tag,
-        details: JSON.stringify({ attemptCount, statusCode, errorDetails, stack: err?.stack || null })
+        details: JSON.stringify({ attemptCount, statusCode, responsePayload, errorDetails, stack: err?.stack || null })
     }));
 }
 

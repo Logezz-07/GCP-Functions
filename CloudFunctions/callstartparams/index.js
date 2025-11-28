@@ -5,9 +5,7 @@ import {
 } from "@roger/r4b-common-nodemodules";
 
 
-
 functions.http("helloHttp", async (req, res) => {
-
 
   const params = req.body.sessionInfo?.parameters || {};
   const tag = req.body.fulfillmentInfo?.tag || "Unknown-Tag";
@@ -61,7 +59,7 @@ functions.http("helloHttp", async (req, res) => {
           brand: parseJson(d.brand),
           dnisLanguage: parseJson(d.language?.dnisLanguage),
           aniLookup: parseJson(d.aniLookup),
-          validANI: parseJson(a.validANI),
+          validAni: parseJson(a.validANI),
           searchHomeContact: parseJson(d.icmSearch?.searchHomeContact),
           searchMobileContact: parseJson(d.icmSearch?.searchMobileContact),
           searchBusinessContact: parseJson(d.icmSearch?.searchBusinessContact),
@@ -112,12 +110,12 @@ functions.http("helloHttp", async (req, res) => {
       logger.logWebhookResponse(sessionId, tag, webhookResponse);
       res.status(200).json(webhookResponse);
     } catch (err) {
+
       logger.logErrorResponse({ sessionId, tag, attempt: 1, err });
       const webhookResponse = {
         sessionInfo: {
           parameters: {
             returnCode: "1",
-            errorDetails: err.message || String(err)
           }
         }
       };

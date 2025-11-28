@@ -1,8 +1,10 @@
 import * as functions from "@google-cloud/functions-framework";
 import {
   apiClient, logger, getIvaConfigs, preloadNluConfig,
-  getNluConfigByKey
+  getNluConfigByKey, parseJson
 } from "@roger/r4b-common-nodemodules";
+
+
 
 functions.http("helloHttp", async (req, res) => {
 
@@ -17,23 +19,21 @@ functions.http("helloHttp", async (req, res) => {
     let ResponsePayload = {};
     let sessionParams = {};
     try {
-      const Dnis = params.Dnis || "NA";
-      const Ani = params.Ani || "NA";
-      logger.logWebhookRequest(sessionId, tag, { Dnis, Ani });
+      const dnis = params.dnis || "NA";
+      const ani = params.ani || "NA";
+      const env = params.mwInstance || "qa4";
+      logger.logWebhookRequest(sessionId, tag, { dnis, ani, env });
 
       // Load IVA Config
       const ivaResultConfig = await getIvaConfigs({ sessionId, tag });
       const ivaConfig = ivaResultConfig.ResponsePayload;
 
-      const apiUrl = ivaConfig[tag].replace("${Dnis}", Dnis).replace("${Ani}", Ani);
+      const apiUrl = ivaConfig[tag + `-${env}`].replace("${dnis}", dnis).replace("${ani}", ani);
       const time = new Date().toISOString()
       const headers = {
         cdr: sessionId,
-        clientSystem: ivaConfig.CLIENT_SYSTEM,
-        brand: ivaConfig.BRAND,
-        transactionId: `${sessionId}-${time}`,
+        transactionId: `${sessionId}-${ani}`,
         transactionDateTime: time,
-        ivrSubscriptionKey: ivaConfig.IVR_SUBSCRIPTION_KEY
       };
 
       // Parallel Tasks — API Call + NLU Preload
@@ -56,25 +56,49 @@ functions.http("helloHttp", async (req, res) => {
       if (Status === 200) {
         const d = ResponsePayload.dnisParams || {};
         const a = ResponsePayload.aniParams || {};
-        //parse and set session params
+
         sessionParams = {
-          SearchBusinessContact: d.icmSearch?.searchBusinessContact || "NA",
-          HomeContact: d.icmSearch?.searchHomeContact || "NA",
-          MobileContact: d.icmSearch?.searchMobileContact || "NA",
-          aniConfirm: d.aniConfirm || "NA",
-          aniLookup: d?.aniLookup || "NA",
-          dnisLang: d.language?.offerLanguageMenu || "NA",
-          identifyAccount: d.identifyAccount || "NA",
-          npaLanguage: a.npaLanguage || "NA",
-          offerlanguageMenu: d.language?.offerLanguageMenu || "NA",
-          predctiveEnd: d.predictiveInd || "NA",
-          validAni: a.validANI || "NA",
+          brand: parseJson(d.brand),
+          dnisLanguage: parseJson(d.language?.dnisLanguage),
+          aniLookup: parseJson(d.aniLookup),
+          validANI: parseJson(a.validANI),
+          searchHomeContact: parseJson(d.icmSearch?.searchHomeContact),
+          searchMobileContact: parseJson(d.icmSearch?.searchMobileContact),
+          searchBusinessContact: parseJson(d.icmSearch?.searchBusinessContact),
+          npaLanguage: parseJson(a.npaLanguage),
+          greetingScriptEn: parseJson(d.greetingScript?.scriptContent?.en),
+          greetingScriptFr: parseJson(d.greetingScript?.scriptContent?.fr),
+          disclaimerScriptEn: parseJson(d.disclaimerScript?.scriptContent?.en),
+          disclaimerScriptFr: parseJson(d.disclaimerScript?.scriptContent?.fr),
+          offerLanguageMenu: parseJson(d.language?.offerLanguageMenu),
+          applicationId: parseJson(d.applicationId),
+          aniConfirm: parseJson(d.aniConfirm),
+          identifyAccount: parseJson(d.identifyAccount),
+          involuntaryRedirect: parseJson(d.involuntaryRedirect),
+          voluntaryRedirect: parseJson(d.voluntaryRedirect),
           returnCode: "0"
         };
       } else {
         sessionParams = {
           returnCode: "1",
-          response: ResponsePayload
+          brand: "NA",
+          dnisLanguage: "NA",
+          aniLookup: "NA",
+          validANI: "NA",
+          searchHomeContact: "NA",
+          searchMobileContact: "NA",
+          searchBusinessContact: "NA",
+          npaLanguage: "NA",
+          greetingScriptEn: "NA",
+          greetingScriptFr: "NA",
+          disclaimerScriptEn: "NA",
+          disclaimerScriptFr: "NA",
+          offerLanguageMenu: "NA",
+          applicationId: "NA",
+          aniConfirm: "NA",
+          identifyAccount: "NA",
+          involuntaryRedirect: "NA",
+          voluntaryRedirect: "NA",
         };
       }
       // Spread IVA config values + session params

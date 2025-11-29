@@ -1,6 +1,6 @@
 import { Storage } from "@google-cloud/storage";
 import * as logger from "./logger.js";
-import fallbackConfig from "./config.json" with { type: "json" };
+import fallbackConfig from "./fallbackConfigs/config.json" with { type: "json" };
 
 
 const storage = new Storage();
@@ -51,6 +51,9 @@ async function getIvaConfigs({ sessionId, tag }) {
         }
     } catch (err) {
         logger.logErrorResponse({ sessionId, tag, attemptCount: 1, err });
+        cachedIvaConfig = fallbackConfig;
+        ivaConfigEtag = "fallback-local";
+        logger.logConsole(sessionId, tag, "Using fallback IVA config");
         status = 500;
         returnCode = "1";
         responsePayload = fallbackConfig;

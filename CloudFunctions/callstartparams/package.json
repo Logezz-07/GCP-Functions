@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@google-cloud/functions-framework": "^3.5.1",
-    "@roger/r4b-common-nodemodules": "^1.2.8"
+    "@roger/r4b-common-nodemodules": "^1.2.9"
   },
   "keywords": [],
   "author": "",

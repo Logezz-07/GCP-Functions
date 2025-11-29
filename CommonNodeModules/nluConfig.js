@@ -2,11 +2,16 @@ import { Storage } from "@google-cloud/storage";
 import * as logger from "./logger.js";
 import csv from "csvtojson";
 import { readFile } from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const storage = new Storage();
 const BUCKET_NAME = process.env.GCS_BUCKET_NAME;
 const NLU_CONFIG_PATH = process.env.GCS_NLU_CONFIG_PATH;
 const NLU_CONFIG_KEY = process.env.GCS_NLU_CONFIG_KEY;
+
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+const FALLBACK_NLU_PATH = path.resolve(dirname, "./fallbackConfigs/r4b-nlu-config.csv");
 
 let cachedNluConfig = null;
 let nluConfigEtag = null;
@@ -31,9 +36,7 @@ async function preloadNluConfig({ sessionId, tag }) {
 
     logger.logConsole(sessionId, tag, `NLU file downloaded in ${downloadTime} ms`);
 
-    const csvText = contents.toString();
-    const jsonArray = await csv().fromString(csvText);
-
+    const jsonArray = await csv().fromString(contents.toString());
     cachedNluConfig = jsonArray;
     nluConfigEtag = metadata.etag;
 
@@ -44,13 +47,19 @@ async function preloadNluConfig({ sessionId, tag }) {
     logger.logConsole(sessionId, tag, "Using fallback NLU config");
 
     try {
-      const fallbackCSV = await readFile("./fallbackConfigs/r4b-nlu-config.csv", "utf-8");
+      const fallbackCSV = await readFile(FALLBACK_NLU_PATH, "utf-8");
       cachedNluConfig = await csv().fromString(fallbackCSV);
       nluConfigEtag = "fallback-local";
-      logger.logConsole(sessionId, tag, `Fallback NLU CSV loaded (${cachedNluConfig.length} rows)`);
+
+      logger.logConsole(
+        sessionId,
+        tag,
+        `Fallback NLU CSV loaded (${cachedNluConfig.length} rows)`
+      );
     } catch (fallbackErr) {
       logger.logErrorResponse({ sessionId, tag, attemptCount: 2, err: fallbackErr });
       logger.logConsole(sessionId, tag, "Fallback NLU config also failed");
+      cachedNluConfig = []; // safe empty array
     }
   }
 }
@@ -61,10 +70,9 @@ async function getNluConfigByKey({ sessionId, tag, key }) {
     await preloadNluConfig({ sessionId, tag });
   }
 
-  const filtered = cachedNluConfig?.filter(row => row[NLU_CONFIG_KEY] == key) || [];
+  const filtered = cachedNluConfig.filter(row => row[NLU_CONFIG_KEY] === key);
 
   if (filtered.length === 0) {
-    logger.logConsole(sessionId, tag, `NLU key "${key}" not found`);
     return {
       Status: 404,
       ReturnCode: "1",

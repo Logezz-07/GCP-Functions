@@ -1,0 +1,21 @@
+{
+  "returnCode": "1",
+  "brand": "FallbackBrand",
+  "dnisLanguage": "NA",
+  "aniLookup": "NA",
+  "validANI": "NA",
+  "searchHomeContact": "NA",
+  "searchMobileContact": "NA",
+  "searchBusinessContact": "NA",
+  "npaLanguage": "NA",
+  "greetingScriptEn": "NA",
+  "greetingScriptFr": "NA",
+  "disclaimerScriptEn": "NA",
+  "disclaimerScriptFr": "NA",
+  "offerLanguageMenu": "NA",
+  "applicationId": "NA",
+  "aniConfirm": "NA",
+  "identifyAccount": "NA",
+  "involuntaryRedirect": "NA",
+  "voluntaryRedirect": "NA"
+}

@@ -1,7 +1,7 @@
 import * as functions from "@google-cloud/functions-framework";
 import {
   apiClient, logger, getIvaConfigs, preloadNluConfig,
-  getNluConfigByKey, parseJson
+  getNluConfigByKey, parseJson, fallbackApiData
 } from "@roger/r4b-common-nodemodules";
 
 
@@ -25,8 +25,8 @@ functions.http("helloHttp", async (req, res) => {
       // Load IVA Config
       const ivaResultConfig = await getIvaConfigs({ sessionId, tag });
       const ivaConfig = ivaResultConfig.ResponsePayload;
-
       const apiUrl = ivaConfig[tag + `-${env}`].replace("${dnis}", dnis).replace("${ani}", ani);
+
       const time = new Date().toISOString()
       const headers = {
         cdr: sessionId,
@@ -41,9 +41,6 @@ functions.http("helloHttp", async (req, res) => {
         }),
         preloadNluConfig({ sessionId, tag })
       ]);
-      if (nluSettle.status === "rejected") {
-        logger.logConsole(sessionId, tag, "NLU preload failed (continuing)");
-      }
       if (apiSettle.status === "fulfilled") {
         const apiResult = apiSettle.value;
         Status = apiResult.Status;
@@ -79,24 +76,7 @@ functions.http("helloHttp", async (req, res) => {
       } else {
         sessionParams = {
           returnCode: "1",
-          brand: "NA",
-          dnisLanguage: "NA",
-          aniLookup: "NA",
-          validANI: "NA",
-          searchHomeContact: "NA",
-          searchMobileContact: "NA",
-          searchBusinessContact: "NA",
-          npaLanguage: "NA",
-          greetingScriptEn: "NA",
-          greetingScriptFr: "NA",
-          disclaimerScriptEn: "NA",
-          disclaimerScriptFr: "NA",
-          offerLanguageMenu: "NA",
-          applicationId: "NA",
-          aniConfirm: "NA",
-          identifyAccount: "NA",
-          involuntaryRedirect: "NA",
-          voluntaryRedirect: "NA",
+          ...fallbackApiData
         };
       }
       // Spread IVA config values + session params
@@ -105,17 +85,19 @@ functions.http("helloHttp", async (req, res) => {
         ...sessionParams
       };
       const webhookResponse = {
-        sessionInfo: { parameters: finalParams }
+        sessionInfo: {
+          parameters: finalParams
+        }
       };
       logger.logWebhookResponse(sessionId, tag, webhookResponse);
       res.status(200).json(webhookResponse);
     } catch (err) {
-
       logger.logErrorResponse({ sessionId, tag, attempt: 1, err });
       const webhookResponse = {
         sessionInfo: {
           parameters: {
             returnCode: "1",
+            ...fallbackApiData
           }
         }
       };

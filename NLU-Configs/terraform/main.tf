@@ -13,7 +13,7 @@ provider "google" {
 }
 
 resource "google_storage_bucket_object" "nlu_config" {
-  name         = "R4B-NLU-Config.csv"
+  name         = "r4b-nlu-config.csv"
   bucket       = var.bucket_name
   source       = var.csv_path
   content_type = "text/csv"

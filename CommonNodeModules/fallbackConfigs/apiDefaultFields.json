@@ -1,55 +1,20 @@
 {
-  "description": "Marketing Driven R4B - Lucrative",
   "brand": "ROGERS",
-  "applicationId": "AR",
   "dnisLanguage": "en-US",
-  "offerLanguageMenu": true,
   "aniLookup": true,
+  "validAni": true,
+  "searchHomeContact": false,
+  "searchMobileContact": false,
+  "searchBusinessContact": true,
+  "npaLanguage": "en-US",
+  "greetingScriptEn": "Welcome to Rogers for Business!",
+  "greetingScriptFr": "Bienvenue chez Rogers pour les Entreprises!",
+  "disclaimerScriptEn": "This call may be recorded for quality and training purposes",
+  "disclaimerScriptFr": "Cet appel pourra être enregistré à des fins de qualité et de formation",
+  "offerLanguageMenu": true,
+  "applicationId": "AR",
   "aniConfirm": false,
-  "aniPredictiveInd": true,
-  "itnPredictiveInd": true,
   "identifyAccount": true,
-  "idType": "phone",
-  "predictiveInd": true,
-  "greetingScript": {
-    "scriptId": "GRT_3501",
-    "scriptContent": {
-      "en": "Welcome to Rogers for Business!",
-      "fr": "Bienvenue chez Rogers pour les Entreprises!"
-    }
-  },
-  "voluntaryRedirect": "ALL",
-  "involuntaryRedirectInd": true,
-  "intent": "AccountChanges",
-  "callHistory": true,
-  "disclaimerScript": {
-    "scriptId": "DSC_3501",
-    "scriptContent": {
-      "en": "This call may be recorded for quality and training purposes",
-      "fr": "Cet appel pourra être enregistré à des fins de qualité et de formation"
-    }
-  },
-  "routingParams": {
-    "routingId": "R_1923",
-    "systemOverride": "AFFINITY_BSD_SERV_WIR"
-  },
-  "icmSearchIndicators": {
-    "searchHomeContact": false,
-    "searchBusinessContact": true,
-    "searchMobileContact": false
-  },
-  "aniDetails": {
-    "validANI": true,
-    "formattedANI": "4167289983",
-    "npaLanguage": "en-US",
-    "timeZone": "America/New_York"
-  },
-  "appConfig": {
-    "globalLanguageMenuInd": "true",
-    "repromptAllowed": "false",
-    "accountChangesVQ": "AcctChangesDRVQ",
-    "competitorFlag": "true",
-    "ccCollectedDays": "11"
-  },
-  "dataSource": "DataCache"
+  "involuntaryRedirect": true,
+  "voluntaryRedirect": "ALL"
 }

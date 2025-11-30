@@ -10,5 +10,11 @@
     "getCallStartParams-qa2": "https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params?ani=${ani}",
     "getCallStartParams-qa3": "https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params?ani=${ani}",
     "getCallStartParams-qa4": "https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params?ani=${ani}",
-    "getCallStartParams-prod": "https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params?ani=${ani}"
+    "getCallStartParams-prod": "https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params?ani=${ani}",
+    
+    "getAniIdentification-qa1": "https://ivr-internal.npe.apim.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
+    "getAniIdentification-qa2": "https://ivr-internal.npe.apim.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
+    "getAniIdentification-qa3": "https://ivr-internal.npe.apim.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
+    "getAniIdentification-qa4": "https://ivr-internal.npe.apim.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
+    "getAniIdentification-prod": "https://ivr-internal.npe.apim.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}"
 }

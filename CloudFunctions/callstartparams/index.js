@@ -106,6 +106,97 @@ functions.http("helloHttp", async (req, res) => {
       res.status(200).send(webhookResponse);
     }
   }
+
+  else if (tag === "getAniIdentification") {
+    let Status = 500;
+    let ResponsePayload = {};
+    let sessionParams = {};
+
+    try {
+      const env = params.mwInstance || "qa4";
+      const ani = params.ani || "NA";
+      const accountNumber = params.accountNumber || "NA"
+      const idType = params.idType;
+      const idNumber = params.idType === "phone" ? ani : accountNumber;
+      const searchHomeContact = params.searchHomeContact || false;
+      const searchMobileContact = params.searchMobileContact || false;
+      const searchBusinessContact = params.searchBusinessContact || false;
+      const searchBrand = params.brand || "NA";
+
+      logger.logWebhookRequest(sessionId, tag, {
+        ani, env, accountNumber, idType, idNumber, searchHomeContact, searchMobileContact, searchBusinessContact, searchBrand
+      });
+      const headers = {
+        cdr: sessionId,
+        transactionId: `${sessionId}-${ani}`,
+        transactionDateTime: new Date().toISOString()
+      };
+      const ivaConfig = {
+        timeOutMs: params.timeOutMs,
+        apiAttempts: params.apiAttempts,
+        tokenUrl: params.tokenUrl,
+        scope: params.scope,
+        tokenRefreshTimeMin: params.tokenRefreshTimeMin
+      }
+      let apiUrl = params[`${tag}-${env}`]
+        .replace("${idType}", idType)
+        .replace("${idNumber}", idNumber)
+        .replace("${searchHomeContact}", searchHomeContact)
+        .replace("${searchMobileContact}", searchMobileContact)
+        .replace("${searchBusinessContact}", searchBusinessContact)
+        .replace("${searchBrand}", searchBrand);
+      const apiResult = await apiClient.getRequest({ sessionId, tag, url: apiUrl, headers, ivaConfig });
+      Status = apiResult.Status;
+      ResponsePayload = apiResult.ResponsePayload;
+
+      if (Status === 200) {
+        const accounts = ResponsePayload.billingAccounts || [];
+        const accountNumberList = accounts.map(a => parseJson(a.accountNumber));
+        const accountSessionList = accounts.map(a => parseJson(a.sessionId));
+
+        sessionParams = {
+          dirtyAni: parseJson(ResponsePayload.dirtyANI),
+          numberOfBillingAccounts: parseJson(ResponsePayload.numberOfBillingAccounts) === "NA" ? 0 : parseJson(ResponsePayload.numberOfBillingAccounts),
+          uniqueBillingLanguage: parseJson(ResponsePayload.uniqueBillingLanguage),
+          billingLanguage: parseJson(accounts[0]?.billingLanguage),
+          accountNumberList,
+          accountSessionList,
+          returnCode: "0"
+        };
+      } else {
+        sessionParams = {
+          returnCode: "1",
+        };
+      }
+
+      const webhookResponse = {
+        sessionInfo: {
+          parameters: sessionParams
+        }
+      };
+
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.status(200).json(webhookResponse);
+
+    } catch (err) {
+      logger.logErrorResponse({ sessionId, tag, attempt: 1, err });
+
+      const webhookResponse = {
+        sessionInfo: {
+          parameters: {
+            returnCode: "1",
+          }
+        }
+      };
+
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.setHeader("Content-Type", "application/json");
+      res.status(200).send(webhookResponse);
+    }
+  }
+
+
+
   else {
     logger.logConsole(sessionId, tag, "Invalid tag for this function");
     const webhookResponse = {

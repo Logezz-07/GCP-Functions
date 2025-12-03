@@ -22,7 +22,7 @@ on:
         required: true
 
 jobs:
-  restore-agent:
+  Restore-agent:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
 
@@ -32,14 +32,26 @@ jobs:
       AGENT_DISPLAY_NAME: ${{ github.event.inputs.agent_display_name }}
 
     steps:
+      - name: Validate Git Tag
+        run: |
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+            TAG="${{ github.event.inputs.git_tag }}"
+            EXPECTED_PREFIX="GDF-${ENVIRONMENT}-v"
+
+          if echo "$TAG" | grep -Eq "^${EXPECTED_PREFIX}[0-9]+$"; then
+            echo "✔️ The provided deployment tag - '$TAG' aligns with the selected $ENVIRONMENT environment."
+          else
+            echo "❌ ERROR: The tag '$TAG' does not match the expected naming convention for the '$ENVIRONMENT' environment."
+             exit 1
+          fi
       # Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.git_tag }}
 
-      # Validate Agent 
-      - name: Validate Agent 
+      # Validate Agent
+      - name: Validate Agent
         run: |
           echo "🔍 Checking: ConversationalAgents/${AGENT_DISPLAY_NAME}"
           if [ ! -d "ConversationalAgents/${AGENT_DISPLAY_NAME}" ]; then

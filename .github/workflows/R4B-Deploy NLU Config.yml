@@ -22,11 +22,24 @@ on:
         required: true
 
 jobs:
-  deploy-nlu-config:
+  Deploy-NLU-Config:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
 
     steps:
+      # Validate Git Tag
+      - name: Validate Git Tag
+        run: |
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+            TAG="${{ github.event.inputs.git_tag }}"
+            EXPECTED_PREFIX="NLU-Config-${ENVIRONMENT}-v"
+
+          if echo "$TAG" | grep -Eq "^${EXPECTED_PREFIX}[0-9]+$"; then
+            echo "✔️ The provided deployment tag - '$TAG' aligns with the selected $ENVIRONMENT environment."
+          else
+            echo "❌ ERROR: The tag '$TAG' does not match the expected naming convention for the '$ENVIRONMENT' environment."
+             exit 1
+          fi
       # 1️⃣ Checkout the selected tag
       - name: Checkout repository
         uses: actions/checkout@v4

@@ -1,12 +1,12 @@
 import * as functions from "@google-cloud/functions-framework";
 import {
-  apiClient, logger, getIvaConfigs, preloadNluConfig,
-  getNluConfigByKey, parseJson, fallbackApiData
+    apiClient, logger, getIvaConfigs, preloadNluConfig,
+    getNluConfigByKey, parseJson, fallbackApiData
 } from "@roger/r4b-common-nodemodules";
 
 functions.http("helloHttp", async (req, res) => {
 
-    console.log("Request Body:", JSON.stringify(req.body, null, 2));
+
     const sessionId = req.body.sessionInfo?.session?.split("/sessions/").pop() || "unknown-session";
     const tag = req.body.fulfillmentInfo?.tag || "PostDataTransfer";
     logger.logWebhookDetails(sessionId, tag);

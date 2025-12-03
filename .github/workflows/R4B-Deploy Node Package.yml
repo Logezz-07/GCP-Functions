@@ -16,11 +16,24 @@ on:
         required: true
 
 jobs:
-  publish:
+  Publish-Node-Package:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
 
     steps:
+      # Validate Git Tag
+      - name: Validate Git Tag
+        run: |
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+            TAG="${{ github.event.inputs.git_tag }}"
+            EXPECTED_PREFIX="NodeModules-${ENVIRONMENT}-v"
+
+          if echo "$TAG" | grep -Eq "^${EXPECTED_PREFIX}[0-9]+$"; then
+            echo "✔️ The provided deployment tag - '$TAG' aligns with the selected $ENVIRONMENT environment."
+          else
+            echo "❌ ERROR: The tag '$TAG' does not match the expected naming convention for the '$ENVIRONMENT' environment."
+             exit 1
+          fi
       # Checkout repo
       - name: Checkout repo
         uses: actions/checkout@v4

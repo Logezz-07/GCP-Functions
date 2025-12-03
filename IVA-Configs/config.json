@@ -1,0 +1,20 @@
+{
+    "tokenUrl": "https://login.microsoftonline.com/0ab4cbbf-4bc7-4826-b52c-a14fed5286b9/oauth2/v2.0/token",
+    "scope": "api://e2a158e0-3d20-4773-a16f-b9e2a9a75fe1/.default",
+    "timeOutMs": "15000",
+    "apiAttempts": "2",
+    "tokenrefreshTimeMin": "55",
+    "broadCastId1": "Control Tower",
+    "broadCastId2": "Application Team",
+    "broadCastId3": "IVR Support",
+    "getCallStartParams-qa1": "https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params?ani=${ani}",
+    "getCallStartParams-qa2": "https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params?ani=${ani}",
+    "getCallStartParams-qa3": "https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params?ani=${ani}",
+    "getCallStartParams-qa4": "https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params?ani=${ani}",
+    "getCallStartParams-prod": "https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params?ani=${ani}",
+    "getAniIdentification-qa1": "https://ivr-internal.npe.apim.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
+    "getAniIdentification-qa2": "https://ivr-internal.npe.apim.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
+    "getAniIdentification-qa3": "https://ivr-internal.npe.apim.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
+    "getAniIdentification-qa4": "https://ivr-internal.npe.apim.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
+    "getAniIdentification-prod": "https://ivr-internal.npe.apim.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}"
+}

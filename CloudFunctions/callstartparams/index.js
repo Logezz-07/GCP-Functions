@@ -10,7 +10,6 @@ functions.http("helloHttp", async (req, res) => {
   const params = req.body.sessionInfo?.parameters || {};
   const tag = req.body.fulfillmentInfo?.tag || "Unknown-Tag";
   const sessionId = params.sessionId || "unknown-session";
-
   logger.logWebhookDetails(sessionId, tag);
   if (tag === "getCallStartParams") {
     let Status = 500;
@@ -195,7 +194,112 @@ functions.http("helloHttp", async (req, res) => {
     }
   }
 
+  else if (tag === "getBroadcastMessage") {
+    let Status = 500;
+    let ResponsePayload = {};
+    let sessionParams = {};
 
+    try {
+      const env = params.mwInstance || "qa4";
+      const broadcastId = params.broadcastId || "NA";
+      const dnis = params.dnis || "NA";
+      const language = params.flowLanguage || "NA";
+      const brand = params.brand || "NA";
+      const applicationId = params.applicationId || "NA";
+      const sessionIds = params.accountSessionList || [];
+
+      logger.logWebhookRequest(sessionId, tag, { env, broadcastId, dnis, language, brand, applicationId, sessionIds });
+
+      const apiUrl = params[`${tag}-${env}`];
+      const headers = {
+        cdr: sessionId,
+        transactionId: `${sessionId}-${params.ani || "NA"}`,
+        transactionDateTime: new Date().toISOString(),
+      };
+
+      // IVA config 
+      const ivaConfig = {
+        timeOutMs: params.timeOutMs,
+        apiAttempts: params.apiAttempts,
+        tokenUrl: params.tokenUrl,
+        scope: params.scope,
+        tokenRefreshTimeMin: params.tokenRefreshTimeMin
+      };
+
+      // Build POST Body
+      const requestBody = {
+        broadcastId: broadcastId,
+        dnis: dnis,
+        language: language,
+        applicationId: applicationId,
+        brand: brand,
+        sessionIds: sessionIds,
+      };
+
+      const apiResult = await apiClient.postRequest({
+        sessionId,
+        tag,
+        url: apiUrl,
+        headers,
+        data: requestBody,
+        ivaConfig
+      });
+
+      Status = apiResult.Status;
+      ResponsePayload = apiResult.ResponsePayload;
+
+      if (Status === 200) {
+
+        const b = ResponsePayload.broadcast;
+        const type = b?.questionOrMessage;
+
+        // Common fields
+        sessionParams = {
+          enabled: parseJson(ResponsePayload.enabled),
+          questionOrMessage: parseJson(type),
+          primaryMessage: parseJson(b?.broadcastScript?.voiceScriptContent),
+          nextAction: parseJson(b?.nextAction),
+          intent: parseJson(b?.intent),
+          smsEnabled: parseJson(b?.smsEnabled),
+          returnCode: "0",
+        };
+        // Question
+        if (type === "question") {
+          sessionParams.secondaryMessageRequired = parseJson(b?.secondaryMessageRequired);
+          sessionParams.secondaryMessage = parseJson(b?.secondaryMessageScript?.voiceScriptContent);
+        }
+
+      } else {
+        sessionParams = {
+          enabled: "false",
+          returnCode: "1"
+        };
+      }
+
+      const webhookResponse = {
+        sessionInfo: { parameters: sessionParams }
+      };
+
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.status(200).json(webhookResponse);
+
+    } catch (err) {
+      logger.logErrorResponse({ sessionId, tag, attempt: 1, err });
+
+      const webhookResponse = {
+        sessionInfo: {
+          parameters: {
+            enabled: "false",
+            returnCode: "1",
+          }
+        }
+      };
+
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.setHeader("Content-Type", "application/json");
+      res.status(200).send(webhookResponse);
+    }
+  }
 
   else {
     logger.logConsole(sessionId, tag, "Invalid tag for this function");

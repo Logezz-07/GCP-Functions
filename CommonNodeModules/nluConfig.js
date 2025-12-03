@@ -4,6 +4,7 @@ import csv from "csvtojson";
 import { readFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import { log } from "console";
 
 const storage = new Storage();
 const BUCKET_NAME = process.env.GCS_BUCKET_NAME;
@@ -33,6 +34,7 @@ async function preloadNluConfig({ sessionId, tag }) {
     const downloadStart = Date.now();
     const [contents] = await file.download();
     const downloadTime = Date.now() - downloadStart;
+    console.log(`NLU file downloaded in ${downloadTime} ms`);
 
     logger.logConsole(sessionId, tag, `NLU file downloaded in ${downloadTime} ms`);
 

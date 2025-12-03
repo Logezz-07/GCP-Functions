@@ -6,7 +6,7 @@ import {
 
 
 functions.http("helloHttp", async (req, res) => {
-
+  
   const params = req.body.sessionInfo?.parameters || {};
   const tag = req.body.fulfillmentInfo?.tag || "Unknown-Tag";
   const sessionId = params.sessionId || "unknown-session";

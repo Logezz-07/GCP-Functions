@@ -11,7 +11,7 @@ on:
 
 jobs:
   ConfigCheck-AutoTag:
-    name: ConfigCheck-AutoTag – ${{ github.ref_name }} Environment
+    name: ConfigCheck-AutoTag – ${{ github.ref_name }}
     runs-on: ubuntu-latest
 
     steps:

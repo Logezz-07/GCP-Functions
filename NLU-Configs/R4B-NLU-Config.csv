@@ -270,4 +270,4 @@ S.No,AppTag,LOB,AuthReq,ImmediateTxf,ClarfierQuestion,NextAction
 271,change-vague,21SV,Y,N,In.order.to.get.you.to.the.right.place.can.you.tell.me.a.little.more.about.why.youre.calling.You.can.say.things.like.add.someone.to.auto.policy.or.change.billing.address.on.homeowners.policy,POLICY_CHANGE
 272,change-vague,21SM,Y,N,In.order.to.get.you.to.the.right.place.can.you.tell.me.a.little.more.about.why.youre.calling.You.can.say.things.like.add.someone.to.auto.policy.or.change.billing.address.on.homeowners.policy,POLICY_CHANGE
 273,change-vague,SHARED_MAIN_MENU_FWS,Y,N,In.order.to.get.you.to.the.right.place.can.you.tell.me.a.little.more.about.why.youre.calling.You.can.say.things.like.add.someone.to.auto.policy.or.change.billing.address.on.homeowners.policy,POLICY_CHANGE
-274,claims_adjuster-request,SHARED_MM_BW,N,N,NA,CLAIMS_ROADSIDE_ASST
+274,claims_adjuster-request,SHARED_MM_BW,N,N,NA,CLAIMS_ROADSIDE

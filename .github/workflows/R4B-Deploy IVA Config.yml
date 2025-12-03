@@ -20,11 +20,24 @@ on:
         required: true
 
 jobs:
-  deploy-config:
+  Deploy-IVA-Config:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
 
     steps:
+      # Validate Git Tag# Validate Git Tag
+      - name: Validate Git Tag
+        run: |
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+            TAG="${{ github.event.inputs.git_tag }}"
+            EXPECTED_PREFIX="IVA-Config-${ENVIRONMENT}-v"
+
+          if echo "$TAG" | grep -Eq "^${EXPECTED_PREFIX}[0-9]+$"; then
+            echo "✔️ The provided deployment tag - '$TAG' aligns with the selected $ENVIRONMENT environment."
+          else
+            echo "❌ ERROR: The tag '$TAG' does not match the expected naming convention for the '$ENVIRONMENT' environment."
+             exit 1
+          fi
       # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -56,13 +69,13 @@ jobs:
         working-directory: IVA-Configs/terraform
         run: |
           echo "🧾 Running Terraform Plan for IVA Config upload..."
-          
+
           TF_VARS="
             -var=project_id=${{ vars.PROJECT_ID }} \
             -var=bucket_name=${{ vars.CONFIG_BUCKET_NAME }} \
             -var=config_path=../config.json \
           "
-          
+
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "Dry Run mode enabled — comparing local config.json with remote GCS (no state updates)..."
             terraform plan -lock=false -input=false $TF_VARS

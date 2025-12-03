@@ -10,7 +10,8 @@ on:
       - "NLU-Configs/**"
 
 jobs:
-  CodeCheck-AutoTag:
+  ConfigCheck-AutoTag:
+    name: ConfigCheck-AutoTag – ${{ github.ref_name }} Environment
     runs-on: ubuntu-latest
 
     steps:

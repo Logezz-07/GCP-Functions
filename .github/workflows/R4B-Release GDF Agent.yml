@@ -11,6 +11,7 @@ on:
 
 jobs:
   Release-Agent:
+    name: Release-Agent on – ${{ github.ref_name }} Environment
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
 
@@ -36,7 +37,7 @@ jobs:
       - name: Update Webhook URLs
         run: |
           echo "🔍 Searching for ConversationalAgents/*/webhooks folders..."
-          
+
           for agent in ConversationalAgents/*; do
             if [ -d "$agent/webhooks" ]; then
               echo "📁 Found agent: $agent"

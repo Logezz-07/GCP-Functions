@@ -1,5 +1,7 @@
 import { Storage } from "@google-cloud/storage";
 import * as logger from "./logger.js";
+import fallbackConfig from "./fallbackConfigs/config.json" with { type: "json" };
+
 
 const storage = new Storage();
 const BUCKET_NAME = process.env.GCS_BUCKET_NAME;
@@ -49,9 +51,10 @@ async function getIvaConfigs({ sessionId, tag }) {
         }
     } catch (err) {
         logger.logErrorResponse({ sessionId, tag, attemptCount: 1, err });
+        logger.logConsole(sessionId, tag, "Using fallback IVA config");
         status = 500;
         returnCode = "1";
-        responsePayload = { message: err.message };
+        responsePayload = fallbackConfig;
     }
 
     return { Status: status, ReturnCode: returnCode, ResponsePayload: responsePayload };

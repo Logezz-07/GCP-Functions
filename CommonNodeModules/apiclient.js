@@ -2,8 +2,8 @@ import axios from "axios";
 import * as logger from "./logger.js";
 
 // load from terraform secret env
-const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const CLIENT_ID = process.env.clientId;
+const CLIENT_SECRET = process.env.clientSecret;
 
 //storing it in memory for reuse
 let TOKEN = null;
@@ -30,6 +30,7 @@ async function makeRequest({ sessionId, tag, attempt, url, method, headers = {},
 
             if (status === 200 || returnCode === "0") break; // success
         } catch (err) {
+
             logger.logErrorResponse({ sessionId, tag, attemptCount, err });
             returnCode = err.response?.data?.returnCode || "1";
             status = err.response?.status || null;
@@ -42,12 +43,11 @@ async function makeRequest({ sessionId, tag, attempt, url, method, headers = {},
 
 async function getValidToken({ sessionId, tag, ivaConfig }) {
 
-    const tokenUrl = ivaConfig.TOKEN_URL;
-    const scope = ivaConfig.SCOPE;
-    const refreshTime = Number(ivaConfig.REFRESH_TIME_MIN);
-    const timeoutMs = Number(ivaConfig.TIME_OUT_MS);
-    const attempt = Number(ivaConfig.API_ATTEMPTS);
-
+    const tokenUrl = ivaConfig.tokenUrl;
+    const scope = ivaConfig.scope;
+    const refreshTime = Number(ivaConfig.tokenRefreshTimeMin);
+    const timeoutMs = Number(ivaConfig.timeOutMs);
+    const attempt = Number(ivaConfig.apiAttempts);
     const now = Date.now();
     let generateNew = false;
 
@@ -106,12 +106,12 @@ async function getValidToken({ sessionId, tag, ivaConfig }) {
 export async function getRequest({ sessionId, tag, url, headers = {}, params = null, ivaConfig }) {
     const token = await getValidToken({ sessionId, tag, ivaConfig });
     const reqHeaders = { ...headers, Authorization: `Bearer ${token}` };
-    return makeRequest({ sessionId, tag, attempt: ivaConfig.API_ATTEMPTS, url, method: "GET", headers: reqHeaders, params, timeoutMs: ivaConfig.TIME_OUT_MS });
+    return makeRequest({ sessionId, tag, attempt: ivaConfig.apiAttempts, url, method: "GET", headers: reqHeaders, params, timeoutMs: ivaConfig.timeOutMs });
 }
 
 export async function postRequest({ sessionId, tag, url, headers = {}, data = null, ivaConfig }) {
     const token = await getValidToken({ sessionId, tag, ivaConfig });
     const reqHeaders = { ...headers, Authorization: `Bearer ${token}` };
-    return makeRequest({ sessionId, tag, attempt: ivaConfig.API_ATTEMPTS, url, method: "POST", headers: reqHeaders, data, timeoutMs: ivaConfig.TIME_OUT_MS });
+    return makeRequest({ sessionId, tag, attempt: ivaConfig.apiAttempts, url, method: "POST", headers: reqHeaders, data, timeoutMs: ivaConfig.timeOutMs });
 }
 

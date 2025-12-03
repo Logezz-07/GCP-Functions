@@ -39,7 +39,9 @@ This structure is designed with enterprise-level governance, enabling:
 Contains all automation workflows for:
 - CI/CD  
 - Cloud Function deployments  
-- Agent deployments   
+- Agent deployments  
+- IVA Config deployment
+- CommonNode Modules deployment 
 - Auto version tagging  
 
 
@@ -60,11 +62,15 @@ Dialogflow CX agent files:
 IVA configuration files: 
 - Global IVA configs with stucture of JSON parameters  
 
-### `6. CommonNodeModules/`
+### `4. CommonNodeModules/`
 Shared Node.js modules for:
 - Logging    
 - API Clients 
 - Config loaders  
+
+### `5. NLU-Configs/`
+NLU configuration files: 
+- Global NLU configs with stucture of CSV parameters
 
 ## 🔄 Branching & Contribution Standards
 

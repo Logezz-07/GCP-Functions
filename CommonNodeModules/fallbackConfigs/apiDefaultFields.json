@@ -1,0 +1,20 @@
+{
+  "brand": "ROGERS",
+  "dnisLanguage": "en-US",
+  "aniLookup": true,
+  "validAni": true,
+  "searchHomeContact": false,
+  "searchMobileContact": false,
+  "searchBusinessContact": true,
+  "npaLanguage": "en-US",
+  "greetingScriptEn": "Welcome to Rogers for Business!",
+  "greetingScriptFr": "Bienvenue chez Rogers pour les Entreprises!",
+  "disclaimerScriptEn": "This call may be recorded for quality and training purposes",
+  "disclaimerScriptFr": "Cet appel pourra être enregistré à des fins de qualité et de formation",
+  "offerLanguageMenu": true,
+  "applicationId": "AR",
+  "aniConfirm": false,
+  "identifyAccount": true,
+  "involuntaryRedirect": true,
+  "voluntaryRedirect": "ALL"
+}

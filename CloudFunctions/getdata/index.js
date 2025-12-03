@@ -5,6 +5,7 @@ import {
 
 functions.http("helloHttp", async (req, res) => {
 
+    console.log("Test");
 
     const sessionId = req.body.sessionInfo?.session?.split("/sessions/").pop() || "unknown-session";
     const tag = req.body.fulfillmentInfo?.tag || "PostDataTransfer";

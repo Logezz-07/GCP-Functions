@@ -11,7 +11,7 @@ on:
 
 jobs:
   CodeCheck-AutoTag:
-    name: CodeCheck-AutoTag – ${{ github.ref_name }} Environment
+    name: CodeCheck-AutoTag – ${{ github.ref_name }}
     runs-on: ubuntu-latest
     
     steps:

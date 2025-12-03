@@ -39,7 +39,9 @@ This structure is designed with enterprise-level governance, enabling:
 Contains all automation workflows for:
 - CI/CD  
 - Cloud Function deployments  
-- Agent deployments   
+- Agent deployments  
+- IVA Config deployment
+- CommonNode Modules deployment 
 - Auto version tagging  
 
 
@@ -60,38 +62,18 @@ Dialogflow CX agent files:
 IVA configuration files: 
 - Global IVA configs with stucture of JSON parameters  
 
-### `6. CommonNodeModules/`
+### `4. CommonNodeModules/`
 Shared Node.js modules for:
 - Logging    
 - API Clients 
 - Config loaders  
+
+### `5. NLU-Configs/`
+NLU configuration files: 
+- Global NLU configs with stucture of CSV parameters
 
 ## 🔄 Branching & Contribution Standards
 
 ### Branch Protection
 Environment branches (Dev, QA, Prod) are protected.  
 **All changes must go through Pull Requests.**
-
-### Developer Workflow
-
-1. Checkout feature branch from Dev:
-```
-git checkout -b dev-cloudfunctions-update origin/Dev
-```
-2. Restore only the required folder:
-```
-git restore --source=origin/Dev "CloudFunctions" (Required Folder)
-```
-3. Modify required folder.
-
-4. Push branch:
-```
-git push origin dev-cloudfunction-update
-```
-5. Create PR:
-```
-dev-cloudfunction-update → Dev
-```
-6. CI/CD runs automatically.
-
-7. Merge after review.

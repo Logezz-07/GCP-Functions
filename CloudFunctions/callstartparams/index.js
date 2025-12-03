@@ -1,147 +1,316 @@
-const functions = require("@google-cloud/functions-framework");
-const apiRequest = require('@roger/r4b-common-nodemodules').apiClient;
-const logger = require('@roger/r4b-common-nodemodules').logger;
+import * as functions from "@google-cloud/functions-framework";
+import {
+  apiClient, logger, getIvaConfigs, preloadNluConfig,
+  getNluConfigByKey, parseJson, fallbackApiData
+} from "@roger/r4b-common-nodemodules";
 
 
 functions.http("helloHttp", async (req, res) => {
 
-  const sessionId = req.body.sessionInfo?.session.split("/sessions/").pop() || "unknown-session";
+  const params = req.body.sessionInfo?.parameters || {};
   const tag = req.body.fulfillmentInfo?.tag || "Unknown-Tag";
+  const sessionId = params.sessionId || "unknown-session";
   logger.logWebhookDetails(sessionId, tag);
-  const sessionParamsFromCX = req.body.sessionInfo?.parameters || {};
-  let sessionParams = {};
-  let Status = 1;
-  let ResponsePayload = {}
+  if (tag === "getCallStartParams") {
+    let Status = 500;
+    let ResponsePayload = {};
+    let sessionParams = {};
+    try {
+      const dnis = params.dnis || "NA";
+      const ani = params.ani || "NA";
+      const env = params.mwInstance || "qa4";
+      logger.logWebhookRequest(sessionId, tag, { dnis, ani, env });
 
-  try {
-    if (tag === "callStartApi") {
-      const dnis = sessionParamsFromCX?.Dnis || "NA";
-      logger.logWebhookRequest(sessionId, tag, { Dnis: dnis });
-      const apiUrl = `https://dev1-cct.rogers.com/dev01-config/ivr-config-ms/ivr/${dnis}/call-start/params`;
+      // Load IVA Config
+      const ivaResultConfig = await getIvaConfigs({ sessionId, tag });
+      const ivaConfig = ivaResultConfig.ResponsePayload;
+      const apiUrl = ivaConfig[tag + `-${env}`].replace("${dnis}", dnis).replace("${ani}", ani);
+
+      const time = new Date().toISOString()
       const headers = {
-        cdr: "112432245667775757",
-        clientSystem: "IVR",
-        brand: "FIDO",
-        transactionId: "454545323",
-        transactionDateTime: "2024-11-07T10:23:00",
-        ivrSubscriptionKey: "f9422c1450c747aaaca69253a489f3c6",
+        cdr: sessionId,
+        transactionId: `${sessionId}-${ani}`,
+        transactionDateTime: time,
       };
 
-      const apiResult = await apiRequest.getRequest({ sessionId, tag, url: apiUrl, headers });
-      Status = apiResult.Status;
-      ResponsePayload = apiResult.ResponsePayload;
-
-      if (Status === 200 && apiResult.ReturnCode === "0") {
-        const dnisParams = ResponsePayload.dnisParams || {};
-        const aniParams = ResponsePayload.aniParams || {};
-        sessionParams = {
-          SearchBusinessContact: dnisParams.icmSearch?.searchBusinessContact || "NA",
-          HomeContact: dnisParams.icmSearch?.searchHomeContact || "NA",
-          MobileContact: dnisParams.icmSearch?.searchMobileContact || "NA",
-          aniConfirm: dnisParams.aniConfirm || "NA",
-          aniLookup: dnisParams?.aniLookup || "NA",
-          dnisLang: dnisParams.language?.offerLanguageMenu || "NA",
-          identifyAccount: dnisParams.identifyAccount || "NA",
-          npaLanguage: aniParams.npaLanguage || "NA",
-          offerlanguageMenu: dnisParams.language?.offerLanguageMenu || "NA",
-          predctiveEnd: dnisParams.predictiveInd || "NA",
-          validAni: aniParams.validANI || "NA",
-          returnCode: "0",
-        };
+      // Parallel Tasks — API Call + NLU Preload
+      const [apiSettle, nluSettle] = await Promise.allSettled([
+        apiClient.getRequest({
+          sessionId, tag, url: apiUrl, headers, ivaConfig
+        }),
+        preloadNluConfig({ sessionId, tag })
+      ]);
+      if (apiSettle.status === "fulfilled") {
+        const apiResult = apiSettle.value;
+        Status = apiResult.Status;
+        ResponsePayload = apiResult.ResponsePayload;
       } else {
-        sessionParams = {
-          returnCode: apiResult.ReturnCode || "1",
-          response: ResponsePayload,
-        };
+        logger.logConsole(sessionId, tag, "API request failed ");
       }
-    }
-    else if (tag === "AccountVerification") {
-      const accountNumber = sessionParamsFromCX?.accountNumber || "";
-      logger.logWebhookRequest(sessionId, tag, { accountNumber });
-      if (/^\d{6}$/.test(accountNumber)) {
+      if (Status === 200) {
+        const d = ResponsePayload.dnisParams || {};
+        const a = ResponsePayload.aniParams || {};
+
         sessionParams = {
-          AccountStatus: "Verified",
-          VerificationMessage: `Account ${accountNumber} has been verified successfully.`,
-          returnCode: "0",
+          brand: parseJson(d.brand),
+          dnisLanguage: parseJson(d.language?.dnisLanguage),
+          aniLookup: parseJson(d.aniLookup),
+          validAni: parseJson(a.validANI),
+          searchHomeContact: parseJson(d.icmSearch?.searchHomeContact),
+          searchMobileContact: parseJson(d.icmSearch?.searchMobileContact),
+          searchBusinessContact: parseJson(d.icmSearch?.searchBusinessContact),
+          npaLanguage: parseJson(a.npaLanguage),
+          greetingScriptEn: parseJson(d.greetingScript?.scriptContent?.en),
+          greetingScriptFr: parseJson(d.greetingScript?.scriptContent?.fr),
+          disclaimerScriptEn: parseJson(d.disclaimerScript?.scriptContent?.en),
+          disclaimerScriptFr: parseJson(d.disclaimerScript?.scriptContent?.fr),
+          offerLanguageMenu: parseJson(d.language?.offerLanguageMenu),
+          applicationId: parseJson(d.applicationId),
+          aniConfirm: parseJson(d.aniConfirm),
+          identifyAccount: parseJson(d.identifyAccount),
+          involuntaryRedirect: parseJson(d.involuntaryRedirect),
+          voluntaryRedirect: parseJson(d.voluntaryRedirect),
+          returnCode: "0"
         };
-      } else {
-        sessionParams = {
-          AccountStatus: "Invalid",
-          VerificationMessage: "Invalid account number format.",
-          returnCode: "1",
-        };
-      }
-    }
-    else if (tag === "AniIdentification") {
-      console.log("hi");
-
-      const ani = sessionParamsFromCX?.Ani || "NA";
-      logger.logWebhookRequest(sessionId, tag, { Ani: ani });
-
-      const apiUrl = "https://dev1-cct.rogers.com/dev01-identification/ivr-identification-ms/idc/data";
-      const headers = {
-        cdr: "112432245667775757",
-        clientSystem: "IVR",
-        brand: "FIDO",
-        transactionId: "4545453232",
-        transactionDateTime: "2024-11-07T10:23:00",
-        ivrSubscriptionKey: "f9422c1450c747aaaca69253a489f3c6",
-      };
-
-      const params = {
-        brand: "FIDO",
-        searchHomeContact: "Y",
-        searchMobileContact: "Y",
-        searchBusinessContact: "Y",
-        phoneNumber: ani,
-        predictiveInd: "Y",
-      };
-      let config = null;
-      const apiResult = await apiRequest.getRequest({ sessionId, tag, url: apiUrl, headers, params });
-      Status = apiResult.Status;
-      ResponsePayload = apiResult.ResponsePayload;
-      if (Status === 200 && ResponsePayload.identifiedCustomer) {
-        const accountList = [];
-        ResponsePayload.idcData?.primaryContacts?.forEach((contact) => {
-          contact.customers?.forEach((customer) => {
-            customer.accounts?.forEach((account) => {
-              if (account.accountNumber) {
-                accountList.push(account.accountNumber.slice(-4));
-              }
-            });
-          });
-        });
-        sessionParams = {
-          returnCode: "0",
-          identifiedCustomer: ResponsePayload.identifiedCustomer,
-          AccountList: accountList,
-        };
-
       } else {
         sessionParams = {
           returnCode: "1",
-          response: ResponsePayload,
+          ...fallbackApiData
         };
       }
+      // Spread IVA config values + session params
+      const finalParams = {
+        ...ivaConfig,
+        ...sessionParams
+      };
+      const webhookResponse = {
+        sessionInfo: {
+          parameters: finalParams
+        }
+      };
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.status(200).json(webhookResponse);
+    } catch (err) {
+      logger.logErrorResponse({ sessionId, tag, attempt: 1, err });
+      const webhookResponse = {
+        sessionInfo: {
+          parameters: {
+            returnCode: "1",
+            ...fallbackApiData
+          }
+        }
+      };
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.setHeader("Content-Type", "application/json");
+      res.status(200).send(webhookResponse);
     }
+  }
 
-    const webhookResponse = { sessionInfo: { parameters: { ...sessionParams } } };
-    logger.logWebhookResponse(sessionId, tag, webhookResponse);
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).send(webhookResponse);
-  } catch (err) {
-    logger.logErrorResponse({ sessionId, tag, attempt: 1, err });
+  else if (tag === "getAniIdentification") {
+    let Status = 500;
+    let ResponsePayload = {};
+    let sessionParams = {};
 
-    const returnCode = "1";
-    const errorDetails =
-      err.code === "ECONNABORTED"
-        ? "Request timed out after 15 seconds"
-        : err.message || String(err);
+    try {
+      const env = params.mwInstance || "qa4";
+      const ani = params.ani || "NA";
+      const accountNumber = params.accountNumber || "NA"
+      const idType = params.idType;
+      const idNumber = params.idType === "phone" ? ani : accountNumber;
+      const searchHomeContact = params.searchHomeContact || false;
+      const searchMobileContact = params.searchMobileContact || false;
+      const searchBusinessContact = params.searchBusinessContact || false;
+      const searchBrand = params.brand || "NA";
 
+      logger.logWebhookRequest(sessionId, tag, {
+        ani, env, accountNumber, idType, idNumber, searchHomeContact, searchMobileContact, searchBusinessContact, searchBrand
+      });
+      const headers = {
+        cdr: sessionId,
+        transactionId: `${sessionId}-${ani}`,
+        transactionDateTime: new Date().toISOString()
+      };
+      const ivaConfig = {
+        timeOutMs: params.timeOutMs,
+        apiAttempts: params.apiAttempts,
+        tokenUrl: params.tokenUrl,
+        scope: params.scope,
+        tokenRefreshTimeMin: params.tokenRefreshTimeMin
+      }
+      let apiUrl = params[`${tag}-${env}`]
+        .replace("${idType}", idType)
+        .replace("${idNumber}", idNumber)
+        .replace("${searchHomeContact}", searchHomeContact)
+        .replace("${searchMobileContact}", searchMobileContact)
+        .replace("${searchBusinessContact}", searchBusinessContact)
+        .replace("${searchBrand}", searchBrand);
+      const apiResult = await apiClient.getRequest({ sessionId, tag, url: apiUrl, headers, ivaConfig });
+      Status = apiResult.Status;
+      ResponsePayload = apiResult.ResponsePayload;
+
+      if (Status === 200) {
+        const accounts = ResponsePayload.billingAccounts || [];
+        const accountNumberList = accounts.map(a => parseJson(a.accountNumber));
+        const accountSessionList = accounts.map(a => parseJson(a.sessionId));
+
+        sessionParams = {
+          dirtyAni: parseJson(ResponsePayload.dirtyANI),
+          numberOfBillingAccounts: parseJson(ResponsePayload.numberOfBillingAccounts) === "NA" ? 0 : parseJson(ResponsePayload.numberOfBillingAccounts),
+          uniqueBillingLanguage: parseJson(ResponsePayload.uniqueBillingLanguage),
+          billingLanguage: parseJson(accounts[0]?.billingLanguage),
+          accountNumberList,
+          accountSessionList,
+          returnCode: "0"
+        };
+      } else {
+        sessionParams = {
+          returnCode: "1",
+        };
+      }
+
+      const webhookResponse = {
+        sessionInfo: {
+          parameters: sessionParams
+        }
+      };
+
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.status(200).json(webhookResponse);
+
+    } catch (err) {
+      logger.logErrorResponse({ sessionId, tag, attempt: 1, err });
+
+      const webhookResponse = {
+        sessionInfo: {
+          parameters: {
+            returnCode: "1",
+          }
+        }
+      };
+
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.setHeader("Content-Type", "application/json");
+      res.status(200).send(webhookResponse);
+    }
+  }
+
+  else if (tag === "getBroadcastMessage") {
+    let Status = 500;
+    let ResponsePayload = {};
+    let sessionParams = {};
+
+    try {
+      const env = params.mwInstance || "qa4";
+      const broadcastId = params.broadcastId || "NA";
+      const dnis = params.dnis || "NA";
+      const language = params.flowLanguage || "NA";
+      const brand = params.brand || "NA";
+      const applicationId = params.applicationId || "NA";
+      const sessionIds = params.accountSessionList || [];
+
+      logger.logWebhookRequest(sessionId, tag, { env, broadcastId, dnis, language, brand, applicationId, sessionIds });
+
+      const apiUrl = params[`${tag}-${env}`];
+      const headers = {
+        cdr: sessionId,
+        transactionId: `${sessionId}-${params.ani || "NA"}`,
+        transactionDateTime: new Date().toISOString(),
+      };
+
+      // IVA config 
+      const ivaConfig = {
+        timeOutMs: params.timeOutMs,
+        apiAttempts: params.apiAttempts,
+        tokenUrl: params.tokenUrl,
+        scope: params.scope,
+        tokenRefreshTimeMin: params.tokenRefreshTimeMin
+      };
+
+      // Build POST Body
+      const requestBody = {
+        broadcastId: broadcastId,
+        dnis: dnis,
+        language: language,
+        applicationId: applicationId,
+        brand: brand,
+        sessionIds: sessionIds,
+      };
+
+      const apiResult = await apiClient.postRequest({
+        sessionId,
+        tag,
+        url: apiUrl,
+        headers,
+        data: requestBody,
+        ivaConfig
+      });
+
+      Status = apiResult.Status;
+      ResponsePayload = apiResult.ResponsePayload;
+
+      if (Status === 200) {
+
+        const b = ResponsePayload.broadcast;
+        const type = b?.questionOrMessage;
+
+        // Common fields
+        sessionParams = {
+          enabled: parseJson(ResponsePayload.enabled),
+          questionOrMessage: parseJson(type),
+          primaryMessage: parseJson(b?.broadcastScript?.voiceScriptContent),
+          nextAction: parseJson(b?.nextAction),
+          intent: parseJson(b?.intent),
+          smsEnabled: parseJson(b?.smsEnabled),
+          returnCode: "0",
+        };
+        // Question
+        if (type === "question") {
+          sessionParams.secondaryMessageRequired = parseJson(b?.secondaryMessageRequired);
+          sessionParams.secondaryMessage = parseJson(b?.secondaryMessageScript?.voiceScriptContent);
+        }
+
+      } else {
+        sessionParams = {
+          enabled: "false",
+          returnCode: "1"
+        };
+      }
+
+      const webhookResponse = {
+        sessionInfo: { parameters: sessionParams }
+      };
+
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.status(200).json(webhookResponse);
+
+    } catch (err) {
+      logger.logErrorResponse({ sessionId, tag, attempt: 1, err });
+
+      const webhookResponse = {
+        sessionInfo: {
+          parameters: {
+            enabled: "false",
+            returnCode: "1",
+          }
+        }
+      };
+
+      logger.logWebhookResponse(sessionId, tag, webhookResponse);
+      res.setHeader("Content-Type", "application/json");
+      res.status(200).send(webhookResponse);
+    }
+  }
+
+  else {
+    logger.logConsole(sessionId, tag, "Invalid tag for this function");
     const webhookResponse = {
-      sessionInfo: { parameters: { returnCode, errorDetails } },
+      sessionInfo: {
+        parameters: {
+          returnCode: "1",
+          errorDetails: "Invalid tag for this function"
+        }
+      }
     };
-
     logger.logWebhookResponse(sessionId, tag, webhookResponse);
     res.setHeader("Content-Type", "application/json");
     res.status(200).send(webhookResponse);

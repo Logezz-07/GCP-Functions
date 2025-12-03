@@ -87,14 +87,14 @@ resource "google_cloudfunctions2_function" "functions" {
 
     # Secret environment variables (from Secret Manager)
     secret_environment_variables {
-      key        = "CLIENT_ID"
+      key        = "clientId"
       project_id = var.secret_project_id
       secret     = var.client_id_secret
       version    = "latest"
     }
 
     secret_environment_variables {
-      key        = "CLIENT_SECRET"
+      key        = "clientSecret"
       project_id = var.secret_project_id
       secret     = var.client_secret_secret
       version    = "latest"

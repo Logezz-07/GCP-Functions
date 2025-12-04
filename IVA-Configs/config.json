@@ -6,7 +6,7 @@
     "tokenrefreshTimeMin": "55",
     "broadCastId1": "Control Tower",
     "broadCastId2": "Application Team",
-    "broadCastId3": "IV",
+    "broadCastId3": "I",
     "getCallStartParams-qa1": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",
     "getCallStartParams-qa2": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",
     "getCallStartParams-qa3": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",

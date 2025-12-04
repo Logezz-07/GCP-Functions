@@ -6,7 +6,7 @@ import {
 
 
 functions.http("helloHttp", async (req, res) => {
-  
+
   const params = req.body.sessionInfo?.parameters || {};
   const tag = req.body.fulfillmentInfo?.tag || "Unknown-Tag";
   const sessionId = params.sessionId || "unknown-session";
@@ -48,31 +48,31 @@ functions.http("helloHttp", async (req, res) => {
         logger.logConsole(sessionId, tag, "API request failed ");
       }
       if (Status === 200) {
-        const d = ResponsePayload.dnisParams || {};
-        const a = ResponsePayload.aniParams || {};
+        const d = ResponsePayload || {};
 
         sessionParams = {
           brand: parseJson(d.brand),
-          dnisLanguage: parseJson(d.language?.dnisLanguage),
+          dnisLanguage: parseJson(d.dnisLanguage),
           aniLookup: parseJson(d.aniLookup),
-          validAni: parseJson(a.validANI),
-          searchHomeContact: parseJson(d.icmSearch?.searchHomeContact),
-          searchMobileContact: parseJson(d.icmSearch?.searchMobileContact),
-          searchBusinessContact: parseJson(d.icmSearch?.searchBusinessContact),
-          npaLanguage: parseJson(a.npaLanguage),
+          validAni: parseJson(d.aniDetails?.validANI),
+          searchHomeContact: parseJson(d.icmSearchIndicators?.searchHomeContact),
+          searchMobileContact: parseJson(d.icmSearchIndicators?.searchMobileContact),
+          searchBusinessContact: parseJson(d.icmSearchIndicators?.searchBusinessContact),
+          npaLanguage: parseJson(d.aniDetails?.npaLanguage),
           greetingScriptEn: parseJson(d.greetingScript?.scriptContent?.en),
           greetingScriptFr: parseJson(d.greetingScript?.scriptContent?.fr),
           disclaimerScriptEn: parseJson(d.disclaimerScript?.scriptContent?.en),
           disclaimerScriptFr: parseJson(d.disclaimerScript?.scriptContent?.fr),
-          offerLanguageMenu: parseJson(d.language?.offerLanguageMenu),
+          offerLanguageMenu: parseJson(d.offerLanguageMenu),
           applicationId: parseJson(d.applicationId),
           aniConfirm: parseJson(d.aniConfirm),
           identifyAccount: parseJson(d.identifyAccount),
-          involuntaryRedirect: parseJson(d.involuntaryRedirect),
+          involuntaryRedirect: parseJson(d.involuntaryRedirectInd),
           voluntaryRedirect: parseJson(d.voluntaryRedirect),
           returnCode: "0"
         };
-      } else {
+      }
+      else {
         sessionParams = {
           returnCode: "1",
           ...fallbackApiData

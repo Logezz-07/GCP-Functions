@@ -2,6 +2,7 @@
   "name": "callstartparams",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "artifactregistry-login": "npx google-artifactregistry-auth --repo-config=./.npmrc --credential-config=./.npmrc",
     "start": "functions-framework --target=helloHttp"

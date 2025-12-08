@@ -67,6 +67,7 @@ functions.http("helloHttp", async (req, res) => {
           applicationId: parseJson(d.applicationId),
           aniConfirm: parseJson(d.aniConfirm),
           identifyAccount: parseJson(d.identifyAccount),
+          idType: parseJson(d.idType),
           involuntaryRedirect: parseJson(d.involuntaryRedirectInd),
           voluntaryRedirect: parseJson(d.voluntaryRedirect),
           returnCode: "0"
@@ -115,8 +116,8 @@ functions.http("helloHttp", async (req, res) => {
       const env = params.mwInstance || "qa4";
       const ani = params.ani || "NA";
       const accountNumber = params.accountNumber || "NA"
-      const idType = params.idType;
-      const idNumber = params.idType === "phone" ? ani : accountNumber;
+      const idType = params.callerIdType || "NA";
+      const idNumber = params.callerIdType === "phone" ? ani : accountNumber;
       const searchHomeContact = params.searchHomeContact || false;
       const searchMobileContact = params.searchMobileContact || false;
       const searchBusinessContact = params.searchBusinessContact || false;
@@ -206,9 +207,11 @@ functions.http("helloHttp", async (req, res) => {
       const language = params.flowLanguage || "NA";
       const brand = params.brand || "NA";
       const applicationId = params.applicationId || "NA";
+      const accountNumber = params.accountNumber || "";
       const sessionIds = params.accountSessionList || [];
 
-      logger.logWebhookRequest(sessionId, tag, { env, broadcastId, dnis, language, brand, applicationId, sessionIds });
+
+      logger.logWebhookRequest(sessionId, tag, { env, broadcastId, dnis, language, brand, applicationId, sessionIds, sessionIdInContext: accountNumber });
 
       const apiUrl = params[`${tag}-${env}`];
       const headers = {
@@ -234,6 +237,7 @@ functions.http("helloHttp", async (req, res) => {
         applicationId: applicationId,
         brand: brand,
         sessionIds: sessionIds,
+        sessionIdInContext: accountNumber
       };
 
       const apiResult = await apiClient.postRequest({

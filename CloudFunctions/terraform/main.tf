@@ -36,7 +36,6 @@ resource "google_storage_bucket_object" "function_objects" {
   source   = data.archive_file.functions[each.key].output_path
 }
 
-# Artifact Registry password split for build auth
 locals {
   pwd_part1 = substr(var.registry_pwd, 0, 2000)
   pwd_part2 = substr(var.registry_pwd, 2000, length(var.registry_pwd) - 2000)
@@ -53,6 +52,7 @@ resource "google_cloudfunctions2_function" "functions" {
   build_config {
     runtime     = "nodejs20"
     entry_point = "helloHttp"
+    service_account = "projects/${var.project_id}/serviceAccounts/rogers-serviceaccount@roger-470808.iam.gserviceaccount.com"
 
     source {
       storage_source {
@@ -61,11 +61,9 @@ resource "google_cloudfunctions2_function" "functions" {
       }
     }
 
-    # Build-time environment variables (for Cloud Build)
     environment_variables = {
       ARTIFACT_REGISTRY_PWD_1 = local.pwd_part1
       ARTIFACT_REGISTRY_PWD_2 = local.pwd_part2
-      
     }
   }
 
@@ -75,17 +73,16 @@ resource "google_cloudfunctions2_function" "functions" {
     available_memory   = "256M"
     timeout_seconds    = 60
     ingress_settings   = "ALLOW_INTERNAL_ONLY"
+    service_account_email = "rogers-serviceaccount@roger-470808.iam.gserviceaccount.com"
 
-    # Runtime environment variables available via process.env
     environment_variables = {
       TOKEN_URL          = var.token_url
       SCOPE              = var.scope
       TOKEN_REFRESH_TIME = var.token_refresh_time
-      GCS_CONFIG_PATH = var.config_file_path
-      GCS_BUCKET_NAME = var.config_bucket_name
+      GCS_CONFIG_PATH    = var.config_file_path
+      GCS_BUCKET_NAME    = var.config_bucket_name
     }
 
-    # Secret environment variables (from Secret Manager)
     secret_environment_variables {
       key        = "clientId"
       project_id = var.secret_project_id
@@ -102,7 +99,7 @@ resource "google_cloudfunctions2_function" "functions" {
   }
 }
 
-# Allow public invoke (optional)
+# Allow public invoke
 resource "google_cloud_run_service_iam_member" "invoker" {
   for_each = google_cloudfunctions2_function.functions
 
@@ -121,4 +118,3 @@ output "function_uris" {
     k => f.service_config[0].uri
   }
 }
-

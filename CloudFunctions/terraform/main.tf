@@ -52,7 +52,6 @@ resource "google_cloudfunctions2_function" "functions" {
   build_config {
     runtime     = "nodejs20"
     entry_point = "helloHttp"
-    service_account = "projects/${var.project_id}/serviceAccounts/rogers-serviceaccount@roger-470808.iam.gserviceaccount.com"
 
     source {
       storage_source {
@@ -73,7 +72,6 @@ resource "google_cloudfunctions2_function" "functions" {
     available_memory   = "256M"
     timeout_seconds    = 60
     ingress_settings   = "ALLOW_INTERNAL_ONLY"
-    service_account_email = "rogers-serviceaccount@roger-470808.iam.gserviceaccount.com"
 
     environment_variables = {
       TOKEN_URL          = var.token_url

@@ -41,13 +41,13 @@ async function makeRequest({ sessionId, tag, attempt, url, method, headers = {},
     return { Status: status, ReturnCode: returnCode, ResponsePayload: responsePayload };
 }
 
-async function getValidToken({ sessionId, tag, ivaConfig }) {
+async function getValidToken({ sessionId, tag, tokenConfig }) {
 
-    const tokenUrl = ivaConfig.tokenUrl;
-    const scope = ivaConfig.scope;
-    const refreshTime = Number(ivaConfig.tokenRefreshTimeMin);
-    const timeoutMs = Number(ivaConfig.timeOutMs);
-    const attempt = Number(ivaConfig.apiAttempts);
+    const tokenUrl = tokenConfig.tokenUrl;
+    const scope = tokenConfig.scope;
+    const refreshTime = Number(tokenConfig.tokenRefreshTimeMin);
+    const timeoutMs = Number(tokenConfig.timeOutMs);
+    const attempt = Number(tokenConfig.apiAttempts);
     const now = Date.now();
     let generateNew = false;
 
@@ -103,15 +103,15 @@ async function getValidToken({ sessionId, tag, ivaConfig }) {
 }
 
 
-export async function getRequest({ sessionId, tag, url, headers = {}, params = null, ivaConfig }) {
-    const token = await getValidToken({ sessionId, tag, ivaConfig });
+export async function getRequest({ sessionId, tag, url, headers = {}, params = null, tokenConfig }) {
+    const token = await getValidToken({ sessionId, tag, tokenConfig });
     const reqHeaders = { ...headers, Authorization: `Bearer ${token}` };
-    return makeRequest({ sessionId, tag, attempt: ivaConfig.apiAttempts, url, method: "GET", headers: reqHeaders, params, timeoutMs: ivaConfig.timeOutMs });
+    return makeRequest({ sessionId, tag, attempt: tokenConfig.apiAttempts, url, method: "GET", headers: reqHeaders, params, timeoutMs: tokenConfig.timeOutMs });
 }
 
-export async function postRequest({ sessionId, tag, url, headers = {}, data = null, ivaConfig }) {
-    const token = await getValidToken({ sessionId, tag, ivaConfig });
+export async function postRequest({ sessionId, tag, url, headers = {}, data = null, tokenConfig }) {
+    const token = await getValidToken({ sessionId, tag, tokenConfig });
     const reqHeaders = { ...headers, Authorization: `Bearer ${token}` };
-    return makeRequest({ sessionId, tag, attempt: ivaConfig.apiAttempts, url, method: "POST", headers: reqHeaders, data, timeoutMs: ivaConfig.timeOutMs });
+    return makeRequest({ sessionId, tag, attempt: tokenConfig.apiAttempts, url, method: "POST", headers: reqHeaders, data, timeoutMs: tokenConfig.timeOutMs });
 }
 

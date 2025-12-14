@@ -15,6 +15,7 @@ functions.http("helloHttp", async (req, res) => {
     let Status = 500;
     let ResponsePayload = {};
     let sessionParams = {};
+    let ivaConfig = {};
     try {
       const dnis = params.dnis || "NA";
       const ani = params.ani || "NA";
@@ -23,7 +24,7 @@ functions.http("helloHttp", async (req, res) => {
 
       // Load IVA Config
       const ivaResultConfig = await getIvaConfigs({ sessionId, tag });
-      let ivaConfig = ivaResultConfig.ResponsePayload;
+      ivaConfig = ivaResultConfig.ResponsePayload;
       const tokenConfig = {
         timeOutMs: ivaConfig.timeOutMs,
         apiAttempts: ivaConfig.apiAttempts,
@@ -92,7 +93,8 @@ functions.http("helloHttp", async (req, res) => {
         sessionInfo: {
           parameters: {
             returnCode: "1",
-            ...fallbackApiData
+            ...fallbackApiData,
+            ...ivaConfig
           }
         }
       };

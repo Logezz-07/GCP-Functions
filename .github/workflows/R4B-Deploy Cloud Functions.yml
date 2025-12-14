@@ -12,7 +12,7 @@ on:
           - QA
           - Prod
       dry_run:
-        description: "Run as Dry Run"
+        description: "Run as Dry Run "
         required: true
         type: boolean
       git_tag:
@@ -25,114 +25,83 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
 
     steps:
-      # -------------------------------------------------
       # Validate Git Tag
-      # -------------------------------------------------
       - name: Validate Git Tag
         run: |
           ENVIRONMENT="${{ github.event.inputs.environment }}"
-          TAG="${{ github.event.inputs.git_tag }}"
-          EXPECTED_PREFIX="CloudFunctions-${ENVIRONMENT}-v"
+            TAG="${{ github.event.inputs.git_tag }}"
+            EXPECTED_PREFIX="CloudFunctions-${ENVIRONMENT}-v"
 
           if echo "$TAG" | grep -Eq "^${EXPECTED_PREFIX}[0-9]+$"; then
-            echo "✔️ Tag '$TAG' is valid for $ENVIRONMENT"
+            echo "✔️ The provided deployment tag - '$TAG' aligns with the selected $ENVIRONMENT environment."
           else
-            echo "❌ ERROR: Invalid tag '$TAG' for $ENVIRONMENT"
-            exit 1
+            echo "❌ ERROR: The tag '$TAG' does not match the expected naming convention for the '$ENVIRONMENT' environment."
+             exit 1
           fi
-
-      # -------------------------------------------------
-      # Checkout Repository
-      # -------------------------------------------------
+      # Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.git_tag }}
 
-      # -------------------------------------------------
       # Authenticate to Google Cloud
-      # -------------------------------------------------
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # -------------------------------------------------
       # Setup Terraform
-      # -------------------------------------------------
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.6
 
-      # -------------------------------------------------
       # Terraform Init
-      # -------------------------------------------------
       - name: Terraform Init
         working-directory: CloudFunctions/terraform
         run: |
-          ENV=$(echo "${{ github.event.inputs.environment }}" | tr '[:upper:]' '[:lower:]')
-          echo "⚙️ Initializing Terraform for environment: $ENV"
+          ENVIRONMENT=$(echo "${{ github.event.inputs.environment }}" | tr '[:upper:]' '[:lower:]')
+          echo "⚙️ Initializing Terraform backend for environment: $ENVIRONMENT"
 
           terraform init -reconfigure \
             -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
-            -backend-config="prefix=cloud-functions-${ENV}-state"
+            -backend-config="prefix=cloud-functions-${ENVIRONMENT}-state"
 
-      # -------------------------------------------------
-      # Terraform Plan (FULL – unchanged behaviour)
-      # -------------------------------------------------
+      # Terraform Plan
       - name: Terraform Plan
         working-directory: CloudFunctions/terraform
         run: |
-          IFS=',' read -ra FUNCTIONS <<< "${{ vars.FUNCTIONS_LIST }}"
+          FUNCTIONS_LIST=$(echo "${{ vars.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
 
-          cat > runtime.auto.tfvars <<EOF
-          project_id            = "${{ vars.PROJECT_ID }}"
-          region                = "${{ vars.REGION }}"
-          functions             = [$(printf '"%s",' "${FUNCTIONS[@]}" | sed 's/,$//')]
-          registry_pwd          = "${{ secrets.NPM_PASSWORD }}"
-          source_bucket         = "${{ vars.SOURCE_BUCKET }}"
-          secret_project_id     = "${{ vars.GOOGLE_SECRET_PROJECT_ID }}"
-          token_url             = "${{ vars.TOKEN_URL }}"
-          scope                 = "${{ vars.SCOPE }}"
-          token_refresh_time    = "${{ vars.TOKEN_REFRESH_TIME }}"
-          client_id_secret      = "${{ vars.CLIENT_ID_KEY }}"
-          client_secret_secret  = "${{ vars.CLIENT_SECRET_KEY }}"
-          config_bucket_name    = "${{ vars.CONFIG_BUCKET_NAME }}"
-          config_file_path      = "${{ vars.CONFIG_FILE_PATH }}"
-          EOF
+          # Common var block (reusable for plan and apply)
+          TF_VARS="
+            -var=project_id=${{ vars.PROJECT_ID }} \
+            -var=region=${{ vars.REGION }} \
+            -var=functions=[$FUNCTIONS_LIST] \
+            -var=registry_pwd=${{ secrets.NPM_PASSWORD }} \
+            -var=source_bucket=${{ vars.SOURCE_BUCKET }} \
+            -var=secret_project_id=${{ vars.GOOGLE_SECRET_PROJECT_ID }} \
+            -var=token_url=${{ vars.TOKEN_URL }} \
+            -var=scope=${{ vars.SCOPE }} \
+            -var=token_refresh_time=${{ vars.TOKEN_REFRESH_TIME }} \
+            -var=client_id_secret=${{ vars.CLIENT_ID_KEY }} \
+            -var=client_secret_secret=${{ vars.CLIENT_SECRET_KEY }} \
+            -var=config_bucket_name=${{ vars.CONFIG_BUCKET_NAME }} \
+            -var=config_file_path=${{ vars.CONFIG_FILE_PATH }} \
+          "
 
-          echo "🧾 Running Terraform Plan"
+          echo "🧾 Running Terraform Plan for environment: ${{ github.event.inputs.environment }}"
 
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            terraform plan -lock=false -input=false
+            echo "🧪 Dry Run mode enabled — no state update, no apply."
+            terraform plan -lock=false -input=false $TF_VARS
           else
-            terraform plan -lock=true -input=false
+            echo "☁️ Apply mode — generating deployment plan."
+            terraform plan -out=tfplan.out -lock=true -input=false $TF_VARS
           fi
 
-      # -------------------------------------------------
-      # Terraform Targeted Apply (SAFE)
-      # -------------------------------------------------
-      - name: Terraform Targeted Apply
+      # Terraform Apply
+      - name: Terraform Apply
         if: ${{ github.event.inputs.dry_run == 'false' }}
         working-directory: CloudFunctions/terraform
         run: |
-          echo "🚀 Deploying selected functions: ${{ vars.FUNCTIONS_LIST }}"
-
-          IFS=',' read -ra FUNCTIONS <<< "${{ vars.FUNCTIONS_LIST }}"
-
-          for func in "${FUNCTIONS[@]}"; do
-           func=$(echo "$func" | xargs)
-           echo "📦 Applying function: $func"
-
-               TARGET_FN=$(printf 'google_cloudfunctions2_function.functions["%s"]' "$func")
-               TARGET_OBJ=$(printf 'google_storage_bucket_object.function_objects["%s"]' "$func")
-
-          terraform apply -auto-approve \
-          -lock=false \
-          -input=false \
-          -target="$TARGET_FN" \
-          -target="$TARGET_OBJ"
-           done
-
-          echo "✅ Selected functions deployed successfully"
+          echo "🚀 Applying Terraform plan for Cloud Functions..."
+          terraform apply -auto-approve tfplan.out

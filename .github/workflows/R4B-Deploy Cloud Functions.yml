@@ -66,86 +66,87 @@ jobs:
           terraform_version: 1.6.6
 
       # -------------------------------------------------
-      # Terraform Init (Shared State)
+      # Terraform Init
       # -------------------------------------------------
       - name: Terraform Init
         working-directory: CloudFunctions/terraform
         run: |
           ENV=$(echo "${{ github.event.inputs.environment }}" | tr '[:upper:]' '[:lower:]')
-          echo "⚙️ Terraform init for environment: $ENV"
+          echo "⚙️ Initializing Terraform for environment: $ENV"
 
           terraform init -reconfigure \
             -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
             -backend-config="prefix=cloud-functions-${ENV}-state"
 
       # -------------------------------------------------
-      # Terraform Plan (Targeted – Dry Run)
+      # Terraform Plan (UNCHANGED – FULL VALIDATION)
       # -------------------------------------------------
-      - name: Terraform Plan (Targeted)
-        if: ${{ github.event.inputs.dry_run == 'true' }}
+      - name: Terraform Plan
         working-directory: CloudFunctions/terraform
         run: |
-          IFS=',' read -ra FUNCTIONS <<< "${{ vars.FUNCTIONS_LIST }}"
+          FUNCTIONS_LIST=$(echo "${{ vars.FUNCTIONS_LIST }}" | sed 's/\([^,]*\)/"&"/g')
 
-          TF_VARS=(
-            -var=project_id=${{ vars.PROJECT_ID }}
-            -var=region=${{ vars.REGION }}
-            -var=functions=[\"${FUNCTIONS[*]// /\",\"}\"]
-            -var=registry_pwd=${{ secrets.NPM_PASSWORD }}
-            -var=source_bucket=${{ vars.SOURCE_BUCKET }}
-            -var=secret_project_id=${{ vars.GOOGLE_SECRET_PROJECT_ID }}
-            -var=token_url=${{ vars.TOKEN_URL }}
-            -var=scope=${{ vars.SCOPE }}
-            -var=token_refresh_time=${{ vars.TOKEN_REFRESH_TIME }}
-            -var=client_id_secret=${{ vars.CLIENT_ID_KEY }}
-            -var=client_secret_secret=${{ vars.CLIENT_SECRET_KEY }}
-            -var=config_bucket_name=${{ vars.CONFIG_BUCKET_NAME }}
+          TF_VARS="
+            -var=project_id=${{ vars.PROJECT_ID }} \
+            -var=region=${{ vars.REGION }} \
+            -var=functions=[$FUNCTIONS_LIST] \
+            -var=registry_pwd=${{ secrets.NPM_PASSWORD }} \
+            -var=source_bucket=${{ vars.SOURCE_BUCKET }} \
+            -var=secret_project_id=${{ vars.GOOGLE_SECRET_PROJECT_ID }} \
+            -var=token_url=${{ vars.TOKEN_URL }} \
+            -var=scope=${{ vars.SCOPE }} \
+            -var=token_refresh_time=${{ vars.TOKEN_REFRESH_TIME }} \
+            -var=client_id_secret=${{ vars.CLIENT_ID_KEY }} \
+            -var=client_secret_secret=${{ vars.CLIENT_SECRET_KEY }} \
+            -var=config_bucket_name=${{ vars.CONFIG_BUCKET_NAME }} \
             -var=config_file_path=${{ vars.CONFIG_FILE_PATH }}
-          )
+          "
 
-          for FN in "${FUNCTIONS[@]}"; do
-            echo "🧪 Planning function: $FN"
+          echo "🧾 Running Terraform Plan for environment: ${{ github.event.inputs.environment }}"
 
-            terraform plan \
-              -input=false \
-              -lock=false \
-              -target=google_cloudfunctions2_function.functions[\"$FN\"] \
-              -target=google_storage_bucket_object.function_objects[\"$FN\"] \
-              "${TF_VARS[@]}"
-          done
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "🧪 Dry Run mode enabled"
+            terraform plan -lock=false -input=false $TF_VARS
+          else
+            terraform plan -lock=true -input=false $TF_VARS
+          fi
 
       # -------------------------------------------------
-      # Terraform Apply (Targeted)
+      # Terraform Targeted Apply (SAFE & CORRECT)
       # -------------------------------------------------
-      - name: Terraform Apply (Targeted)
+      - name: Terraform Targeted Apply
         if: ${{ github.event.inputs.dry_run == 'false' }}
         working-directory: CloudFunctions/terraform
         run: |
+          echo "🚀 Deploying selected functions: ${{ vars.FUNCTIONS_LIST }}"
+
           IFS=',' read -ra FUNCTIONS <<< "${{ vars.FUNCTIONS_LIST }}"
 
-          TF_VARS=(
-            -var=project_id=${{ vars.PROJECT_ID }}
-            -var=region=${{ vars.REGION }}
-            -var=functions=[\"${FUNCTIONS[*]// /\",\"}\"]
-            -var=registry_pwd=${{ secrets.NPM_PASSWORD }}
-            -var=source_bucket=${{ vars.SOURCE_BUCKET }}
-            -var=secret_project_id=${{ vars.GOOGLE_SECRET_PROJECT_ID }}
-            -var=token_url=${{ vars.TOKEN_URL }}
-            -var=scope=${{ vars.SCOPE }}
-            -var=token_refresh_time=${{ vars.TOKEN_REFRESH_TIME }}
-            -var=client_id_secret=${{ vars.CLIENT_ID_KEY }}
-            -var=client_secret_secret=${{ vars.CLIENT_SECRET_KEY }}
-            -var=config_bucket_name=${{ vars.CONFIG_BUCKET_NAME }}
+          TF_VARS="
+            -var=project_id=${{ vars.PROJECT_ID }} \
+            -var=region=${{ vars.REGION }} \
+            -var=functions=[\"${FUNCTIONS[*]// /\",\"}\"] \
+            -var=registry_pwd=${{ secrets.NPM_PASSWORD }} \
+            -var=source_bucket=${{ vars.SOURCE_BUCKET }} \
+            -var=secret_project_id=${{ vars.GOOGLE_SECRET_PROJECT_ID }} \
+            -var=token_url=${{ vars.TOKEN_URL }} \
+            -var=scope=${{ vars.SCOPE }} \
+            -var=token_refresh_time=${{ vars.TOKEN_REFRESH_TIME }} \
+            -var=client_id_secret=${{ vars.CLIENT_ID_KEY }} \
+            -var=client_secret_secret=${{ vars.CLIENT_SECRET_KEY }} \
+            -var=config_bucket_name=${{ vars.CONFIG_BUCKET_NAME }} \
             -var=config_file_path=${{ vars.CONFIG_FILE_PATH }}
-          )
+          "
 
-          for FN in "${FUNCTIONS[@]}"; do
-            echo "🚀 Deploying function: $FN"
+          for func in "${FUNCTIONS[@]}"; do
+            func=$(echo "$func" | xargs)
+            echo "📦 Applying function: $func"
 
             terraform apply -auto-approve \
-              -lock=true \
-              -input=false \
-              -target=google_cloudfunctions2_function.functions[\"$FN\"] \
-              -target=google_storage_bucket_object.function_objects[\"$FN\"] \
-              "${TF_VARS[@]}"
+              -lock=false \
+              -target=google_cloudfunctions2_function.functions["$func"] \
+              -target=google_storage_bucket_object.function_objects["$func"] \
+              $TF_VARS
           done
+
+          echo "✅ Selected functions deployed successfully"

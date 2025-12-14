@@ -358,7 +358,7 @@ functions.http("helloHttp", async (req, res) => {
       ResponsePayload = apiResult.ResponsePayload;
       const billingAccounts = parseJson(ResponsePayload.numberOfBillingAccounts) === "NA" ? 0 : parseJson(ResponsePayload.numberOfBillingAccounts);
       if (Status === 200 && billingAccounts !== 0 && billingAccounts <= 4) {
-        const accounts = ResponsePayload.billingAccounts || [];
+        const accounts = ResponsePayload.billingAccountInContext ? [ResponsePayload.billingAccountInContext] : [];
         let disambigMenuPrompt = "";
         let disambigMenuPromptNm1 = "";
         let disambigMenuPromptNm2 = "";

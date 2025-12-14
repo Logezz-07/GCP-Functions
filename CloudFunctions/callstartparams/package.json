@@ -1,0 +1,18 @@
+{
+  "name": "callstartparams",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "artifactregistry-login": "npx google-artifactregistry-auth --repo-config=./.npmrc --credential-config=./.npmrc",
+    "start": "functions-framework --target=helloHttp"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.5.1",
+    "@roger/r4b-common-nodemodules": "^1.3.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

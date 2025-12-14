@@ -92,8 +92,8 @@ jobs:
 
             terraform plan \
               -lock=false \
-              -target=google_cloudfunctions2_function.functions["$FN"] \
-              -target=google_storage_bucket_object.function_objects["$FN"]
+              -target=google_cloudfunctions2_function.functions["'"$FN"'"] \
+              -target=google_storage_bucket_object.function_objects["'"$FN"'"]
           done
 
       # -------------------------------------------------
@@ -126,7 +126,7 @@ jobs:
 
             terraform apply -auto-approve \
               -lock=true \
-              -target=google_cloudfunctions2_function.functions["$FN"] \
-              -target=google_storage_bucket_object.function_objects["$FN"] \
+              -target=google_cloudfunctions2_function.functions["'"$FN"'"] \
+              -target=google_storage_bucket_object.function_objects["'"$FN"'"] \
               $TF_VARS
           done

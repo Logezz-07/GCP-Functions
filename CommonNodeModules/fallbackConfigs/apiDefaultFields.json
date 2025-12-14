@@ -13,6 +13,7 @@
   "disclaimerScriptFr": "Cet appel pourra être enregistré à des fins de qualité et de formation",
   "offerLanguageMenu": true,
   "applicationId": "AR",
+  "idType": "phone",
   "aniConfirm": false,
   "identifyAccount": true,
   "involuntaryRedirect": true,

@@ -1,7 +1,6 @@
 import * as logger from "./logger.js";
 import * as apiClient from "./apiclient.js";
 import { getIvaConfigs } from "./ivaConfig.js";
-import { preloadNluConfig, getNluConfigByKey } from "./nluConfig.js";
 import fallbackApiData from "./fallbackConfigs/apiDefaultFields.json" with { type: "json" };
 
 function parseJson(value) {
@@ -10,4 +9,4 @@ function parseJson(value) {
 }
 
 
-export { logger, apiClient, getIvaConfigs, getNluConfigByKey, preloadNluConfig, parseJson, fallbackApiData }
+export { logger, apiClient, getIvaConfigs, parseJson, fallbackApiData }

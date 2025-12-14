@@ -1,20 +1,57 @@
 {
-    "tokenUrl": "https://login.microsoftonline.com/0ab4cbbf-4bc7-4826-b52c-a14fed5286b9/oauth2/v2.0/token",
-    "scope": "api://f483184c-4847-4ba1-8deb-bab5f1cfb0c6/.default",
     "timeOutMs": "15000",
     "apiAttempts": "2",
     "tokenrefreshTimeMin": "55",
     "broadCastId1": "Control Tower",
     "broadCastId2": "Application Team",
     "broadCastId3": "IVA",
-    "getCallStartParams-qa1": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",
-    "getCallStartParams-qa2": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",
-    "getCallStartParams-qa3": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",
-    "getCallStartParams-qa4": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",
-    "getCallStartParams-prod": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",
-    "getAniIdentification-qa1": "https://ivr.npe.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
-    "getAniIdentification-qa2": "https://ivr.npe.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
-    "getAniIdentification-qa3": "https://ivr.npe.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
-    "getAniIdentification-qa4": "https://ivr.npe.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}",
-    "getAniIdentification-prod": "https://ivr.npe.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile?idType=${idType}&idNumber=${idNumber}&searchHomeContact=${searchHomeContact}&searchMobileContact=${searchMobileContact}&searchBusinessContact=${searchBusinessContact}&searchBrand=${searchBrand}"
+    "scope": {
+        "qa1": "api://f483184c-4847-4ba1-8deb-bab5f1cfb0c6/.default",
+        "qa2": "api://f483184c-4847-4ba1-8deb-bab5f1cfb0c6/.default",
+        "qa3": "api://f483184c-4847-4ba1-8deb-bab5f1cfb0c6/.default",
+        "qa4": "api://f483184c-4847-4ba1-8deb-bab5f1cfb0c6/.default",
+        "prod": "api://f483184c-4847-4ba1-8deb-bab5f1cfb0c6/.default"
+    },
+    "getToken": {
+        "qa1": "https://login.microsoftonline.com/0ab4cbbf-4bc7-4826-b52c-a14fed5286b9/oauth2/v2.0/token",
+        "qa2": "https://login.microsoftonline.com/0ab4cbbf-4bc7-4826-b52c-a14fed5286b9/oauth2/v2.0/token",
+        "qa3": "https://login.microsoftonline.com/0ab4cbbf-4bc7-4826-b52c-a14fed5286b9/oauth2/v2.0/token",
+        "qa4": "https://login.microsoftonline.com/0ab4cbbf-4bc7-4826-b52c-a14fed5286b9/oauth2/v2.0/token",
+        "prod": "https://login.microsoftonline.com/0ab4cbbf-4bc7-4826-b52c-a14fed5286b9/oauth2/v2.0/token"
+    },
+    "getCallStartParams": {
+        "qa1": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",
+        "qa2": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",
+        "qa3": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",
+        "qa4": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}",
+        "prod": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/${dnis}/start/params?ani=${ani}"
+    },
+    "getAniIdentification": {
+        "qa1": "https://ivr.npe.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile",
+        "qa2": "https://ivr.npe.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile",
+        "qa3": "https://ivr.npe.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile",
+        "qa4": "https://ivr.npe.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile",
+        "prod": "https://ivr.npe.rogers.com/qa4/r4b-identification/ivr-r4b-identification-ms/caller/profile"
+    },
+    "getBroadcastMessage": {
+        "qa1": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/broadcast/params",
+        "qa2": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/broadcast/params",
+        "qa3": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/broadcast/params",
+        "qa4": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/broadcast/params",
+        "prod": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/broadcast/params"
+    },
+    "getBillingProfile": {
+        "qa1": "https://ivr.npe.rogers.com/qa4/r4b-account/ivr-r4b-account-ms/accounts/billing/profile?accountNumber=${accountNumber}&maestroInd=${maestroInd}&lob=${lob}&accountBrand=${accountBrand}&sessionId=${sessionId}",
+        "qa2": "https://ivr.npe.rogers.com/qa4/r4b-account/ivr-r4b-account-ms/accounts/billing/profile?accountNumber=${accountNumber}&maestroInd=${maestroInd}&lob=${lob}&accountBrand=${accountBrand}&sessionId=${sessionId}",
+        "qa3": "https://ivr.npe.rogers.com/qa4/r4b-account/ivr-r4b-account-ms/accounts/billing/profile?accountNumber=${accountNumber}&maestroInd=${maestroInd}&lob=${lob}&accountBrand=${accountBrand}&sessionId=${sessionId}",
+        "qa4": "https://ivr.npe.rogers.com/qa4/r4b-account/ivr-r4b-account-ms/accounts/billing/profile?accountNumber=${accountNumber}&maestroInd=${maestroInd}&lob=${lob}&accountBrand=${accountBrand}&sessionId=${sessionId}",
+        "prod": "https://ivr.npe.rogers.com/qa4/r4b-account/ivr-r4b-account-ms/accounts/billing/profile?accountNumber=${accountNumber}&maestroInd=${maestroInd}&lob=${lob}&accountBrand=${accountBrand}&sessionId=${sessionId}"
+    },
+    "getPredictiveTreatment": {
+        "qa1": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/predictive/params",
+        "qa2": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/predictive/params",
+        "qa3": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/predictive/params",
+        "qa4": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/predictive/params",
+        "prod": "https://ivr.npe.rogers.com/qa4/r4b-config/ivr-r4b-config-ms/config/predictive/params"
+    }
 }

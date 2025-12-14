@@ -128,8 +128,8 @@ jobs:
             terraform apply -auto-approve \
               -lock=false \
               -input=false \
-              -target=google_cloudfunctions2_function.functions["$func"] \
-              -target=google_storage_bucket_object.function_objects["$func"]
+              -target=google_cloudfunctions2_function.functions["'"$func"'"] \
+              -target=google_storage_bucket_object.function_objects["'"$func"'"]
           done
 
           echo "✅ Selected functions deployed successfully"

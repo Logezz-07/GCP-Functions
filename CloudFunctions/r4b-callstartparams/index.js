@@ -161,18 +161,28 @@ functions.http("helloHttp", async (req, res) => {
 
       if (Status === 200) {
         const accounts = ResponsePayload.billingAccounts || [];
-        const accountNumberList = accounts.map(a => parseJson(a.accountNumber));
-        const accountSessionList = accounts.map(a => parseJson(a.sessionId));
-
-        sessionParams = {
-          dirtyAni: parseJson(ResponsePayload.dirtyANI),
-          numberOfBillingAccounts: parseJson(ResponsePayload.numberOfBillingAccounts) === "NA" ? 0 : parseJson(ResponsePayload.numberOfBillingAccounts),
-          uniqueBillingLanguage: parseJson(ResponsePayload.uniqueBillingLanguage),
-          billingLanguage: parseJson(accounts[0]?.billingLanguage),
-          accountNumberList,
-          accountSessionList,
-          returnCode: "0"
-        };
+        const billingAccounts = parseJson(ResponsePayload.numberOfBillingAccounts) === "NA" ? 0 : parseJson(ResponsePayload.numberOfBillingAccounts);
+        const uniqueBillingLanguage = parseJson(ResponsePayload.uniqueBillingLanguage);
+        const billingLanguage = parseJson(accounts[0]?.billingLanguage);
+        const dirtyANI = parseJson(ResponsePayload.dirtyANI);
+        if (billingAccounts !== 0 && billingAccounts <= 4) {
+          sessionParams = await DisambigParams(accounts, billingAccounts,);
+          sessionParams = {
+            ...sessionParams,
+            uniqueBillingLanguage,
+            billingLanguage,
+            dirtyANI
+          }
+        }
+        else {
+          sessionParams = {
+            uniqueBillingLanguage,
+            billingLanguage,
+            dirtyANI,
+            returnCode: "0",
+            numberOfBillingAccounts: billingAccounts
+          };
+        }
       } else {
         sessionParams = {
           returnCode: "1",
@@ -358,80 +368,8 @@ functions.http("helloHttp", async (req, res) => {
       ResponsePayload = apiResult.ResponsePayload;
       const billingAccounts = parseJson(ResponsePayload.numberOfBillingAccounts) === "NA" ? 0 : parseJson(ResponsePayload.numberOfBillingAccounts);
       if (Status === 200 && billingAccounts !== 0 && billingAccounts <= 4) {
-        const accounts = ResponsePayload.billingAccountInContext ? [ResponsePayload.billingAccountInContext] : [];
-        let disambigMenuPrompt = "";
-        let disambigMenuPromptNm1 = "";
-        let disambigMenuPromptNm2 = "";
-        let disambigMenuPromptNi1 = "";
-        let disambigMenuPromptNi2 = "";
-
-        // Sort business first
-        accounts.sort((a, b) =>
-          Number(b.businessInd === true) - Number(a.businessInd === true)
-        );
-
-        const accountNumberList = accounts.map(a => parseJson(a.accountNumber));
-        const accountSessionList = accounts.map(a => parseJson(a.sessionId));
-        const productLabelsMixList = accounts.map(a => parseJson(a.subscriptionSummary?.productLabelsMix));
-        const businessIndList = accounts.map(a => parseJson(a.businessInd));
-        const maestroAccountIndList = accounts.map(a => parseJson(a.maestroAccountInd));
-        const collectionSuspendedIndList = accounts.map(a => parseJson(a.collectionSuspendedInd));
-        const accountClassificationList = accounts.map(a => parseJson(a.accountClassification));
-        const lobList = accounts.map(a => parseJson(a.lob));
-        const accountStatusList = accounts.map(a => parseJson(a.accountStatus));
-
-        const menuAccountOption = ["say One ", "say Two ", "say Three ", "say Four "];
-        const nmNiAccountOption = ["say or press One", " say or press Two", "say or press Three", "say or pressFour,"]
-
-        if (accounts.length === 1) {
-
-          const last4 = accountNumberList[0]?.slice(-4);
-          const products = productLabelsMixList[0] || "";
-          const category = businessIndList[0] ? "Business" : "Personal";
-
-          disambigMenuPrompt = `Are you calling about the ${category} account ending in ${last4} with ${products}?`;
-          disambigMenuPromptNm1 = `I'm sorry, i didn't get that. Are you calling about the ${category} account ending in ${last4} with ${products}? You can say yes or no`;
-          disambigMenuPromptNm2 = `If you are calling about the ${category} account ending in ${last4} with ${products}, say yes or press 1, or say no or press 2.`;
-          disambigMenuPromptNi1 = `I'm sorry, I couldn't hear that. Are you calling about the ${category} account ending in ${last4} with ${products}? You can say yes or no`;
-          disambigMenuPromptNi2 = `If you are calling about the ${category} account ending in ${last4} with ${products}, say yes or press 1, or say no or press 2.`;
-        } else {
-
-          accounts.forEach((acc, index) => {
-            const last4 = accountNumberList[index]?.slice(-4);
-            const products = productLabelsMixList[index] || "";
-            const category = businessIndList[index] ? "Business" : "Personal";
-
-            const optionPrompt = menuAccountOption[index];
-            const dtmfOption = nmNiAccountOption[index];
-
-            disambigMenuPrompt += `For the ${category} account ending in ${last4} with ${products}, ${optionPrompt},`;
-            disambigMenuPromptNm2 += `For the ${category} account ending in ${last4} with ${products}, ${dtmfOption},`;
-            disambigMenuPromptNi2 += `For the ${category} account ending in ${last4} with ${products}, ${dtmfOption},`
-          });
-          disambigMenuPromptNm1 = `I'm sorry, i didn't get that. ${disambigMenuPrompt}, or say,a different account.`
-          disambigMenuPromptNm2 = `I'm sorry, i still didn't get that. ${disambigMenuPromptNm2}, or say, a different account. or press ${billingAccounts + 1}.`
-          disambigMenuPromptNi1 = `I'm sorry, i didn't get that. ${disambigMenuPrompt}, or say,a different account.`
-          disambigMenuPromptNi2 = `I'm sorry, i still couldn't hear that. ${disambigMenuPromptNi2}, or say, a different account. or press ${billingAccounts + 1}.`
-
-        }
-
-        sessionParams = {
-          numberOfBillingAccounts: billingAccounts,
-          lastFourAccountNumberList: accountNumberList.map(a => a !== "NA" ? a.slice(-4) : "NA"),
-          accountNumberList,
-          accountSessionList,
-          maestroAccountIndList,
-          accountClassificationList,
-          collectionSuspendedIndList,
-          lobList,
-          accountStatusList,
-          disambigMenuPrompt,
-          disambigMenuPromptNi1,
-          disambigMenuPromptNi2,
-          disambigMenuPromptNm1,
-          disambigMenuPromptNm2,
-          returnCode: "0"
-        };
+        const accounts = ResponsePayload.billingAccounts ? [ResponsePayload.billingAccounts] : [];
+        sessionParams = await DisambigParams(accounts, billingAccounts);
       } else if (billingAccounts === 0) {
         sessionParams = {
           returnCode: "0",
@@ -671,4 +609,85 @@ functions.http("helloHttp", async (req, res) => {
     res.setHeader("Content-Type", "application/json");
     res.status(200).send(webhookResponse);
   }
+
 });
+
+async function DisambigParams(accounts, billingAccounts) {
+  let disambigMenuPrompt = "";
+  let disambigMenuPromptNm1 = "";
+  let disambigMenuPromptNm2 = "";
+  let disambigMenuPromptNi1 = "";
+  let disambigMenuPromptNi2 = "";
+  let sessionParams = {};
+
+  // Sort business first
+  accounts.sort((a, b) =>
+    Number(b.businessInd === true) - Number(a.businessInd === true)
+  );
+
+  const accountNumberList = accounts.map(a => parseJson(a.accountNumber));
+  const accountSessionList = accounts.map(a => parseJson(a.sessionId));
+  const productLabelsMixList = accounts.map(a => parseJson(a.subscriptionSummary?.productLabelsMix));
+  const businessIndList = accounts.map(a => parseJson(a.businessInd));
+  const maestroAccountIndList = accounts.map(a => parseJson(a.maestroAccountInd));
+  const collectionSuspendedIndList = accounts.map(a => parseJson(a.collectionSuspendedInd));
+  const accountClassificationList = accounts.map(a => parseJson(a.accountClassification));
+  const lobList = accounts.map(a => parseJson(a.lob));
+  const accountStatusList = accounts.map(a => parseJson(a.accountStatus));
+
+  const menuAccountOption = ["say One ", "say Two ", "say Three ", "say Four "];
+  const nmNiAccountOption = ["say or press One", " say or press Two", "say or press Three", "say or pressFour,"]
+
+  if (accounts.length === 1) {
+
+    const last4 = accountNumberList[0]?.slice(-4);
+    const products = productLabelsMixList[0] || "";
+    const category = businessIndList[0] ? "Business" : "Personal";
+
+    disambigMenuPrompt = `Are you calling about the ${category} account ending in ${last4} with ${products}?`;
+    disambigMenuPromptNm1 = `I'm sorry, i didn't get that. Are you calling about the ${category} account ending in ${last4} with ${products}? You can say yes or no`;
+    disambigMenuPromptNm2 = `If you are calling about the ${category} account ending in ${last4} with ${products}, say yes or press 1, or say no or press 2.`;
+    disambigMenuPromptNi1 = `I'm sorry, I couldn't hear that. Are you calling about the ${category} account ending in ${last4} with ${products}? You can say yes or no`;
+    disambigMenuPromptNi2 = `If you are calling about the ${category} account ending in ${last4} with ${products}, say yes or press 1, or say no or press 2.`;
+  } else {
+
+    accounts.forEach((acc, index) => {
+      const last4 = accountNumberList[index]?.slice(-4);
+      const products = productLabelsMixList[index] || "";
+      const category = businessIndList[index] ? "Business" : "Personal";
+
+      const optionPrompt = menuAccountOption[index];
+      const dtmfOption = nmNiAccountOption[index];
+
+      disambigMenuPrompt += `For the ${category} account ending in ${last4} with ${products}, ${optionPrompt},`;
+      disambigMenuPromptNm2 += `For the ${category} account ending in ${last4} with ${products}, ${dtmfOption},`;
+      disambigMenuPromptNi2 += `For the ${category} account ending in ${last4} with ${products}, ${dtmfOption},`
+    });
+    disambigMenuPromptNm1 = `I'm sorry, i didn't get that. ${disambigMenuPrompt}, or say,a different account.`
+    disambigMenuPromptNm2 = `I'm sorry, i still didn't get that. ${disambigMenuPromptNm2}, or say, a different account. or press ${billingAccounts + 1}.`
+    disambigMenuPromptNi1 = `I'm sorry, i didn't get that. ${disambigMenuPrompt}, or say,a different account.`
+    disambigMenuPromptNi2 = `I'm sorry, i still couldn't hear that. ${disambigMenuPromptNi2}, or say, a different account. or press ${billingAccounts + 1}.`
+
+  }
+
+  sessionParams = {
+    numberOfBillingAccounts: billingAccounts,
+    lastFourAccountNumberList: accountNumberList.map(a => a !== "NA" ? a.slice(-4) : "NA"),
+    accountNumberList,
+    accountSessionList,
+    maestroAccountIndList,
+    accountClassificationList,
+    collectionSuspendedIndList,
+    lobList,
+    accountStatusList,
+    disambigMenuPrompt,
+    disambigMenuPromptNi1,
+    disambigMenuPromptNi2,
+    disambigMenuPromptNm1,
+    disambigMenuPromptNm2,
+    returnCode: "0"
+  };
+
+  return sessionParams;
+
+}

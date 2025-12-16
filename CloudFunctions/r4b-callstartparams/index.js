@@ -368,7 +368,7 @@ functions.http("helloHttp", async (req, res) => {
       ResponsePayload = apiResult.ResponsePayload;
       const billingAccounts = parseJson(ResponsePayload.numberOfBillingAccounts) === "NA" ? 0 : parseJson(ResponsePayload.numberOfBillingAccounts);
       if (Status === 200 && billingAccounts !== 0 && billingAccounts <= 4) {
-        const accounts = ResponsePayload.billingAccounts ? [ResponsePayload.billingAccounts] : [];
+        const accounts = sessionList.length === 1 ? ResponsePayload.billingAccountInContext || [] : ResponsePayload.billingAccounts || [];
         sessionParams = await DisambigParams(accounts, billingAccounts);
       } else if (billingAccounts === 0) {
         sessionParams = {
@@ -641,27 +641,27 @@ async function DisambigParams(accounts, billingAccounts) {
   if (accounts.length === 1) {
 
     const last4 = accountNumberList[0]?.slice(-4);
-    const products = productLabelsMixList[0] || "";
+    const products = productLabelsMixList[0] === "NA" ? "" : `with ${productLabelsMixList[0]}`;
     const category = businessIndList[0] ? "Business" : "Personal";
 
-    disambigMenuPrompt = `Are you calling about the ${category} account ending in ${last4} with ${products}?`;
-    disambigMenuPromptNm1 = `I'm sorry, i didn't get that. Are you calling about the ${category} account ending in ${last4} with ${products}? You can say yes or no`;
-    disambigMenuPromptNm2 = `If you are calling about the ${category} account ending in ${last4} with ${products}, say yes or press 1, or say no or press 2.`;
-    disambigMenuPromptNi1 = `I'm sorry, I couldn't hear that. Are you calling about the ${category} account ending in ${last4} with ${products}? You can say yes or no`;
-    disambigMenuPromptNi2 = `If you are calling about the ${category} account ending in ${last4} with ${products}, say yes or press 1, or say no or press 2.`;
+    disambigMenuPrompt = `Are you calling about the ${category} account ending in ${last4} ${products}?`;
+    disambigMenuPromptNm1 = `I'm sorry, i didn't get that. Are you calling about the ${category} account ending in ${last4} ${products}? You can say yes or no`;
+    disambigMenuPromptNm2 = `If you are calling about the ${category} account ending in ${last4} ${products}, say yes or press 1, or say no or press 2.`;
+    disambigMenuPromptNi1 = `I'm sorry, I couldn't hear that. Are you calling about the ${category} account ending in ${last4} ${products}? You can say yes or no`;
+    disambigMenuPromptNi2 = `If you are calling about the ${category} account ending in ${last4} ${products}, say yes or press 1, or say no or press 2.`;
   } else {
 
     accounts.forEach((acc, index) => {
       const last4 = accountNumberList[index]?.slice(-4);
-      const products = productLabelsMixList[index] || "";
+      const products = productLabelsMixList[index] === "NA" ? "" : `with ${productLabelsMixList[index]}`;
       const category = businessIndList[index] ? "Business" : "Personal";
 
       const optionPrompt = menuAccountOption[index];
       const dtmfOption = nmNiAccountOption[index];
 
-      disambigMenuPrompt += `For the ${category} account ending in ${last4} with ${products}, ${optionPrompt},`;
-      disambigMenuPromptNm2 += `For the ${category} account ending in ${last4} with ${products}, ${dtmfOption},`;
-      disambigMenuPromptNi2 += `For the ${category} account ending in ${last4} with ${products}, ${dtmfOption},`
+      disambigMenuPrompt += `For the ${category} account ending in ${last4} ${products}, ${optionPrompt},`;
+      disambigMenuPromptNm2 += `For the ${category} account ending in ${last4}  ${products}, ${dtmfOption},`;
+      disambigMenuPromptNi2 += `For the ${category} account ending in ${last4}  ${products}, ${dtmfOption},`
     });
     disambigMenuPromptNm1 = `I'm sorry, i didn't get that. ${disambigMenuPrompt}, or say,a different account.`
     disambigMenuPromptNm2 = `I'm sorry, i still didn't get that. ${disambigMenuPromptNm2}, or say, a different account. or press ${billingAccounts + 1}.`

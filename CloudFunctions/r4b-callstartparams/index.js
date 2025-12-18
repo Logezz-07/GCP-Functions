@@ -61,9 +61,11 @@ functions.http("helloHttp", async (req, res) => {
           disclaimerScriptFr: parseJson(d.disclaimerScript?.scriptContent?.fr),
           offerLanguageMenu: parseJson(d.offerLanguageMenu),
           applicationId: parseJson(d.applicationId),
+          reportingVar_applicationID: parseJson(d.applicationId),
           aniConfirm: parseJson(d.aniConfirm),
           identifyAccount: parseJson(d.identifyAccount),
           idType: parseJson(d.idType),
+          predictiveInd: parseJson(d.predictiveInd),
           involuntaryRedirectInd: parseJson(d.involuntaryRedirectInd),
           voluntaryRedirect: parseJson(d.voluntaryRedirect),
           returnCode: "0"
@@ -350,12 +352,9 @@ functions.http("helloHttp", async (req, res) => {
         scope: params.scope[env],
         tokenRefreshTimeMin: params.tokenRefreshTimeMin
       }
-      // request Body
-      if (sessionList.length === 1) {
-        requestBody = { "sessionIdInContext": sessionList[0] }
-      } else {
-        requestBody = { "sessionIds": sessionList }
-      }
+
+      requestBody = { "sessionIds": sessionList }
+
       const apiResult = await apiClient.postRequest({
         sessionId,
         tag,
@@ -368,7 +367,7 @@ functions.http("helloHttp", async (req, res) => {
       ResponsePayload = apiResult.ResponsePayload;
       const billingAccounts = parseJson(ResponsePayload.numberOfBillingAccounts) === "NA" ? 0 : parseJson(ResponsePayload.numberOfBillingAccounts);
       if (Status === 200 && billingAccounts !== 0 && billingAccounts <= 4) {
-        const accounts = sessionList.length === 1 ? ResponsePayload.billingAccountInContext || [] : ResponsePayload.billingAccounts || [];
+        const accounts = ResponsePayload.billingAccounts || [];
         sessionParams = await DisambigParams(accounts, billingAccounts);
       } else if (billingAccounts === 0) {
         sessionParams = {
@@ -557,6 +556,7 @@ functions.http("helloHttp", async (req, res) => {
         const p = ResponsePayload.predictiveRule;
         sessionParams = {
           enabled: parseJson(ResponsePayload.enabled),
+          reportingVar_predictiveRule: parseJson(p?.predictiveRuleId),
           predictiveMessageAvailable: parseJson(p?.predictiveMessageAvailable),
           questionOrMessage: parseJson(p?.questionOrMessage),
           voiceScriptContent: parseJson(p?.predictiveScript?.voiceScriptContent),
@@ -634,6 +634,7 @@ async function DisambigParams(accounts, billingAccounts) {
   const accountClassificationList = accounts.map(a => parseJson(a.accountClassification));
   const lobList = accounts.map(a => parseJson(a.lob));
   const accountStatusList = accounts.map(a => parseJson(a.accountStatus));
+  const billingSystemList = accounts.map(a => parseJson(a.billingSystem));
 
   const menuAccountOption = ["say One ", "say Two ", "say Three ", "say Four "];
   const nmNiAccountOption = ["say or press One", " say or press Two", "say or press Three", "say or pressFour,"]
@@ -675,8 +676,11 @@ async function DisambigParams(accounts, billingAccounts) {
     lastFourAccountNumberList: accountNumberList.map(a => a !== "NA" ? a.slice(-4) : "NA"),
     accountNumberList,
     accountSessionList,
+    reportingVar_accountNumbers: accountNumberList.join(","),
     maestroAccountIndList,
     accountClassificationList,
+    businessIndList,
+    billingSystemList,
     collectionSuspendedIndList,
     lobList,
     accountStatusList,

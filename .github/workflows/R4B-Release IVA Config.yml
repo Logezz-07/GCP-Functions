@@ -2,54 +2,31 @@ name: R4B-Release IVA Config
 
 on:
   push:
-    branches:
-      - Dev
-      - QA
-      - Prod
     paths:
       - "IVA-Configs/**"
 
 jobs:
-  ConfigCheck-AutoTag:
-    name: ConfigCheck-AutoTag – ${{ github.ref_name }}
-    runs-on: ubuntu-latest
-
+  # Job 1 : IVA Config Auto Tagging
+  Config-AutoTagging:
+    name: Config-AutoTag – ${{ github.ref_name }}
+    environment: ${{ vars.DefultEnvironment }}
+    #self-hosted runner
+    runs-on:
+      - ubuntu-latest
+      
     steps:
-      # Checkout Repo
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 1️⃣ Single Required JSON Validation (ONLY config.json)
-      - name: IVA-Config-Check
-        run: |
-          echo "🔍 Validating IVA Config JSON (config.json)..."
-          if [ -f "IVA-Configs/config.json" ]; then
-            cat IVA-Configs/config.json | jq empty
-            echo "✅ config.json validation passed!"
-          else
-            echo "❌ config.json NOT FOUND at: IVA-Configs/config.json"
-            exit 1
-          fi
-
-      # 2️⃣ Create Environment-Specific Next Tag
       - name: Create Next Tag
         id: tag
         run: |
-          BRANCH_NAME=${GITHUB_REF##*/}
+          RAW_BRANCH_NAME="${GITHUB_REF##*/}"
+          SAFE_BRANCH_NAME=$(echo "$RAW_BRANCH_NAME" | tr '/' '-')
 
-          if [ "$BRANCH_NAME" == "Dev" ]; then
-            PREFIX="IVA-Config-Dev"
-          elif [ "$BRANCH_NAME" == "QA" ]; then
-            PREFIX="IVA-Config-QA"
-          elif [ "$BRANCH_NAME" == "Prod" ]; then
-            PREFIX="IVA-Config-Prod"
-          else
-            echo "❌ Unknown branch: $BRANCH_NAME"
-            exit 1
-          fi
-
+          PREFIX="IVA-Config-${SAFE_BRANCH_NAME}"
           LAST_TAG=$(git tag --list "${PREFIX}-v*" | sort -V | tail -n 1)
 
           if [ -z "$LAST_TAG" ]; then
@@ -62,10 +39,8 @@ jobs:
           echo "version=$NEXT_VERSION" >> $GITHUB_OUTPUT
           echo "🏷 Next Tag: $NEXT_VERSION"
 
-      # 3️⃣ Push Tag
       - name: Push Tag
         run: |
-          echo "🚀 Pushing Tag to repo..."
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 

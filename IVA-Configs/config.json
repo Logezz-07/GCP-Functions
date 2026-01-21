@@ -1,6 +1,6 @@
 {
     "timeOutMs": "15000",
-    "apiAttempts": "2",
+    "apiAttempts": "3",
     "tokenrefreshTimeMin": "55",
     "broadCastId1": "Control Tower",
     "broadCastId2": "Application Team",
